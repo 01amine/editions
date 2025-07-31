@@ -436,7 +436,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ),
             ],
           ),
-        )).toList(),
+        )),
 
         const SizedBox(height: 24),
 
