@@ -1,9 +1,27 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/discovery/backend/fastapi/venv/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/template/venv/bin/python",
   "python.analysis.typeCheckingMode": "strict",
-
+  "python.analysis.addHoverSummaries": true,
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.indexing": true,
+  "python.analysis.useLibraryCodeForTypes": true,
+  "python.analysis.logLevel": "Error",
+  "python.analysis.completeFunctionCalls": true,
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.variableTypes": true,
+  "python.analysis.inlayHints.functionParameterTypes": true,
+  "python.analysis.inlayHints.variableParameterTypes": true,
+  "python.analysis.inlayHints.functionReturnTypesStyle": "plain",
+  "python.analysis.inlayHints.variableTypesStyle": "plain",
+  "python.analysis.inlayHints.functionParameterTypesStyle": "plain",
+  "python.analysis.inlayHints.variableParameterTypesStyle": "plain",
+  "python.analysis.inlayHints.functionReturnTypesEnabled": true,
+  "python.analysis.inlayHints.variableTypesEnabled": true,
+  "python.analysis.inlayHints.functionParameterTypesEnabled": true,
+  "python.languageServer":"Pylance",
   "python.analysis.extraPaths": [
-    "./backend/src"//to fix i forget how to set this path 
+    "./backend/app"
   ],
 
   "[python]": {
@@ -16,7 +34,7 @@
   },
 
   "ruff.path": [
-    "${workspaceFolder}/discovery/backend/fastapi/bin/ruff"
+    "${workspaceFolder}/template/venv/bin/ruff"
   ],
   "postman.settings.dotenv-detection-notification-visibility": false
 }
