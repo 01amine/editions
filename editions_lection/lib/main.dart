@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+//import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/theme.dart';
 import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -14,7 +14,7 @@ import 'features/splash/presentation/pages/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  //await dotenv.load(fileName: ".env");
   await di.init();
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.immersiveSticky,
