@@ -27,6 +27,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void initState() {
     super.initState();
 
+    // Pre-cache images for instant loading
+    _precacheImages();
+
     // Initialize animation controllers
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -94,6 +97,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _iconController.forward();
   }
 
+  // Pre-cache all images for instant loading
+  void _precacheImages() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final imagePaths = [
+        AppImages.onboarding1,
+        AppImages.onboarding2,
+        AppImages.onboarding3,
+      ];
+
+      for (String imagePath in imagePaths) {
+        precacheImage(AssetImage(imagePath), context);
+      }
+    });
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -118,26 +136,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     context.read<OnboardingBloc>().add(CompleteOnboarding());
   }
 
-  // ignore: unused_element
   void _onPageChanged(int index) {
     setState(() => _currentIndex = index);
     _slideController.reset();
     _iconController.reset();
     _slideController.forward();
     _iconController.forward();
-  }
-
-  IconData _getPageIcon(int index) {
-    switch (index) {
-      case 0:
-        return Icons.local_library;
-      case 1:
-        return Icons.description;
-      case 2:
-        return Icons.quiz;
-      default:
-        return Icons.book;
-    }
   }
 
   Color _getPageAccentColor(int index) {
@@ -156,11 +160,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   List<String> _getPageFeatures(int index) {
     switch (index) {
       case 0:
-        return ['📚 Manuels de médecine', '🔬 Ouvrages spécialisés', '📖 Références académiques'];
+        return [
+          '📚 Manuels de médecine',
+          '🔬 Ouvrages spécialisés',
+          '📖 Références académiques'
+        ];
       case 1:
-        return ['📄 Polycopiés de cours', '✏️ Notes personnalisées', '🖨️ Impression haute qualité'];
+        return [
+          '📄 Polycopiés de cours',
+          '✏️ Notes personnalisées',
+          '🖨️ Impression haute qualité'
+        ];
       case 2:
-        return ['❓ QCM par spécialité', '📋 Annales d\'examens', '🎯 Guides de révision'];
+        return [
+          '❓ QCM par spécialité',
+          '📋 Annales d\'examens',
+          '🎯 Guides de révision'
+        ];
       default:
         return [];
     }
@@ -170,6 +186,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     final double containerHeight = size.height * 0.55;
+    final double imageAreaHeight =
+        size.height - containerHeight + 32; // +32 for overlap
 
     return BlocListener<OnboardingBloc, OnboardingState>(
       listener: (context, state) {
@@ -180,7 +198,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       child: Scaffold(
         body: Stack(
           children: [
-            // Background gradient instead of images for cleaner look
+            // Background gradient - Full screen
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -195,77 +213,59 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     stops: const [0.0, 0.7, 1.0],
                   ),
                 ),
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      // Logo and header section
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF2E7D32),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.local_library,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Lectio',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: const Color(0xFF2E7D32),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              ),
+            ),
 
-                      // Animated icon section
-                      Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: AnimatedBuilder(
-                            animation: _iconController,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: _iconScaleAnimation.value,
-                                child: Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: _getPageAccentColor(_currentIndex).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(60),
-                                    border: Border.all(
-                                      color: _getPageAccentColor(_currentIndex).withOpacity(0.3),
-                                      width: 2,
-                                    ),
-                                  ),
+            // Images - Top area with overlap
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: imageAreaHeight,
+              child: SafeArea(
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: _onPageChanged,
+                  itemCount: _pages.length,
+                  itemBuilder: (context, index) {
+                    return AnimatedBuilder(
+                      animation: _iconController,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _iconScaleAnimation.value,
+                          child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              _pages[index].assetPath,
+                              fit: BoxFit.cover, // Fill the entire area
+                              width: double.infinity,
+                              height: double.infinity,
+                              // Add gapless playback for smoother transitions
+                              gaplessPlayback: true,
+                              // Add error handling
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: _getPageAccentColor(index)
+                                      .withOpacity(0.1),
                                   child: Icon(
-                                    _getPageIcon(_currentIndex),
-                                    size: 60,
-                                    color: _getPageAccentColor(_currentIndex),
+                                    Icons.image_not_supported,
+                                    size: 64,
+                                    color: _getPageAccentColor(index),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),
 
-            // Content Container
+            // Content Container - Bottom part
             Positioned(
               bottom: 0,
               left: 0,
@@ -308,7 +308,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           // Content Area
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
+                              padding:
+                                  const EdgeInsets.fromLTRB(32, 32, 32, 16),
                               child: AnimatedBuilder(
                                 animation: _slideAnimation,
                                 builder: (context, child) {
@@ -337,8 +338,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                   children: List.generate(
                                     _pages.length,
                                     (index) => AnimatedContainer(
-                                      duration: const Duration(milliseconds: 300),
-                                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 6),
                                       width: _currentIndex == index ? 32 : 8,
                                       height: 8,
                                       decoration: BoxDecoration(
@@ -355,7 +358,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
                                 // Navigation Buttons
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     _buildSkipButton(),
                                     _buildNextButton(),
@@ -380,7 +384,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _buildPageContent() {
     final page = _pages[_currentIndex];
     final features = _getPageFeatures(_currentIndex);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -388,10 +392,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         Text(
           page.title,
           style: Theme.of(context).textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF2C2C2C),
-            height: 1.2,
-          ),
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2C2C2C),
+                height: 1.2,
+              ),
         ),
 
         const SizedBox(height: 20),
@@ -400,76 +404,43 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         Text(
           page.description,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: const Color(0xFF5A5A5A),
-            height: 1.6,
-            fontSize: 16,
-          ),
+                color: const Color(0xFF5A5A5A),
+                height: 1.6,
+                fontSize: 16,
+              ),
         ),
 
         const SizedBox(height: 28),
 
         // Features list
         ...features.map((feature) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 2),
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: _getPageAccentColor(_currentIndex),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  feature,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF2C2C2C),
-                    fontWeight: FontWeight.w500,
-                    height: 1.4,
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 2),
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: _getPageAccentColor(_currentIndex),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF2C2C2C),
+                            fontWeight: FontWeight.w500,
+                            height: 1.4,
+                          ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        )),
-
-        const SizedBox(height: 24),
-
-        // Call-to-action badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: _getPageAccentColor(_currentIndex).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: _getPageAccentColor(_currentIndex).withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.school,
-                size: 18,
-                color: _getPageAccentColor(_currentIndex),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Conçu pour les étudiants en médecine',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: _getPageAccentColor(_currentIndex),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
+            )),
       ],
     );
   }
@@ -485,9 +456,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       child: Text(
         'Passer',
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF9E9E9E),
-        ),
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF9E9E9E),
+            ),
       ),
     );
   }
@@ -526,9 +497,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             Text(
               isLastPage ? 'Commencer' : 'Suivant',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
             ),
             const SizedBox(width: 8),
             Icon(
