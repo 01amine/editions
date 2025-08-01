@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from fastapi import APIRouter, HTTPException, status, Depends
-from app.schema.user import UserLogin, Token, UserCreate
+# from app.schema.user import UserLogin, Token, UserCreate
+from app.models.user import UserCreate
 from app.services.auth import authenticate_user, create_access_token, hash_password
 from app.models.user import User
 from app.deps.auth import get_current_user
@@ -15,7 +16,7 @@ async def get_user():
     return {"msg": "User route working"}
 
 
-@router.post("/register", response_model=Token)
+@router.post("/register")
 async def register_user(data: UserCreate):
     if await User.find_one({"email": data.email}):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -41,8 +42,8 @@ async def register_user(data: UserCreate):
     return response
 
 
-@router.post("/login", response_model=Token)
-async def login_user(credentials: UserLogin):
+@router.post("/login")
+async def login_user(credentials: UserCreate):
     user = await authenticate_user(credentials.email, credentials.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
