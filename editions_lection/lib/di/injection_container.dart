@@ -17,6 +17,7 @@ import '../features/auth/domain/usecases/login_user.dart';
 import '../features/auth/domain/usecases/save_token.dart';
 import '../features/auth/domain/usecases/signup_user.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
+import '../features/home/data/datasource/remote_data.dart';
 import '../features/home/data/repositories/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
 import '../features/home/domain/usecases/get_books.dart';
@@ -92,7 +93,6 @@ Future<void> init() async {
     () => IsUserLoggedIn(sl<AuthRepository>()),
   );
 
-
   // BLoCs
   sl.registerFactory<AuthBloc>(
     () => AuthBloc(
@@ -125,8 +125,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetPolycopies(sl()));
 
   // Repositories
-  sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(sl()));
+  sl.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // Data sources
-  //sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(
+      client: sl<http.Client>(),
+      baseUrl: EndPoints.baseUrl,
+    ),
+  );
 }
