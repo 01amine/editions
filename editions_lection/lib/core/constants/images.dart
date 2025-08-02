@@ -4,7 +4,7 @@ class AppImages {
   static const String iconsPath = '$assetsPath/icons';
   static const String logo = '$imagesPath/logo.png';
   static const String onboarding1 = '$imagesPath/onboarding1.jpg';
-  static const String onboarding2 = '$imagesPath/onboarding2.jpg';
+  static const String onboarding2 = '$imagesPath/onboarding2.png';
   static const String onboarding3 = '$imagesPath/onboarding3.png';
   static const String auth_background = '$imagesPath/login_background.png';
 }
