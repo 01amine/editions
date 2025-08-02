@@ -40,7 +40,6 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AuthResponse>> signup({
     required String fullName,
-    required String birthday,
     required String phoneNumber,
     required String email,
     required String password,
@@ -49,7 +48,6 @@ class AuthRepositoryImpl implements AuthRepository {
       try {
         final authResponse = await remoteDataSource.signup(
           fullName: fullName,
-          birthday: birthday,
           phoneNumber: phoneNumber,
           email: email,
           password: password,

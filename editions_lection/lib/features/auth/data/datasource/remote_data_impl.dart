@@ -36,7 +36,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthResponseModel> signup({
     required String fullName,
-    required String birthday,
     required String phoneNumber,
     required String email,
     required String password,
@@ -46,7 +45,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'fullName': fullName,
-        'birthday': birthday,
+        
         'phoneNumber': phoneNumber,
         'email': email,
         'password': password,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:editions_lection/core/extensions/extensions.dart';
 
 import '../../../../core/constants/images.dart';
@@ -24,11 +23,8 @@ class _SignupScreenState extends State<SignupScreen>
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  DateTime? _selectedDate;
-
   // Error messages
   String? _fullNameError;
-  String? _birthdayError;
   String? _phoneNumberError;
   String? _emailError;
   String? _passwordError;
@@ -100,7 +96,7 @@ class _SignupScreenState extends State<SignupScreen>
   bool _validateForm() {
     setState(() {
       _fullNameError = null;
-      _birthdayError = null;
+
       _phoneNumberError = null;
       _emailError = null;
       _passwordError = null;
@@ -119,28 +115,6 @@ class _SignupScreenState extends State<SignupScreen>
         _fullNameError = "Le nom doit contenir au moins 2 caractères";
       });
       isValid = false;
-    }
-
-    // Birthday validation
-    if (_birthdayController.text.trim().isEmpty || _selectedDate == null) {
-      setState(() {
-        _birthdayError = "La date de naissance est requise";
-      });
-      isValid = false;
-    } else {
-      // Check if user is at least 13 years old
-      DateTime now = DateTime.now();
-      int age = now.year - _selectedDate!.year;
-      if (now.month < _selectedDate!.month ||
-          (now.month == _selectedDate!.month && now.day < _selectedDate!.day)) {
-        age--;
-      }
-      if (age < 13) {
-        setState(() {
-          _birthdayError = "Vous devez avoir au moins 13 ans";
-        });
-        isValid = false;
-      }
     }
 
     // Phone number validation
@@ -196,42 +170,6 @@ class _SignupScreenState extends State<SignupScreen>
               password: _passwordController.text.trim(),
             ),
           );
-    }
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ??
-          DateTime.now().subtract(const Duration(days: 365 * 18)),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: AppTheme.primaryColor,
-              onPrimary: Colors.white,
-              onSurface: AppTheme.primaryTextColor,
-              surface: AppTheme.surfaceColor,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.primaryColor,
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _birthdayController.text = DateFormat('dd / MM / yyyy').format(picked);
-        // Clear birthday error when date is selected
-        _birthdayError = null;
-      });
     }
   }
 
@@ -379,20 +317,6 @@ class _SignupScreenState extends State<SignupScreen>
 
             SizedBox(height: context.height * 0.025),
 
-            // Birthday field
-            _buildDateFieldSection(
-              context,
-              theme,
-              "Date de naissance",
-              "JJ / MM / AAAA",
-              _birthdayController,
-              _birthdayError,
-              Icons.calendar_today_outlined,
-              isTablet,
-            ),
-
-            SizedBox(height: context.height * 0.025),
-
             // Phone number field
             _buildFieldSection(
               context,
@@ -509,131 +433,6 @@ class _SignupScreenState extends State<SignupScreen>
             keyboardType: keyboardType,
             obscureText: obscure,
             errorText: error,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateFieldSection(
-    BuildContext context,
-    ThemeData theme,
-    String label,
-    String hint,
-    TextEditingController controller,
-    String? error,
-    IconData icon,
-    bool isTablet,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: isTablet ? 20 : 18,
-                color: AppTheme.primaryColor,
-              ),
-              SizedBox(width: 8),
-              Text(
-                label,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primaryTextColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: isTablet ? 16 : 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: error != null
-                    ? AppTheme.errorColor.withOpacity(0.1)
-                    : AppTheme.primaryColor.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.accentColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: error != null
-                        ? AppTheme.errorColor
-                        : Colors.transparent,
-                    width: error != null ? 1 : 0,
-                  ),
-                ),
-                child: TextField(
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.readingBackgroundColor,
-                    fontSize: isTablet ? 16 : 14,
-                  ),
-                  readOnly: true,
-                  controller: controller,
-                  onTap: () => _selectDate(context),
-                  decoration: InputDecoration(
-                    hintText: hint,
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.secondaryTextColor,
-                      fontSize: isTablet ? 16 : 14,
-                    ),
-                    filled: true,
-                    fillColor: AppTheme.backgroundColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Colors.black,
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Colors.black,
-                        width: 2,
-                      ),
-                    ),
-                    suffixIcon: Icon(
-                      Icons.calendar_today,
-                      color: AppTheme.secondaryTextColor,
-                      size: isTablet ? 22 : 20,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: isTablet ? 18 : 16,
-                      horizontal: 16,
-                    ),
-                  ),
-                ),
-              ),
-              if (error != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 8),
-                  child: Text(
-                    error,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.errorColor,
-                      fontSize: isTablet ? 13 : 12,
-                    ),
-                  ),
-                ),
-            ],
           ),
         ),
       ],

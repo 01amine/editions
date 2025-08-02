@@ -15,7 +15,6 @@ class SignupUser implements UseCase<AuthResponse, SignupParams> {
   Future<Either<Failure, AuthResponse>> call(SignupParams params) async {
     return await repository.signup(
       fullName: params.fullName,
-      birthday: params.birthday,
       phoneNumber: params.phoneNumber,
       email: params.email,
       password: params.password,
@@ -25,20 +24,18 @@ class SignupUser implements UseCase<AuthResponse, SignupParams> {
 
 class SignupParams extends Equatable {
   final String fullName;
-  final String birthday;
+
   final String phoneNumber;
   final String email;
   final String password;
 
   const SignupParams({
     required this.fullName,
-    required this.birthday,
     required this.phoneNumber,
     required this.email,
     required this.password,
   });
 
   @override
-  List<Object> get props =>
-      [fullName, birthday, phoneNumber, email, password];
+  List<Object> get props => [fullName, phoneNumber, email, password];
 }
