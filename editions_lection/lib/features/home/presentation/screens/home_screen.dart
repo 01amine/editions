@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:editions_lection/features/home/presentation/widgets/material_list_view.dart';
 
+import '../../domain/entities/material.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -12,19 +14,122 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late AnimationController _headerAnimationController;
+  late AnimationController _contentAnimationController;
+  late Animation<double> _headerFadeAnimation;
+  late Animation<Offset> _headerSlideAnimation;
+  late Animation<double> _contentFadeAnimation;
+  late Animation<Offset> _contentSlideAnimation;
+  late TextEditingController _searchController;
+  bool _isSearchFocused = false;
+
   @override
   void initState() {
     super.initState();
+
+    // Initialize animation controllers
+    _headerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _contentAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    // Setup animations
+    _headerFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _headerAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _headerSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, -0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _headerAnimationController,
+      curve: Curves.elasticOut,
+    ));
+
+    _contentFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _contentAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _contentSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _contentAnimationController,
+      curve: Curves.elasticOut,
+    ));
+
+    _searchController = TextEditingController();
+
+    // Fetch data and start animations
     context.read<HomeBloc>().add(FetchHomeData());
+    _startAnimations();
+  }
+
+  void _startAnimations() async {
+    await _headerAnimationController.forward();
+    await Future.delayed(const Duration(milliseconds: 200));
+    _contentAnimationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _headerAnimationController.dispose();
+    _contentAnimationController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
       return 'Bonjour';
+    } else if (hour < 18) {
+      return 'Bon après-midi';
     } else {
       return 'Bonsoir';
+    }
+  }
+
+  String _getUserName() {
+    // TODO: Get actual user name from AuthBloc
+    // For now, return a placeholder that could be replaced with actual auth data
+    return 'Utilisateur';
+  }
+
+  void _navigateToNotifications() {
+    // TODO: Implement navigation to notifications screen
+    Navigator.pushNamed(context, '/notifications');
+  }
+
+  void _navigateToCommands() {
+    // TODO: Implement navigation to commands/orders screen
+    Navigator.pushNamed(context, '/commands');
+  }
+
+  void _navigateToMaterialDetails(String materialId) {
+    // TODO: Implement navigation to material details screen
+    Navigator.pushNamed(context, '/material-details', arguments: materialId);
+  }
+
+  void _onSearchChanged(String query) {
+    // TODO: Implement search functionality
+    // You might want to add a search event to your bloc
+    if (query.isNotEmpty) {
+      // context.read<HomeBloc>().add(SearchMaterials(query: query));
     }
   }
 
@@ -33,87 +138,418 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.width * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: context.height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            context.read<HomeBloc>().add(FetchHomeData());
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: context.width * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${_getGreeting()} User_name', // TODO: Get user name from AuthBloc
-                    style: AppTheme.lightTheme.textTheme.headlineMedium,
+                  SizedBox(height: context.height * 0.02),
+
+                  // Animated Header
+                  SlideTransition(
+                    position: _headerSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _headerFadeAnimation,
+                      child: _buildHeader(),
+                    ),
                   ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.notifications,
-                            color: AppTheme.primaryTextColor),
-                        onPressed: () {
-                          // TODO: navigation to notifications screen
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.book, color: AppTheme.primaryTextColor),
-                        onPressed: () {
-                          // TODO: navigation to command screen
-                        },
-                      ),
-                    ],
+
+                  SizedBox(height: context.height * 0.03),
+
+                  // Animated Search Bar
+                  SlideTransition(
+                    position: _contentSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _contentFadeAnimation,
+                      child: _buildSearchBar(),
+                    ),
+                  ),
+
+                  SizedBox(height: context.height * 0.03),
+
+                  // Animated Content Sections
+                  SlideTransition(
+                    position: _contentSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _contentFadeAnimation,
+                      child: _buildContentSections(),
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: context.height * 0.02),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Rechercher un support, un auteur...',
-                  filled: true,
-                  fillColor: AppTheme.backgroundColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        BorderSide(color: AppTheme.primaryTextColor, width: 1),
-                  ),
-                  prefixIcon: Icon(Icons.search, color: AppTheme.primaryTextColor),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_getGreeting()},',
+                style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                  color: AppTheme.primaryTextColor.withOpacity(0.7),
                 ),
               ),
-              SizedBox(height: context.height * 0.02),
-              Text("Livres populaires",
-                  style: AppTheme.lightTheme.textTheme.headlineMedium),
-              SizedBox(height: context.height * 0.02),
-              BlocBuilder<HomeBloc, HomeState>(
-                builder: (context, state) {
-                  if (state is HomeLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is HomeLoaded) {
-                    return MaterialListView(materials: state.books);
-                  } else if (state is HomeFailure) {
-                    return Center(child: Text(state.message));
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-              SizedBox(height: context.height * 0.02),
-              Text("Polycopies",
-                  style: AppTheme.lightTheme.textTheme.headlineMedium),
-              SizedBox(height: context.height * 0.02),
-              BlocBuilder<HomeBloc, HomeState>(
-                builder: (context, state) {
-                  if (state is HomeLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is HomeLoaded) {
-                    return MaterialListView(materials: state.polycopies);
-                  } else if (state is HomeFailure) {
-                    return Center(child: Text(state.message));
-                  }
-                  return const SizedBox.shrink();
-                },
+              Text(
+                _getUserName(),
+                style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
         ),
+        Row(
+          children: [
+            _buildAnimatedIconButton(
+              icon: Icons.notifications_outlined,
+              onPressed: _navigateToNotifications,
+              delay: const Duration(milliseconds: 600),
+            ),
+            SizedBox(width: context.width * 0.02),
+            _buildAnimatedIconButton(
+              icon: Icons.book_outlined,
+              onPressed: _navigateToCommands,
+              delay: const Duration(milliseconds: 700),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedIconButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    required Duration delay,
+  }) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: Icon(icon, color: AppTheme.primaryTextColor),
+              onPressed: onPressed,
+              iconSize: 24,
+              splashRadius: 20,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: _isSearchFocused ? Colors.white : AppTheme.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _isSearchFocused
+              ? AppTheme.primaryColor
+              : AppTheme.primaryTextColor.withOpacity(0.3),
+          width: _isSearchFocused ? 2 : 1,
+        ),
+        boxShadow: _isSearchFocused
+            ? [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ]
+            : [],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        onTap: () {
+          setState(() {
+            _isSearchFocused = true;
+          });
+        },
+        onEditingComplete: () {
+          setState(() {
+            _isSearchFocused = false;
+          });
+          FocusScope.of(context).unfocus();
+        },
+        decoration: InputDecoration(
+          hintText: 'Rechercher un support, un auteur...',
+          hintStyle: TextStyle(
+            color: AppTheme.primaryTextColor.withOpacity(0.5),
+          ),
+          filled: false,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+          prefixIcon: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            child: Icon(
+              Icons.search,
+              color: _isSearchFocused
+                  ? AppTheme.primaryColor
+                  : AppTheme.primaryTextColor.withOpacity(0.7),
+            ),
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: AppTheme.primaryTextColor.withOpacity(0.7),
+                  ),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentSections() {
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        if (state is HomeLoading) {
+          return _buildLoadingState();
+        } else if (state is HomeLoaded) {
+          return _buildLoadedState(state);
+        } else if (state is HomeFailure) {
+          return _buildErrorState(state);
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Column(
+      children: [
+        SizedBox(height: context.height * 0.1),
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 1500),
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: 0.8 + (0.2 * value),
+              child: CircularProgressIndicator(
+                value: value,
+                backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                strokeWidth: 3,
+              ),
+            );
+          },
+        ),
+        SizedBox(height: context.height * 0.02),
+        Text(
+          'Chargement des supports...',
+          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+            color: AppTheme.primaryTextColor.withOpacity(0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadedState(HomeLoaded state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionWithAnimation(
+          title: "Livres populaires",
+          materials: state.books,
+          delay: const Duration(milliseconds: 200),
+        ),
+        SizedBox(height: context.height * 0.03),
+        _buildSectionWithAnimation(
+          title: "Polycopiés",
+          materials: state.polycopies,
+          delay: const Duration(milliseconds: 400),
+        ),
+        SizedBox(height: context.height * 0.05),
+      ],
+    );
+  }
+
+  Widget _buildSectionWithAnimation({
+    required String title,
+    required List<MaterialEntity> materials,
+    required Duration delay,
+  }) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 30 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTheme.lightTheme.textTheme.headlineMedium
+                          ?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (materials.isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          // TODO: Navigate to see all materials of this type
+                          Navigator.pushNamed(context, '/materials',
+                              arguments: title);
+                        },
+                        child: Text(
+                          'Voir tout',
+                          style: TextStyle(color: AppTheme.primaryColor),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: context.height * 0.015),
+                if (materials.isEmpty)
+                  _buildEmptyState(title)
+                else
+                  EnhancedMaterialListView(
+                    materials: materials,
+                    onMaterialTap: _navigateToMaterialDetails,
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(String section) {
+    return Container(
+      height: context.height * 0.2,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.primaryColor.withOpacity(0.2),
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.library_books_outlined,
+            size: 48,
+            color: AppTheme.primaryTextColor.withOpacity(0.5),
+          ),
+          SizedBox(height: context.height * 0.01),
+          Text(
+            'Aucun ${section.toLowerCase()} disponible',
+            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+              color: AppTheme.primaryTextColor.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(HomeFailure state) {
+    return Container(
+      padding: EdgeInsets.all(context.width * 0.05),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.bounceOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red.withOpacity(0.7),
+                ),
+              );
+            },
+          ),
+          SizedBox(height: context.height * 0.02),
+          Text(
+            'Oops! Une erreur s\'est produite',
+            style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: context.height * 0.01),
+          Text(
+            state.message,
+            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+              color: AppTheme.primaryTextColor.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: context.height * 0.03),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                context.read<HomeBloc>().add(FetchHomeData());
+                _startAnimations();
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Réessayer'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
