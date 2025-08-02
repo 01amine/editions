@@ -27,12 +27,12 @@ class MyTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: AppTheme.darkTheme.textTheme.bodyMedium,
+          style: AppTheme.lightTheme.textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: AppTheme.darkTheme.textTheme.labelMedium,
+            hintStyle: AppTheme.lightTheme.textTheme.labelMedium,
             filled: true,
-            fillColor: AppTheme.accentColor,
+            fillColor: AppTheme.backgroundColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(

@@ -18,10 +18,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final List<OnboardingPage> _pages;
   late AnimationController _fadeController;
   late AnimationController _slideController;
-  late AnimationController _iconController;
+  late AnimationController _imageController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  late Animation<double> _iconScaleAnimation;
+  late Animation<double> _imageOpacityAnimation;
+  late Animation<Offset> _imageSlideAnimation;
 
   @override
   void initState() {
@@ -30,44 +31,55 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     // Pre-cache images for instant loading
     _precacheImages();
 
-    // Initialize animation controllers
+    // Initialize animation controllers with smoother durations
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 700),
       vsync: this,
     );
 
-    _iconController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+    _imageController = AnimationController(
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
+    // Smooth fade animation
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _fadeController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOut,
     ));
 
+    // Clean slide animation for content
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.4),
+      begin: const Offset(0.3, 0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _slideController,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeOutQuart,
     ));
 
-    _iconScaleAnimation = Tween<double>(
+    // Smooth image animations
+    _imageOpacityAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _iconController,
-      curve: Curves.elasticOut,
+      parent: _imageController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+    ));
+
+    _imageSlideAnimation = Tween<Offset>(
+      begin: const Offset(-0.2, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _imageController,
+      curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
     ));
 
     _pages = [
@@ -91,10 +103,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       ),
     ];
 
-    // Start initial animations
+    // Start initial animations with staggered timing
+    _startInitialAnimations();
+  }
+
+  void _startInitialAnimations() {
     _fadeController.forward();
-    _slideController.forward();
-    _iconController.forward();
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _imageController.forward();
+    });
+
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _slideController.forward();
+    });
   }
 
   // Pre-cache all images for instant loading
@@ -117,14 +139,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _pageController.dispose();
     _fadeController.dispose();
     _slideController.dispose();
-    _iconController.dispose();
+    _imageController.dispose();
     super.dispose();
   }
 
   void _onNext() {
     if (_currentIndex < _pages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOutCubic,
       );
     } else {
@@ -138,22 +160,31 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   void _onPageChanged(int index) {
     setState(() => _currentIndex = index);
+
+    // Reset and restart animations with smooth timing
     _slideController.reset();
-    _iconController.reset();
-    _slideController.forward();
-    _iconController.forward();
+    _imageController.reset();
+
+    // Staggered animation restart
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) _imageController.forward();
+    });
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _slideController.forward();
+    });
   }
 
   Color _getPageAccentColor(int index) {
     switch (index) {
       case 0:
-        return const Color(0xFF2E7D32); // Deep green
+        return const Color(0xFF188762); // Updated to new primary color
       case 1:
-        return const Color(0xFF1976D2); // Blue
+        return const Color(0xFF289180); // Updated to new secondary color
       case 2:
-        return const Color(0xFFD32F2F); // Red
+        return const Color(0xFF2a2a2a); // Updated to new accent color
       default:
-        return const Color(0xFF2E7D32);
+        return const Color(0xFF188762);
     }
   }
 
@@ -206,7 +237,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFFF8F9FA),
+                      const Color(0xFFd8e1dd), // Updated background color
                       const Color(0xFFFFFFFF),
                       _getPageAccentColor(_currentIndex).withOpacity(0.05),
                     ],
@@ -216,7 +247,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ),
             ),
 
-            // Images - Top area with overlap
+            // Images - Top area with smooth transitions
             Positioned(
               top: 0,
               left: 0,
@@ -229,32 +260,45 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   itemCount: _pages.length,
                   itemBuilder: (context, index) {
                     return AnimatedBuilder(
-                      animation: _iconController,
+                      animation: _imageController,
                       builder: (context, child) {
-                        return Transform.scale(
-                          scale: _iconScaleAnimation.value,
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: Image.asset(
-                              _pages[index].assetPath,
-                              fit: BoxFit.cover, // Fill the entire area
+                        return FadeTransition(
+                          opacity: _imageOpacityAnimation,
+                          child: SlideTransition(
+                            position: _imageSlideAnimation,
+                            child: Container(
                               width: double.infinity,
                               height: double.infinity,
-                              // Add gapless playback for smoother transitions
-                              gaplessPlayback: true,
-                              // Add error handling
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: _getPageAccentColor(index)
-                                      .withOpacity(0.1),
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 64,
-                                    color: _getPageAccentColor(index),
-                                  ),
-                                );
-                              },
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(24),
+                                  bottomRight: Radius.circular(24),
+                                ),
+                                child: Image.asset(
+                                  _pages[index].assetPath,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  gaplessPlayback: true,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        color: _getPageAccentColor(index)
+                                            .withOpacity(0.1),
+                                        borderRadius: const BorderRadius.only(
+                                          bottomLeft: Radius.circular(24),
+                                          bottomRight: Radius.circular(24),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        size: 64,
+                                        color: _getPageAccentColor(index),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ),
                         );
@@ -285,7 +329,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.08),
                             blurRadius: 20,
                             spreadRadius: 0,
                             offset: const Offset(0, -4),
@@ -332,14 +376,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             padding: const EdgeInsets.fromLTRB(32, 16, 32, 40),
                             child: Column(
                               children: [
-                                // Page Indicators
+                                // Page Indicators with smooth transitions
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: List.generate(
                                     _pages.length,
                                     (index) => AnimatedContainer(
                                       duration:
-                                          const Duration(milliseconds: 300),
+                                          const Duration(milliseconds: 400),
+                                      curve: Curves.easeOutCubic,
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: 6),
                                       width: _currentIndex == index ? 32 : 8,
@@ -347,7 +392,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(4),
                                         color: _currentIndex == index
-                                            ? const Color(0xFF2E7D32)
+                                            ? const Color(0xFF188762)
                                             : const Color(0xFFE0E0E0),
                                       ),
                                     ),
@@ -388,19 +433,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title
+        // Title with smooth entrance
         Text(
           page.title,
           style: Theme.of(context).textTheme.displaySmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF2C2C2C),
+                color: const Color(0xFF2a2a2a), // Updated text color
                 height: 1.2,
               ),
         ),
 
         const SizedBox(height: 20),
 
-        // Description
+        // Description with subtle animation
         Text(
           page.description,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -412,53 +457,82 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
         const SizedBox(height: 28),
 
-        // Features list
-        ...features.map((feature) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 2),
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _getPageAccentColor(_currentIndex),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      feature,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF2C2C2C),
-                            fontWeight: FontWeight.w500,
-                            height: 1.4,
+        // Features list with staggered animation
+        ...features.asMap().entries.map((entry) {
+          final int featureIndex = entry.key;
+          final String feature = entry.value;
+
+          return TweenAnimationBuilder<double>(
+            duration: Duration(milliseconds: 300 + (featureIndex * 100)),
+            tween: Tween(begin: 0.0, end: 1.0),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(30 * (1 - value), 0),
+                child: Opacity(
+                  opacity: value,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: _getPageAccentColor(_currentIndex),
+                            shape: BoxShape.circle,
                           ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: const Color(
+                                      0xFF2a2a2a), // Updated text color
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.4,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            )),
+                ),
+              );
+            },
+          );
+        }),
       ],
     );
   }
 
   Widget _buildSkipButton() {
-    return TextButton(
-      onPressed: _onSkip,
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF9E9E9E),
-      ),
-      child: Text(
-        'Passer',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF9E9E9E),
-            ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      child: TextButton(
+        onPressed: _onSkip,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: Colors.transparent,
+          foregroundColor: const Color(0xFF9E9E9E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        child: Text(
+          'Passer',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF9E9E9E),
+              ),
+        ),
       ),
     );
   }
@@ -466,48 +540,56 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _buildNextButton() {
     final isLastPage = _currentIndex == _pages.length - 1;
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF2E7D32),
-            const Color(0xFF4CAF50),
+            const Color(0xFF188762), // Updated to new primary color
+            const Color(0xFF289180), // Updated to new secondary color
           ],
         ),
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2E7D32).withOpacity(0.3),
+            color: const Color(0xFF188762).withOpacity(0.25),
             blurRadius: 12,
             spreadRadius: 0,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: TextButton(
-        onPressed: _onNext,
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              isLastPage ? 'Commencer' : 'Suivant',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(25),
+          onTap: _onNext,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isLastPage ? 'Commencer' : 'Suivant',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                ),
+                const SizedBox(width: 8),
+                AnimatedRotation(
+                  turns: _slideController.value * 0.1,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(
+                    isLastPage ? Icons.check : Icons.arrow_forward,
                     color: Colors.white,
+                    size: 18,
                   ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Icon(
-              isLastPage ? Icons.arrow_forward : Icons.arrow_forward,
-              color: Colors.white,
-              size: 18,
-            ),
-          ],
+          ),
         ),
       ),
     );
