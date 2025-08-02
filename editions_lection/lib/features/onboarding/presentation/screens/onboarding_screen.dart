@@ -233,7 +233,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       builder: (context, child) {
                         return Transform.scale(
                           scale: _iconScaleAnimation.value,
-                          child: Container(
+                          child: SizedBox(
                             width: double.infinity,
                             height: double.infinity,
                             child: Image.asset(
