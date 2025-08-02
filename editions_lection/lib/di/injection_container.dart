@@ -17,6 +17,11 @@ import '../features/auth/domain/usecases/login_user.dart';
 import '../features/auth/domain/usecases/save_token.dart';
 import '../features/auth/domain/usecases/signup_user.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
+import '../features/home/data/repositories/home_repository_impl.dart';
+import '../features/home/domain/repositories/home_repository.dart';
+import '../features/home/domain/usecases/get_books.dart';
+import '../features/home/domain/usecases/get_polycopies.dart';
+import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/domain/usecases/get_onboarding_seen.dart';
@@ -111,4 +116,17 @@ Future<void> init() async {
       isUserLoggedIn: sl<IsUserLoggedIn>(),
     ),
   );
+
+  // BLoC
+  sl.registerFactory(() => HomeBloc(getBooks: sl(), getPolycopies: sl()));
+
+  // Use cases
+  sl.registerLazySingleton(() => GetBooks(sl()));
+  sl.registerLazySingleton(() => GetPolycopies(sl()));
+
+  // Repositories
+  sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(sl()));
+
+  // Data sources
+  //sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(sl()));
 }

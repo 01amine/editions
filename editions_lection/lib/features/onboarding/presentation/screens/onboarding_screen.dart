@@ -266,7 +266,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           opacity: _imageOpacityAnimation,
                           child: SlideTransition(
                             position: _imageSlideAnimation,
-                            child: Container(
+                            child: SizedBox(
                               width: double.infinity,
                               height: double.infinity,
                               child: ClipRRect(
