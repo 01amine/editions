@@ -1,5 +1,16 @@
 services:
-
+  minio:
+    image: minio/minio:latest
+    container_name: lection_minio
+    restart: unless-stopped
+    volumes:
+      - minio_data:/data
+    networks:
+      - lexion_internal_net
+    environment:
+      MINIO_ROOT_USER: 
+      MINIO_ROOT_PASSWORD: crptx123
+    command: server /data --console-address ":9001"
 
   mongo:
     image: mongo:7
@@ -10,5 +21,10 @@ services:
       - mongo_data:/data/db
 
 volumes:
+  minio_data:
   mongo_data:
+
+networks:
+   lexion_internal_net:
+
 

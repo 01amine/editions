@@ -77,7 +77,6 @@ async def update_material(
     return material
 
 
-# === Delete Material ===
 @router.delete("/{material_id}")
 async def delete_material(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin)):
     success = await materialService.delete_material(material_id)
@@ -86,19 +85,16 @@ async def delete_material(material_id: str, user: User = role_required(Role.ADMI
     return {"detail": "Material deleted"}
 
 
-# === Search by Title ===
 @router.get("/search/", response_model=List[Material])
 async def search_by_title(q: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
     return await materialService.search_materials_by_title(q)
 
 
-# === Filter by Type ===
 @router.get("/filter/type", response_model=List[Material])
 async def get_by_type(type: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
     return await materialService.get_materials_by_type(type)
 
 
-# === Filter by Date ===
 @router.get("/filter/date", response_model=List[Material], description="ISO format: yyyy-mm-dd")
 async def get_by_date(date: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):  # ISO format: yyyy-mm-dd
     try:
