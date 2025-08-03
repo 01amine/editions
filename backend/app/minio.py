@@ -6,7 +6,7 @@ from miniopy_async.error import S3Error  # type: ignore
 from miniopy_async.api import Minio  # type: ignore
 
 from app.utils import check_extension
-from backend.app import exceptions
+from app import exceptions
 
 IMAGES_BUCKET_NAME = "images"
 DOCUMENTS_BUCKET_NAME = "documents"

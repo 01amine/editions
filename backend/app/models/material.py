@@ -1,7 +1,7 @@
 from typing import List, Optional
 import datetime
 from beanie import Document
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 
 class Material(Document):
@@ -14,5 +14,15 @@ class Material(Document):
     created_at: datetime.datetime = Field(default_factory=lambda: datetime.now())
     
     
+    class Settings:
+        name = "material"
+        
+class materialUser(BaseModel):
+    title: str
+    description: Optional[str]
+    image_urls: List[str] = []
+    material_type: str     # "polycopie" or "book"
+    price_dzd: float 
+    created_at: datetime.datetime = Field(default_factory=lambda: datetime.now())
     
     

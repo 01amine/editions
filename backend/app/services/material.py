@@ -1,4 +1,4 @@
-from app.models.material import Material
+from app.models.material import Material, materialUser
 from typing import List, Optional
 from beanie import PydanticObjectId
 from datetime import datetime
@@ -14,14 +14,17 @@ class materialService:
     async def create_material(
         title: str,
         description: str,
-        file_url: str,
+        pdf_url: str,
+        image_urls: List[str],
         material_type: str,
         price_dzd: float,
     ) -> Material:
         material = Material(
+            
             title=title,
             description=description,
-            file_url=file_url,
+            image_urls=image_urls,
+            pdf_url=pdf_url,
             material_type=material_type,
             price_dzd=price_dzd,
         )
@@ -29,8 +32,18 @@ class materialService:
         return material
 
     @staticmethod
-    async def get_all_materials() -> List[Material]:
+    async def get_all_materials( skip: int = 0, limit: int = 10) -> List[Material]:
         return await Material.find_all().sort("-created_at").to_list()
+    
+    @staticmethod
+    async def get_materiel_for_user(skip: int = 0, limit: int = 10) -> List[materialUser]:
+       materials = await Material.find_all().sort("-created_at").to_list()
+       return [materialUser(**m.model_dump()) for m in materials]
+   
+    @staticmethod
+    async def get_all_materials_by_type(material_type: str) -> List[Material]:
+        return await Material.find(Material.material_type == material_type).to_list()
+    
 
     @staticmethod
     async def update_material(material_id: str, data: dict) -> Optional[Material]:
