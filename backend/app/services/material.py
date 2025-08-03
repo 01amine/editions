@@ -5,6 +5,63 @@ from datetime import datetime
 
 
 class materialService:
+    
+    @staticmethod
+    async def filter_materials_user(
+        title: Optional[str] = None,
+        material_type: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        date: Optional[datetime] = None,
+        skip: int = 0,
+        limit: int = 10
+    ) -> List[materialUser]:
+        materials = await materialService.filter_materials_admin(
+            title=title,
+            material_type=material_type,
+            min_price=min_price,
+            max_price=max_price,
+            date=date,
+            skip=skip,
+            limit=limit
+        )
+        return [materialUser(**m.model_dump()) for m in materials]
+    
+    
+    @staticmethod
+    async def filter_materials_admin(
+        title: Optional[str] = None,
+        material_type: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        date: Optional[datetime] = None,
+        skip: int = 0,
+        limit: int = 10
+    ) -> List[Material]:
+        query = {}
+
+        if title:
+            query["title"] = {"$regex": f".*{title}.*", "$options": "i"}
+
+        if material_type:
+            query["material_type"] = material_type
+
+        if min_price is not None or max_price is not None:
+            query["price_dzd"] = {}
+            if min_price is not None:
+                query["price_dzd"]["$gte"] = min_price
+            if max_price is not None:
+                query["price_dzd"]["$lte"] = max_price
+
+        if date:
+            query["created_at"] = date
+
+        return await Material.find(query).sort("-created_at").skip(skip).limit(limit).to_list()
+    @staticmethod
+    async def get_all_material_user(skip: int = 0, limit: int = 10) -> List[materialUser]:
+        material= await Material.find_all().sort("-created_at").to_list()
+        return [materialUser(**m.model_dump()) for m in material]
+        
 
     @staticmethod
     async def get_material_by_id(material_id: str) -> Optional[Material]:
@@ -64,12 +121,22 @@ class materialService:
         return False
 
     @staticmethod
-    async def search_materials_by_title(keyword: str) -> List[Material]:
+    async def search_materials_by_title(keyword: str) -> List[materialUser]:
+        material= await Material.find(Material.title.regex(f".*{keyword}.*", "i")).to_list()
+        return [materialUser(**m.model_dump()) for m in material]
+    
+    @staticmethod
+    async def search_material_admin(keyword: str) -> List[Material]:
         return await Material.find(Material.title.regex(f".*{keyword}.*", "i")).to_list()
 
     @staticmethod
-    async def get_materials_by_type(material_type: str) -> List[Material]:
+    async def get_materials_by_type_admin(material_type: str) -> List[Material]:
         return await Material.find(Material.material_type == material_type).to_list()
+    
+    @staticmethod
+    async def get_materials_user(material_type: str) -> List[materialUser]:
+        material= await Material.find(Material.material_type == material_type).to_list()
+        return [materialUser(**m.model_dump()) for m in material]
 
     @staticmethod
     async def get_materials_by_date(date: datetime) -> List[Material]:
