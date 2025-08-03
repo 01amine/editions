@@ -1,12 +1,14 @@
+from typing import List
 from fastapi import APIRouter
 from fastapi import APIRouter, HTTPException, status, Depends
 # from app.schema.user import UserLogin, Token, UserCreate
-from app.models.user import UserCreate
+from app.models.user import Role, UserCreate, UserLogin
 from app.services.auth import authenticate_user, create_access_token, hash_password
 from app.models.user import User
 from app.deps.auth import get_current_user
 from fastapi.responses import JSONResponse
 from app.config import settings
+from app.deps.auth import role_required
 
 router = APIRouter()
 
@@ -24,7 +26,7 @@ async def register_user(data: UserCreate):
         email=data.email,
         hashed_password=hash_password(data.password),
         full_name=data.full_name,
-        organization_id=data.organization_id,
+        phone_number=data.phone_number,
     )
     await user.insert()
     access_token = create_access_token(data={"sub": str(user.id)})
@@ -43,7 +45,7 @@ async def register_user(data: UserCreate):
 
 
 @router.post("/login")
-async def login_user(credentials: UserCreate):
+async def login_user(credentials: UserLogin):
     user = await authenticate_user(credentials.email, credentials.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -77,3 +79,58 @@ async def logout_user():
         samesite="lax",
     )
     return response
+
+
+@router.post("/add-admin/{user_id}")
+async def add_admin(user: User = role_required(Role.Super_Admin), user_id: str = None):
+    user = await User.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.role = Role.ADMIN
+    await user.save()
+    return user
+
+@router.delete("/remove-admin/{user_id}")
+async def remove_admin(user: User = role_required(Role.Super_Admin), user_id: str = None):
+    user = await User.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.role = Role.USER
+    await user.save()
+    return user
+
+@router.post("/block/{user_id}")
+async def block_user(user: User = role_required(Role.Super_Admin), user_id: str = None):
+    user = await User.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.isblocked = True
+    await user.save()
+    return user
+
+@router.put("/unblock/{user_id}")
+async def unblock_user(user: User = role_required(Role.Super_Admin), user_id: str = None):
+    user = await User.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.isblocked = False
+    await user.save()
+    return user
+
+@router.get("/all-users", response_model=List[User])
+async def get_all_users_paginated(user: User = role_required(Role.Super_Admin,Role.ADMIN),
+                                  skip: int = 0, limit: int = 10):
+    return await User.find().skip(skip).limit(limit).to_list()
+
+@router.get("/all-admins", response_model=List[User])
+async def get_all_admins(user: User = role_required(Role.Super_Admin)):
+    return await User.find({"role": Role.ADMIN}).to_list()
+
+@router.get("/all-students", response_model=List[User])
+async def get_all_students_paginated(user: User = role_required(Role.Super_Admin, Role.ADMIN), skip: int = 0, limit: int = 10):
+    return await User.find({"role": Role.USER}).skip(skip).limit(limit).to_list()
+
+
+
+
+    

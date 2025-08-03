@@ -1,3 +1,4 @@
+from datetime import time
 from typing import Callable
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -15,6 +16,10 @@ async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)
         
     if not token:
         raise HTTPException(status_code=401, detail="No token provided")
+    if request.method == "OPTIONS":
+        return None
+    if  token.get("exp") < int(time.time()):
+        raise HTTPException(status_code=401, detail="Token expired")
     
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=["HS256"])
