@@ -1,5 +1,3 @@
-# app/services/material.py
-
 from app.models.material import Material
 from typing import List, Optional
 from beanie import PydanticObjectId
