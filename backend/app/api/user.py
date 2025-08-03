@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import APIRouter
 from fastapi import APIRouter, HTTPException, Depends
-# from app.schema.user import UserLogin, Token, UserCreate
 from app.models.user import ResetPasswordRequest, Role, UserCreate, UserLogin
 from app.services.auth import authenticate_user, create_access_token, get_reset_token, hash_password, verify_reset_token
 from app.models.user import User
