@@ -4,6 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    SECRET_KEY: str = "your-very-secret-key"
+    PASSWORD_RESET_TOKEN_EXPIRES: int = 3600  # 1 hour
+    BASE_URL: str = "http://localhost:8000"
     MONGO_URI: str = Field(default=...)
     MONGO_DB: str = Field(default=...)
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7

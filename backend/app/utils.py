@@ -41,3 +41,6 @@ def check_extension(
 
     return file_ext
 
+
+async def send_email(email: str, token: str) -> None:
+    pass

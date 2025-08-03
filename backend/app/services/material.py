@@ -1,6 +1,5 @@
 from app.models.material import Material, materialUser
 from typing import List, Optional
-from beanie import PydanticObjectId
 from datetime import datetime
 
 

@@ -34,14 +34,6 @@ class UserLogin(BaseModel):
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
     
-class PasswordReset(BaseModel):
+class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
-    confirm_password: str
-
-    @field_validator('confirm_password')
-    @classmethod
-    def passwords_match(cls, v, info):
-        if 'new_password' in info.data and v != info.data['new_password']:
-            raise ValueError('Passwords do not match')
-        return v
