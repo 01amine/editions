@@ -1,6 +1,5 @@
-import datetime
 from typing import List, Optional
-
+import datetime
 from beanie import Document
 from pydantic import Field
 
@@ -12,7 +11,8 @@ class Material(Document):
     material_type: str     # "polycopie" or "book"
     price_dzd: float 
     pdf_url: Optional[str]     
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime.datetime = Field(default_factory=lambda: datetime.now())
+    
     
     
     

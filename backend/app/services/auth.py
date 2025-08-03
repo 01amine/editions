@@ -2,7 +2,6 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from app.models.user import User
-from app.schema.user import UserCreate
 from typing import Optional
 from app.config import settings
 

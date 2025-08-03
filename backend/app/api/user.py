@@ -130,7 +130,25 @@ async def get_all_admins(user: User = role_required(Role.Super_Admin)):
 async def get_all_students_paginated(user: User = role_required(Role.Super_Admin, Role.ADMIN), skip: int = 0, limit: int = 10):
     return await User.find({"role": Role.USER}).skip(skip).limit(limit).to_list()
 
+@router.post("/me-super-admin")
+async def make_me_super_admin(user: User = Depends(get_current_user)):
+ 
 
+    if Role.Super_Admin not in user.roles:
+        user.roles.append(Role.Super_Admin) 
+        await user.save()
+        return {"message": "User successfully granted Super_Admin role.", "user_roles": user.roles}
+    else:
+        return {"message": "User already has Super_Admin role.", "user_roles": user.roles}
+
+@router.post("/me-admin")
+async def make_me_admin(user: User = Depends(get_current_user)):
+    if Role.ADMIN in user.roles:
+        return {"message": "User already has Admin role.", "user_roles": user.roles}
+    
+    user.roles.append(Role.ADMIN)
+    await user.save()
+    return user
 
 
     
