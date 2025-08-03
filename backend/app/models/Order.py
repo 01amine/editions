@@ -32,3 +32,11 @@ class Order(Document):
 # Admin Accepts & Starts Printing -> printing
 # Admin Finishes -> ready
 # Student Picks It Up -> delivered
+
+
+class OrderCreate(BaseModel):
+    materiel_id: str
+    quantity: int
+    
+
+    

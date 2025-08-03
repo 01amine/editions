@@ -2,7 +2,7 @@ from fastapi import APIRouter,  HTTPException, Body
 from typing import List, Optional
 from datetime import datetime
 from app.services.Order import orderService
-from app.models.Order import Order, OrderStatus
+from app.models.Order import Order, OrderCreate, OrderStatus, Orderitem
 from app.models.user import User, Role
 from app.deps.auth import role_required
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/orders", tags=["Orders"])
 
 @router.post("/", response_model=Order)
 async def create_order(
-    material_ids: List[str] = Body(...),
+    material_ids: List[OrderCreate] = Body(...),
     user: User = role_required(Role.USER, Role.ADMIN, Role.Super_Admin)
 ):
     return await orderService.create_order(user, material_ids)
