@@ -24,7 +24,7 @@ class materialUser(BaseModel):
     image_urls: List[str] = []
     material_type: str     # "polycopie" or "book"
     price_dzd: float 
-    created_at: datetime.datetime = Field(default_factory=lambda: datetime.now())
+    created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now())
     model_config = {
         "populate_by_name": True,   
         "from_attributes": True     
