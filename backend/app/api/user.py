@@ -10,7 +10,7 @@ from app.config import settings
 from app.deps.auth import role_required
 from app.utils import send_email
 
-router = APIRouter()
+router = APIRouter( prefix="/users", tags=["Users"])
 
 
 @router.get("/")

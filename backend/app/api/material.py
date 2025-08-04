@@ -16,6 +16,27 @@ router = APIRouter(prefix="/materials", tags=["Materials"])
 image_bucket = ImageBucket(file_prefix="materials/images")
 document_bucket = DocumentBucket(file_prefix="materials/documents")
 
+
+@router.get("/filter/user", response_model=List[materialUser])
+async def get_materials_user(
+    title: Optional[str] = Query(None),
+    material_type: Optional[str] = Query(None),
+    min_price: Optional[float] = Query(None),
+    max_price: Optional[float] = Query(None),
+    date: Optional[datetime] = Query(None),
+    skip: int = 0,
+    limit: int = 10,
+):
+    return await materialService.filter_materials_user(
+        title=title,
+        material_type=material_type,
+        min_price=min_price,
+        max_price=max_price,
+        date=date,
+        skip=skip,
+        limit=limit,
+    )
+    
 @router.post("/", response_model=Material)
 async def create_material(
     file: UploadFile = File(...),  
@@ -67,30 +88,98 @@ async def get_image(file_url: str):
         headers={"Content-Disposition": f"inline; filename={filename}"}
     )
 
+@router.get("/get-all/user", response_model=List[materialUser])
+async def get_all_materials_user(user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
+    materials = await materialService.get_all_materials()
+    if not materials:
+        raise HTTPException(status_code=404, detail="Materials not found")
+    return [materialUser.model_validate(m, from_attributes=True) for m in materials]
+
+
+
 @router.get("/", response_model=List[Material])
 async def get_all_materials_admin_paginated( user: User = role_required(Role.ADMIN, Role.Super_Admin), skip: int = 0, limit: int = 10):
     return await materialService.get_all_materials(skip, limit)
 
 
-@router.get("/", response_model=List[materialUser])
-async def get_all_materials_user_paginated(user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER), skip: int = 0, limit: int = 10):
-    return await materialService.get_all_materials_user(skip, limit)
+# @router.get("/", response_model=List[materialUser])
+# async def get_all_materials_user_paginated(user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER), skip: int = 0, limit: int = 10):
+#     return await materialService.get_all_materials_user(skip, limit)
 
 
-@router.get("/{material_id}/admin", response_model=Material)
-async def get_material_by_id(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin)):
+
+
+
+
+
+@router.get("/search/admin", response_model=List[Material])
+async def search_by_title(q: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
+    return await materialService.search_materials_by_title(q)
+
+
+@router.get("/filter/type/admin", response_model=List[Material])
+async def get_by_type(type: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
+    return await materialService.get_materials_by_type(type)
+
+@router.get("/filter/admin", response_model=List[Material])
+async def get_materials_admin(
+    title: Optional[str] = Query(None),
+    material_type: Optional[str] = Query(None),
+    min_price: Optional[float] = Query(None),
+    max_price: Optional[float] = Query(None),
+    date: Optional[datetime] = Query(None),
+    skip: int = 0,
+    limit: int = 10,
+    user: User = role_required(Role.ADMIN, Role.Super_Admin),
+):
+    return await materialService.filter_materials_admin(
+        title=title,
+        material_type=material_type,
+        min_price=min_price,
+        max_price=max_price,
+        date=date,
+        skip=skip,
+        limit=limit,
+    )
+
+
+@router.get("/filter/date/admin", response_model=List[Material], description="ISO format: yyyy-mm-dd")
+async def get_by_date(date: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):  # ISO format: yyyy-mm-dd
+    try:
+        parsed = datetime.fromisoformat(date)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+    return await materialService.get_materials_by_date(parsed)
+
+
+@router.delete("/{material_id}")
+async def delete_material(
+    material_id: str,
+    user: User = role_required(Role.ADMIN, Role.Super_Admin),
+):
     material = await materialService.get_material_by_id(material_id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
-    return material
 
+    if material.pdf_url:
+        try:
+            await document_bucket.delete(material.pdf_url)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Failed to delete PDF")
 
-@router.get("/{material_id}/user", response_model=materialUser)
-async def get_material_by_id_user(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
-    material = await materialService.get_material_by_id(material_id)
-    if not material:
-        raise HTTPException(status_code=404, detail="Material not found")
-    return [materialUser(**material.model_dump())]
+    if material.image_urls:
+        for image_url in material.image_urls:
+            try:
+                await image_bucket.delete(image_url)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Failed to delete image")
+
+    success = await materialService.delete_material(material_id)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete material")
+
+    return {"detail": "Material and associated files deleted"}
+
 
 @router.patch("/{material_id}", response_model=Material)
 async def update_material(
@@ -136,91 +225,17 @@ async def update_material(
     return material
 
 
-
-@router.delete("/{material_id}")
-async def delete_material(
-    material_id: str,
-    user: User = role_required(Role.ADMIN, Role.Super_Admin),
-):
+@router.get("/{material_id}/user", response_model=materialUser)
+async def get_material_by_id_user(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
     material = await materialService.get_material_by_id(material_id)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
-
-    if material.pdf_url:
-        try:
-            await document_bucket.delete(material.pdf_url)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="Failed to delete PDF")
-
-    if material.image_urls:
-        for image_url in material.image_urls:
-            try:
-                await image_bucket.delete(image_url)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail="Failed to delete image")
-
-    success = await materialService.delete_material(material_id)
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to delete material")
-
-    return {"detail": "Material and associated files deleted"}
+    return materialUser(**material.model_dump(by_alias=True))
 
 
-
-@router.get("/search/admin", response_model=List[Material])
-async def search_by_title(q: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
-    return await materialService.search_materials_by_title(q)
-
-
-@router.get("/filter/type/admin", response_model=List[Material])
-async def get_by_type(type: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
-    return await materialService.get_materials_by_type(type)
-
-@router.get("/filter/admin", response_model=List[Material])
-async def get_materials_admin(
-    title: Optional[str] = Query(None),
-    material_type: Optional[str] = Query(None),
-    min_price: Optional[float] = Query(None),
-    max_price: Optional[float] = Query(None),
-    date: Optional[datetime] = Query(None),
-    skip: int = 0,
-    limit: int = 10,
-    user: User = role_required(Role.ADMIN, Role.Super_Admin),
-):
-    return await materialService.filter_materials_admin(
-        title=title,
-        material_type=material_type,
-        min_price=min_price,
-        max_price=max_price,
-        date=date,
-        skip=skip,
-        limit=limit,
-    )
-
-@router.get("/filter/user", response_model=List[materialUser])
-async def get_materials_user(
-    title: Optional[str] = Query(None),
-    material_type: Optional[str] = Query(None),
-    min_price: Optional[float] = Query(None),
-    max_price: Optional[float] = Query(None),
-    date: Optional[datetime] = Query(None),
-    skip: int = 0,
-    limit: int = 10,
-):
-    return await materialService.filter_materials_user(
-        title=title,
-        material_type=material_type,
-        min_price=min_price,
-        max_price=max_price,
-        date=date,
-        skip=skip,
-        limit=limit,
-    )
-@router.get("/filter/date/admin", response_model=List[Material], description="ISO format: yyyy-mm-dd")
-async def get_by_date(date: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):  # ISO format: yyyy-mm-dd
-    try:
-        parsed = datetime.fromisoformat(date)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format")
-    return await materialService.get_materials_by_date(parsed)
-
+@router.get("/{material_id}/admin", response_model=Material)
+async def get_material_by_id(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin)):
+    material = await materialService.get_material_by_id(material_id)
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
+    return material
