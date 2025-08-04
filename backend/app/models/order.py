@@ -2,9 +2,10 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 from beanie import Document, Link
-from pydantic import BaseModel
+from bson import ObjectId
+from pydantic import BaseModel, ConfigDict
 from app.models.user import User
-from app.models import material
+from app.models.material import Material
 
 class OrderStatus(str, Enum):
     PENDING = "pending"
@@ -12,17 +13,15 @@ class OrderStatus(str, Enum):
     READY = "ready"
     DELIVERED = "delivered"
     
-class Orderitem(BaseModel):
-    material: Link[material.Material]
-    quantity: int
+
+
     
-    class config:
-        arbitrary_types_allowed = True
+
     
     
 class Order(Document):
     student: Link[User]
-    item : List[Orderitem]
+    item : List[tuple[Link[Material], int]]
     status: OrderStatus = OrderStatus.PENDING 
     appointment_date: Optional[datetime]
     created_at: datetime = datetime.utcnow()

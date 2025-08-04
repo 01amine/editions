@@ -4,6 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    MINIO_HOST: str = "127.0.0.1"              
+    MINIO_PORT: int = 9000                
+    MINIO_ROOT_USER: str = "minioadmin"   
+    MINIO_ROOT_PASSWORD: str = "crptx123"  
     SECRET_KEY: str = "your-very-secret-key"
     PASSWORD_RESET_TOKEN_EXPIRES: int = 3600  # 1 hour
     BASE_URL: str = "http://localhost:8000"

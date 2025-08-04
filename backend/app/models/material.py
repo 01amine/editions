@@ -11,7 +11,7 @@ class Material(Document):
     material_type: str     # "polycopie" or "book"
     price_dzd: float 
     pdf_url: Optional[str]     
-    created_at: datetime.datetime = Field(default_factory=lambda: datetime.now())
+    created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now())
     
     
     class Settings:

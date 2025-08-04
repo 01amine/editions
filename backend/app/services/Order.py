@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from app.models.Order import Order, OrderCreate, OrderStatus, Orderitem
+from app.models.order import Order, OrderCreate, OrderStatus
 from app.models.user import User
 from app.models.material import Material
 from typing import List, Optional
@@ -11,21 +11,22 @@ class orderService:
 
     @staticmethod
     async def create_order(student: User, items: List[OrderCreate]) -> Order:
-        order_items: List[Orderitem] = []
+       order_items: List[tuple[Material, int]] = []
 
-        for item in items:
-            material = await Material.get(item.materiel_id)
-            if not material:
-                raise HTTPException(status_code=404, detail=f"Material not found: {item.materiel_id}")
+       for item in items:
+        material = await Material.get(item.materiel_id)
+        if not material:
+            raise HTTPException(status_code=404, detail=f"Material not found: {item.materiel_id}")
 
-            order_items.append(Orderitem(material=material, quantity=item.quantity))
+        # Append as tuple[Material, int]
+        order_items.append((material, item.quantity))
 
-        order = Order(
-            student=student,
-            item=order_items,  
-        )
-        await order.insert()
-        return order
+       order = Order(
+        student=student,
+        item=order_items,
+       )
+       await order.insert()
+       return order
 
     @staticmethod
     async def get_orders_by_student(student_id: str) -> List[Order]:
@@ -69,7 +70,7 @@ class orderService:
         if not order or order.status != OrderStatus.READY:
             return None
         if order.assigned_admin.id != admin.id:
-            return None  # prevent cross-admin delivery
+            return None 
         order.status = OrderStatus.DELIVERED
         await order.save()
         return order

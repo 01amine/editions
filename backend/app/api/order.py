@@ -2,7 +2,7 @@ from fastapi import APIRouter,  HTTPException, Body
 from typing import List, Optional
 from datetime import datetime
 from app.services.Order import orderService
-from app.models.Order import Order, OrderCreate, OrderStatus, Orderitem
+from app.models.order import Order, OrderCreate, OrderStatus
 from app.models.user import User, Role
 from app.deps.auth import role_required
 

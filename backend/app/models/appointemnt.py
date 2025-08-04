@@ -1,7 +1,7 @@
 from datetime import datetime
 from beanie import Document, Link
 from pydantic import BaseModel, Field
-from app.models import Order
+from app.models.order import Order
 from app.models.user import User
 
 
