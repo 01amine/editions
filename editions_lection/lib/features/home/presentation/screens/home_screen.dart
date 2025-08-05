@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _contentFadeAnimation;
   late Animation<Offset> _contentSlideAnimation;
   late TextEditingController _searchController;
+  final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
 
   @override
@@ -74,6 +75,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _searchController = TextEditingController();
 
+    // Listen to search focus changes
+    _searchFocusNode.addListener(() {
+      setState(() {
+        _isSearchFocused = _searchFocusNode.hasFocus;
+      });
+    });
+
     // Fetch data and start animations
     context.read<HomeBloc>().add(FetchHomeData());
     _startAnimations();
@@ -90,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _headerAnimationController.dispose();
     _contentAnimationController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -108,6 +117,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // TODO: Get actual user name from AuthBloc
     // For now, return a placeholder that could be replaced with actual auth data
     return 'Utilisateur';
+  }
+
+  int _getNotificationCount() {
+    // TODO: Get actual notification count from NotificationBloc
+    return 3; // Placeholder value
+  }
+
+  int _getCommandCount() {
+    // TODO: Get actual command count from CommandBloc
+    return 2; // Placeholder value
   }
 
   void _navigateToNotifications() {
@@ -215,16 +234,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         Row(
           children: [
-            _buildAnimatedIconButton(
+            _buildAnimatedIconButtonWithBadge(
               icon: Icons.notifications_outlined,
               onPressed: _navigateToNotifications,
               delay: const Duration(milliseconds: 600),
+              badgeCount: _getNotificationCount(),
             ),
             SizedBox(width: context.width * 0.02),
-            _buildAnimatedIconButton(
+            _buildAnimatedIconButtonWithBadge(
               icon: Icons.book_outlined,
               onPressed: _navigateToCommands,
               delay: const Duration(milliseconds: 700),
+              badgeCount: _getCommandCount(),
             ),
           ],
         ),
@@ -232,10 +253,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAnimatedIconButton({
+  Widget _buildAnimatedIconButtonWithBadge({
     required IconData icon,
     required VoidCallback onPressed,
     required Duration delay,
+    required int badgeCount,
   }) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -244,17 +266,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       builder: (context, value, child) {
         return Transform.scale(
           scale: value,
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: Icon(icon, color: AppTheme.primaryTextColor),
-              onPressed: onPressed,
-              iconSize: 24,
-              splashRadius: 20,
-            ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: Icon(icon, color: AppTheme.primaryTextColor),
+                  onPressed: onPressed,
+                  iconSize: 24,
+                  splashRadius: 20,
+                ),
+              ),
+              if (badgeCount > 0)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppTheme.backgroundColor,
+                        width: 2,
+                      ),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    child: Text(
+                      badgeCount > 99 ? '99+' : badgeCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         );
       },
@@ -262,74 +318,91 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildSearchBar() {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+    return Container(
       decoration: BoxDecoration(
-        color: _isSearchFocused ? Colors.white : AppTheme.backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _isSearchFocused
-              ? AppTheme.primaryColor
-              : AppTheme.primaryTextColor.withOpacity(0.3),
-          width: _isSearchFocused ? 2 : 1,
-        ),
-        boxShadow: _isSearchFocused
-            ? [
-                BoxShadow(
-                  color: AppTheme.primaryColor.withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ]
-            : [],
-      ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: _onSearchChanged,
-        onTap: () {
-          setState(() {
-            _isSearchFocused = true;
-          });
-        },
-        onEditingComplete: () {
-          setState(() {
-            _isSearchFocused = false;
-          });
-          FocusScope.of(context).unfocus();
-        },
-        decoration: InputDecoration(
-          hintText: 'Rechercher un support, un auteur...',
-          hintStyle: TextStyle(
-            color: AppTheme.primaryTextColor.withOpacity(0.5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+            spreadRadius: 0,
           ),
-          filled: false,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          prefixIcon: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            child: Icon(
-              Icons.search,
-              color: _isSearchFocused
-                  ? AppTheme.primaryColor
-                  : AppTheme.primaryTextColor.withOpacity(0.7),
+          if (_isSearchFocused)
+            BoxShadow(
+              color: AppTheme.primaryColor.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
+        ],
+      ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color:
+                _isSearchFocused ? AppTheme.primaryColor : Colors.transparent,
+            width: 2,
           ),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: AppTheme.primaryTextColor.withOpacity(0.7),
-                  ),
-                  onPressed: () {
-                    _searchController.clear();
-                    _onSearchChanged('');
-                  },
-                )
-              : null,
+        ),
+        child: TextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          onChanged: _onSearchChanged,
+          style: TextStyle(
+            color: AppTheme.primaryTextColor,
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Rechercher un support, un auteur...',
+            hintStyle: TextStyle(
+              color: AppTheme.primaryTextColor.withOpacity(0.5),
+              fontSize: 16,
+            ),
+            filled: false,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
+            ),
+            prefixIcon: Container(
+              padding: const EdgeInsets.all(12),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                child: Icon(
+                  Icons.search_rounded,
+                  color: _isSearchFocused
+                      ? AppTheme.primaryColor
+                      : AppTheme.primaryTextColor.withOpacity(0.5),
+                  size: 24,
+                ),
+              ),
+            ),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? Container(
+                    padding: const EdgeInsets.all(8),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.clear_rounded,
+                        color: AppTheme.primaryTextColor.withOpacity(0.5),
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        _searchController.clear();
+                        _onSearchChanged('');
+                        setState(() {});
+                      },
+                      splashRadius: 16,
+                    ),
+                  )
+                : null,
+          ),
         ),
       ),
     );
