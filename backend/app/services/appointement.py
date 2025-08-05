@@ -2,7 +2,7 @@ from app.models.appointemnt import Appointment
 from datetime import datetime
 from typing import List, Optional
 from app.models.user import User
-from app.models.Order import Order
+from app.models.order import Order
 from beanie import PydanticObjectId
 
 
@@ -19,13 +19,14 @@ class appointemntService:
             order=order,
             scheduled_at=scheduled_at,
             location=location,
+            created_at= datetime.utcnow()
         )
         await appointement.insert()
         return appointement
 
     @staticmethod
-    async def get_all_appointement() -> List[Appointment]:
-        return await Appointment.find_all().to_list()
+    async def get_all_appointement(skip: Optional[int] = 0, limit: Optional[int] = 10) -> List[Appointment]:
+        return await Appointment.find().skip(skip).limit(limit).to_list()
 
     @staticmethod
     async def update_appointement(appointement_id: str, data: dict) -> Optional[Appointment]:

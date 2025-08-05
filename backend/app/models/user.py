@@ -1,6 +1,6 @@
 from enum import Enum
 from beanie import Document
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from datetime import datetime
 from typing import Optional, List
 
@@ -12,15 +12,28 @@ class Role(str, Enum):
 
 
 class User(Document):
-    email: EmailStr
+    email: EmailStr = Field(unique=True)
     hashed_password: str
     isblocked : bool = False
     full_name: Optional[str]
+    phone_number: Optional[str]
     roles: List[Role] = [Role.USER]
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class UserCreate(BaseModel):
     email : str
+    full_name: str
+    phone_number: str
     password: str
     
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str

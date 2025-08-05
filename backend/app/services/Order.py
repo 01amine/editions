@@ -1,6 +1,5 @@
-# app/services/Order.py
-
-from app.models.Order import Order, OrderStatus
+from fastapi import HTTPException
+from app.models.order import Order, OrderCreate, OrderStatus
 from app.models.user import User
 from app.models.material import Material
 from typing import List, Optional
@@ -10,18 +9,28 @@ from beanie import PydanticObjectId
 
 class orderService:
 
-
     @staticmethod
-    async def create_order(student: User, material_ids: List[str]) -> Order:
-        materials = [await Material.get(mid) for mid in material_ids]
-        materials = [m for m in materials if m is not None]
-        order = Order(student=student, materials=materials)
-        await order.insert()
-        return order
+    async def create_order(student: User, items: List[OrderCreate]) -> Order:
+       order_items: List[tuple[Material, int]] = []
+
+       for item in items:
+        material = await Material.get(item.materiel_id)
+        if not material:
+            raise HTTPException(status_code=404, detail=f"Material not found: {item.materiel_id}")
+
+        order_items.append((material, item.quantity))
+
+       order = Order(
+        student=student,
+        item=order_items,
+        
+       )
+       await order.insert()
+       return order
 
     @staticmethod
     async def get_orders_by_student(student_id: str) -> List[Order]:
-        return await Order.find(Order.student.id == PydanticObjectId(student_id)).sort("-created_at").to_list()
+       return await Order.find(Order.student.id == PydanticObjectId(student_id)).sort("-created_at").to_list()
 
 
     @staticmethod
@@ -32,7 +41,7 @@ class orderService:
 
     @staticmethod
     async def get_orders_by_admin(admin_id: str) -> List[Order]:
-        return await Order.find(Order.assigned_admin.id == PydanticObjectId(admin_id)).sort("-created_at").to_list()
+        return await Order.find(Order.assigned_admin == PydanticObjectId(admin_id)).sort("-created_at").to_list()
 
     @staticmethod
     async def accept_order_for_printing(order_id: str, admin: User) -> Optional[Order]:
@@ -59,9 +68,11 @@ class orderService:
     async def mark_order_as_delivered(order_id: str, admin: User) -> Optional[Order]:
         order = await Order.get(order_id)
         if not order or order.status != OrderStatus.READY:
-            return None
-        if order.assigned_admin.id != admin.id:
-            return None  # prevent cross-admin delivery
+          return None
+
+        if str(order.assigned_admin) != str(admin.id):
+           return None
+
         order.status = OrderStatus.DELIVERED
         await order.save()
         return order

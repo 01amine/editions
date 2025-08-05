@@ -1,18 +1,19 @@
 services:
-  cassandra:
-    image: cassandra:4.1
-    container_name: cassandra
-    ports:
-      - "9042:9042"
-    environment:
-      - CASSANDRA_START_RPC=true
+  minio:
+    image: minio/minio:latest
+    container_name: lection_minio
+    restart: unless-stopped
     volumes:
-      - cassandra_data:/var/lib/cassandra
-    healthcheck:
-      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
+      - minio_data:/data
+    networks:
+      - lexion_internal_net
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: crptx123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
 
   mongo:
     image: mongo:7
@@ -23,6 +24,10 @@ services:
       - mongo_data:/data/db
 
 volumes:
-  cassandra_data:
+  minio_data:
   mongo_data:
+
+networks:
+   lexion_internal_net:
+
 
