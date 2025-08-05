@@ -41,12 +41,7 @@ class AppTheme {
   // Social Colors
   static const Color googleColor = Color(0xFF4285F4);
   static const Color facebookColor = Color(0xFF1877F2);
-<<<<<<< Updated upstream
-
-=======
   
-backend  editions_lection
->>>>>>> Stashed changes
   // Transparent Colors
   static const Color overlayColor = Color(0x80000000);
   static const Color shimmerColor = Color(0xFFd8e1dd);
