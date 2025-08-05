@@ -3,7 +3,9 @@ from datetime import datetime
 from typing import List, Optional
 from app.models.user import User
 from app.models.order import Order
-from beanie import PydanticObjectId
+from beanie import Link, PydanticObjectId
+from app.services.notifction import notificationService
+from app.models.material import Material
 
 
 class appointemntService:
@@ -21,6 +23,8 @@ class appointemntService:
             location=location,
             created_at= datetime.utcnow()
         )
+        item = appointemntService.stringify_order_items(order.item)
+        notificationService.create_notification(user=student, message=f'You have a new appointement in {scheduled_at} for this order {item}')
         await appointement.insert()
         return appointement
 
@@ -61,3 +65,11 @@ class appointemntService:
     @staticmethod
     async def get_appointements_by_location(location: str) -> List[Appointment]:
         return await Appointment.find(Appointment.location == location).to_list()
+    
+    @staticmethod
+    async def stringify_order_items(items: List[tuple[Link["Material"], int]]) -> str:
+       parts = []
+       for material_link, qty in items:
+          material = await material_link.fetch()
+          parts.append(f"{qty}x {material.name}")
+       return ", ".join(parts)    

@@ -15,6 +15,6 @@ class Appointment(Document):
 
 class AppointmentCreate(BaseModel):
     order_id: str
-    admin_id: str
+    student_id: str
     scheduled_at: datetime
     location: str
