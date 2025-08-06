@@ -8,6 +8,6 @@ class UserService :
         return await User.find_one(User.full_name == name)
     @staticmethod
     async def get_user_by_id(id:str):
-        return await User.find_one(User.id == ObjectId(id))
+        return await User.find_one({"_id": ObjectId(id)})
     
     

@@ -23,8 +23,8 @@ class appointemntService:
             location=location,
             created_at= datetime.utcnow()
         )
-        item = appointemntService.stringify_order_items(order.item)
-        notificationService.create_notification(user=student, message=f'You have a new appointement in {scheduled_at} for this order {item}')
+        item = await  appointemntService.stringify_order_items(order.item)
+        notif = await notificationService.create_notification(user=student, message=f'You have a new appointement in {scheduled_at} for this order {item}')
         await appointement.insert()
         return appointement
 
@@ -70,6 +70,6 @@ class appointemntService:
     async def stringify_order_items(items: List[tuple[Link["Material"], int]]) -> str:
        parts = []
        for material_link, qty in items:
-          material = await material_link.fetch()
-          parts.append(f"{qty}x {material.name}")
+          material =  material_link
+          parts.append(f"{qty}x {material.title}")
        return ", ".join(parts)    

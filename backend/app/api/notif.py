@@ -9,4 +9,8 @@ router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 @router.get("/")
 async def get_notification(user :User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
-    return notificationService.get_notifications(user)
+    return await  notificationService.get_notifications(user)
+
+@router.get("/all")
+async def get_all_notification(user :User = role_required(Role.ADMIN, Role.Super_Admin)):
+    return await  notificationService.get_all_notifications()
