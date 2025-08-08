@@ -3,11 +3,11 @@ import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
 import 'package:flutter/material.dart';
 
-class EnhancedMaterialListView extends StatelessWidget {
+class CardsList extends StatelessWidget {
   final List<MaterialEntity> materials;
-  final Function(String) onMaterialTap;
+  final Function(MaterialEntity) onMaterialTap;
 
-  const EnhancedMaterialListView({
+  const CardsList({
     super.key,
     required this.materials,
     required this.onMaterialTap,
@@ -35,9 +35,9 @@ class EnhancedMaterialListView extends StatelessWidget {
                 offset: Offset(0, 50 * (1 - animationValue)),
                 child: Opacity(
                   opacity: animationValue,
-                  child: AnimatedMaterialCard(
+                  child: BookCard(
                     material: materials[index],
-                    onTap: () => onMaterialTap(materials[index].id),
+                    onTap: () => onMaterialTap(materials[index]),
                     index: index,
                   ),
                 ),
@@ -50,12 +50,12 @@ class EnhancedMaterialListView extends StatelessWidget {
   }
 }
 
-class AnimatedMaterialCard extends StatefulWidget {
+class BookCard extends StatefulWidget {
   final MaterialEntity material;
   final VoidCallback onTap;
   final int index;
 
-  const AnimatedMaterialCard({
+  const BookCard({
     super.key,
     required this.material,
     required this.onTap,
@@ -63,28 +63,16 @@ class AnimatedMaterialCard extends StatefulWidget {
   });
 
   @override
-  State<AnimatedMaterialCard> createState() => _AnimatedMaterialCardState();
+  State<BookCard> createState() => _BookCardState();
 }
 
-class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
-    with TickerProviderStateMixin {
-  late AnimationController _hoverController;
+class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
   late AnimationController _pressController;
   late AnimationController _shimmerController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _elevationAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<Offset> _offsetAnimation;
-  bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
-
-    _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
 
     _pressController = AnimationController(
       duration: const Duration(milliseconds: 150),
@@ -95,157 +83,80 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat();
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.08,
-    ).animate(CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    _elevationAnimation = Tween<double>(
-      begin: 4.0,
-      end: 16.0,
-    ).animate(CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 0.02,
-    ).animate(CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeInOut,
-    ));
-
-    _offsetAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0, -0.05),
-    ).animate(CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeOutCubic,
-    ));
   }
 
   @override
   void dispose() {
-    _hoverController.dispose();
     _pressController.dispose();
     _shimmerController.dispose();
     super.dispose();
   }
 
-  void _onHoverStart() {
-    if (!_isHovered) {
-      setState(() {
-        _isHovered = true;
-      });
-      _hoverController.forward();
-    }
-  }
-
-  void _onHoverEnd() {
-    if (_isHovered) {
-      setState(() {
-        _isHovered = false;
-      });
-      _hoverController.reverse();
-    }
-  }
-
   void _onTapDown() {
-    setState(() {});
     _pressController.forward();
   }
 
   void _onTapUp() {
-    setState(() {});
-    _pressController.reverse().then((_) {
-      widget.onTap();
-    });
+    _pressController.reverse();
   }
 
   void _onTapCancel() {
-    setState(() {});
     _pressController.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => _onHoverStart(),
-      onExit: (_) => _onHoverEnd(),
-      child: GestureDetector(
-        onTapDown: (_) => _onTapDown(),
-        onTapUp: (_) => _onTapUp(),
-        onTapCancel: _onTapCancel,
-        child: AnimatedBuilder(
-          animation: Listenable.merge([
-            _hoverController,
-            _pressController,
-            _shimmerController,
-          ]),
-          builder: (context, child) {
-            double pressScale = 1.0 - (_pressController.value * 0.03);
+    return GestureDetector(
+      onTapDown: (_) => _onTapDown(),
+      onTapUp: (_) => _onTapUp(),
+      onTapCancel: _onTapCancel,
+      child: AnimatedBuilder(
+        animation: _pressController,
+        builder: (context, child) {
+          double pressScale = 1.0 - (_pressController.value * 0.03);
 
-            return SlideTransition(
-              position: _offsetAnimation,
-              child: Transform.scale(
-                scale: _scaleAnimation.value * pressScale,
-                child: Transform.rotate(
-                  angle: _rotationAnimation.value,
-                  child: Container(
-                    width: context.width * 0.5,
-                    height: context.height * 0.42,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primaryColor.withOpacity(0.15),
-                          blurRadius: _elevationAnimation.value,
-                          spreadRadius: _elevationAnimation.value * 0.1,
-                          offset: Offset(0, _elevationAnimation.value * 0.3),
-                        ),
-                        if (_isHovered)
-                          BoxShadow(
-                            color: AppTheme.primaryColor.withOpacity(0.25),
-                            blurRadius: _elevationAnimation.value * 1.5,
-                            spreadRadius: _elevationAnimation.value * 0.2,
-                            offset: Offset(0, _elevationAnimation.value * 0.5),
-                          ),
+          return Transform.scale(
+            scale: pressScale,
+            child: Container(
+              width: context.width * 0.5,
+              height: context.height * 0.42,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.15),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white,
+                        AppTheme.backgroundColor.withOpacity(0.3),
                       ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.white,
-                              AppTheme.backgroundColor.withOpacity(0.3),
-                            ],
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildImageSection(context),
-                            _buildContentSection(context),
-                            _buildActionSection(context),
-                          ],
-                        ),
-                      ),
-                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildImageSection(context),
+                      _buildContentSection(context),
+                      _buildActionSection(context),
+                    ],
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -270,7 +181,7 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
         child: Stack(
           children: [
             // Main image or placeholder
-            widget.material.imageUrls.isNotEmpty == true
+            widget.material.imageUrls.isNotEmpty
                 ? Image.network(
                     widget.material.imageUrls[0],
                     fit: BoxFit.cover,
@@ -285,28 +196,18 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
                   )
                 : _buildStyledPlaceholder(),
 
-            // Animated overlay with gradient
+            // Overlay with gradient
             Positioned.fill(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 400),
+              child: Container(
                 decoration: BoxDecoration(
-                  gradient: _isHovered
-                      ? LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            AppTheme.primaryColor.withOpacity(0.2),
-                          ],
-                        )
-                      : LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.05),
-                          ],
-                        ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.05),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -315,16 +216,13 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
             Positioned(
               bottom: context.height * 0.015,
               left: context.width * 0.025,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
+              child: Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: context.width * 0.025,
                   vertical: context.height * 0.008,
                 ),
                 decoration: BoxDecoration(
-                  color: _isHovered
-                      ? Colors.white.withOpacity(0.95)
-                      : Colors.white.withOpacity(0.85),
+                  color: Colors.white.withOpacity(0.85),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: AppTheme.primaryColor.withOpacity(0.2),
@@ -348,6 +246,36 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+
+            // Price indicator
+            Positioned(
+              top: context.height * 0.015,
+              right: context.width * 0.025,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.width * 0.02,
+                  vertical: context.height * 0.006,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '${widget.material.priceDzd.toInt()} DA',
+                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -446,7 +374,7 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
 
   Widget _buildContentSection(BuildContext context) {
     return Container(
-      height: context.height * 0.1,
+      height: context.height * 0.08,
       padding: EdgeInsets.symmetric(
         horizontal: context.width * 0.04,
         vertical: context.height * 0.01,
@@ -503,109 +431,156 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
 
   Widget _buildActionSection(BuildContext context) {
     return Container(
-      height: context.height * 0.08,
+      height: context.height * 0.12,
       padding: EdgeInsets.all(context.width * 0.04),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: widget.onTap,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _isHovered
-                ? AppTheme.primaryColor
-                : AppTheme.primaryColor.withOpacity(0.9),
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(vertical: context.height * 0.009),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            elevation: _isHovered ? 8 : 4,
-            shadowColor: AppTheme.primaryColor.withOpacity(0.3),
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child: _isHovered
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.auto_stories,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: context.width * 0.02),
-                      Text(
-                        'Ouvrir',
-                        style:
-                            AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(width: context.width * 0.02),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 400),
-                        builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(8 * value, 0),
-                            child: Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.menu_book_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: context.width * 0.02),
-                      Text(
-                        'Lire plus',
-                        style:
-                            AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+      child: Column(
+        children: [
+          // Read More Button
+          Expanded(
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/book_details_screen',
+                    arguments: widget.material,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor.withOpacity(0.9),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
+                  elevation: 4,
+                  shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.menu_book_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: context.width * 0.02),
+                    Text(
+                      'Lire plus',
+                      style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+          
+          SizedBox(height: context.height * 0.008),
+          
+          // Order Button
+          Expanded(
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  // Handle order action
+                  _showOrderDialog(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primaryColor,
+                  side: BorderSide(
+                    color: AppTheme.primaryColor,
+                    width: 1.5,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      size: 18,
+                      color: AppTheme.primaryColor,
+                    ),
+                    SizedBox(width: context.width * 0.02),
+                    Text(
+                      'Commander',
+                      style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  void _showOrderDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Commander ${widget.material.title}'),
+          content: Text(
+            'Voulez-vous commander ce livre pour ${widget.material.priceDzd.toInt()} DA?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Add order logic here
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Commande ajoutée au panier!'),
+                    backgroundColor: AppTheme.primaryColor,
+                  ),
+                );
+              },
+              child: const Text('Commander'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   IconData _getCategoryIcon() {
-    // You can enhance this based on your material type/category
-    if (widget.material.title.toLowerCase().contains('livre')) {
-      return Icons.menu_book;
-    } else if (widget.material.title.toLowerCase().contains('poly')) {
-      return Icons.description;
-    } else if (widget.material.title.toLowerCase().contains('cours')) {
-      return Icons.school;
+    switch (widget.material.materialType.toLowerCase()) {
+      case 'livre':
+        return Icons.menu_book;
+      case 'polycopie':
+        return Icons.description;
+      case 'cours':
+        return Icons.school;
+      default:
+        return Icons.library_books;
     }
-    return Icons.library_books;
   }
 
   String _getCategoryName() {
-    // You can enhance this based on your material type/category
-    if (widget.material.title.toLowerCase().contains('livre')) {
-      return 'Livre';
-    } else if (widget.material.title.toLowerCase().contains('poly')) {
-      return 'Polycopié';
-    } else if (widget.material.title.toLowerCase().contains('cours')) {
-      return 'Cours';
+    switch (widget.material.materialType.toLowerCase()) {
+      case 'livre':
+        return 'Livre';
+      case 'polycopie':
+        return 'Polycopié';
+      case 'cours':
+        return 'Cours';
+      default:
+        return 'Document';
     }
-    return 'Document';
   }
 }

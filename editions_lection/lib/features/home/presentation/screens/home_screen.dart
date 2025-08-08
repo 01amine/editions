@@ -3,7 +3,7 @@ import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/presentation/bloc/home_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:editions_lection/features/home/presentation/widgets/material_list_view.dart';
+import 'package:editions_lection/features/home/presentation/widgets/cards_list.dart';
 
 import '../../domain/entities/material.dart';
 
@@ -139,9 +139,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     Navigator.pushNamed(context, '/commands');
   }
 
-  void _navigateToMaterialDetails(String materialId) {
+  void _navigateToMaterialDetails(MaterialEntity material) {
     // TODO: Implement navigation to material details screen
-    Navigator.pushNamed(context, '/material-details', arguments: materialId);
+    Navigator.pushNamed(context, '/material-details', arguments: material.id);
   }
 
   void _onSearchChanged(String query) {
@@ -522,7 +522,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 if (materials.isEmpty)
                   _buildEmptyState(title)
                 else
-                  EnhancedMaterialListView(
+                  CardsList(
                     materials: materials,
                     onMaterialTap: _navigateToMaterialDetails,
                   ),
