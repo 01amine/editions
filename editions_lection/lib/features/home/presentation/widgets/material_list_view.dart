@@ -16,7 +16,7 @@ class EnhancedMaterialListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: context.height * 0.4,
+      height: context.height * 0.45,
       child: ListView.separated(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
@@ -24,7 +24,7 @@ class EnhancedMaterialListView extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: context.width * 0.02),
         itemCount: materials.length,
         separatorBuilder: (context, index) =>
-            SizedBox(width: context.width * 0.04),
+            SizedBox(width: context.width * 0.03),
         itemBuilder: (context, index) {
           return TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),
@@ -197,7 +197,8 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
                 child: Transform.rotate(
                   angle: _rotationAnimation.value,
                   child: Container(
-                    width: context.width * 0.48,
+                    width: context.width * 0.5,
+                    height: context.height * 0.42,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
@@ -250,156 +251,107 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
   }
 
   Widget _buildImageSection(BuildContext context) {
-    return Expanded(
-      flex: 4,
-      child: Container(
-        width: double.infinity,
-        margin: EdgeInsets.all(context.width * 0.03),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+    return Container(
+      height: context.height * 0.22,
+      width: double.infinity,
+      margin: EdgeInsets.all(context.width * 0.025),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Main image or placeholder
+            widget.material.fileUrl?.isNotEmpty == true
+                ? Image.network(
+                    widget.material.fileUrl!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return _buildShimmerPlaceholder();
+                    },
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildStyledPlaceholder(),
+                  )
+                : _buildStyledPlaceholder(),
+
+            // Animated overlay with gradient
+            Positioned.fill(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                decoration: BoxDecoration(
+                  gradient: _isHovered
+                      ? LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            AppTheme.primaryColor.withOpacity(0.2),
+                          ],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.05),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+
+            // Category indicator
+            Positioned(
+              bottom: context.height * 0.015,
+              left: context.width * 0.025,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.width * 0.025,
+                  vertical: context.height * 0.008,
+                ),
+                decoration: BoxDecoration(
+                  color: _isHovered
+                      ? Colors.white.withOpacity(0.95)
+                      : Colors.white.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.primaryColor.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getCategoryIcon(),
+                      size: 14,
+                      color: AppTheme.primaryColor,
+                    ),
+                    SizedBox(width: context.width * 0.01),
+                    Text(
+                      _getCategoryName(),
+                      style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                        color: AppTheme.primaryTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              // Main image or placeholder
-              widget.material.fileUrl?.isNotEmpty == true
-                  ? Image.network(
-                      widget.material.fileUrl!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return _buildShimmerPlaceholder();
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildStyledPlaceholder(),
-                    )
-                  : _buildStyledPlaceholder(),
-
-              // Animated overlay with gradient
-              Positioned.fill(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  decoration: BoxDecoration(
-                    gradient: _isHovered
-                        ? LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              AppTheme.primaryColor.withOpacity(0.2),
-                            ],
-                          )
-                        : LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.05),
-                            ],
-                          ),
-                  ),
-                ),
-              ),
-
-              // Floating status badge
-              Positioned(
-                top: 8,
-                right: 8,
-                child: AnimatedScale(
-                  scale: _isHovered ? 1.1 : 1.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.successColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.successColor.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 12,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Disponible',
-                          style: AppTheme.lightTheme.textTheme.labelSmall
-                              ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Category indicator
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _isHovered
-                        ? Colors.white.withOpacity(0.95)
-                        : Colors.white.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppTheme.primaryColor.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _getCategoryIcon(),
-                        size: 14,
-                        color: AppTheme.primaryColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _getCategoryName(),
-                        style:
-                            AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                          color: AppTheme.primaryTextColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -450,7 +402,7 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(context.width * 0.04),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.9),
                 shape: BoxShape.circle,
@@ -464,13 +416,16 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
               ),
               child: Icon(
                 _getCategoryIcon(),
-                size: 32,
+                size: context.width * 0.08,
                 color: AppTheme.primaryColor,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: context.height * 0.01),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: EdgeInsets.symmetric(
+                horizontal: context.width * 0.03,
+                vertical: context.height * 0.005,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(12),
@@ -490,68 +445,69 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
   }
 
   Widget _buildContentSection(BuildContext context) {
-    return Expanded(
-      flex: 3,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          context.width * 0.04,
-          context.width * 0.02,
-          context.width * 0.04,
-          context.width * 0.02,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title with enhanced styling
-            Text(
+    return Container(
+      height: context.height * 0.1,
+      padding: EdgeInsets.symmetric(
+        horizontal: context.width * 0.04,
+        vertical: context.height * 0.01,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Title with enhanced styling
+          Flexible(
+            child: Text(
               widget.material.title,
-              style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryTextColor,
-                height: 1.3,
+                height: 1.2,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+          ),
 
-            const SizedBox(height: 6),
-
-            // Author or subject info
-            if (widget.material.description?.isNotEmpty == true) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.2),
-                    width: 0.5,
-                  ),
-                ),
-                child: Text(
-                  widget.material.description!,
-                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                    color: AppTheme.primaryTextColor.withOpacity(0.8),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          // Author or subject info
+          if (widget.material.description?.isNotEmpty == true) ...[
+            SizedBox(height: context.height * 0.005),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.width * 0.02,
+                vertical: context.height * 0.004,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  width: 0.5,
                 ),
               ),
-            ],
+              child: Text(
+                widget.material.description!,
+                style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.primaryTextColor.withOpacity(0.8),
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildActionSection(BuildContext context) {
     return Container(
+      height: context.height * 0.08,
       padding: EdgeInsets.all(context.width * 0.04),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: double.infinity,
-        height: 48,
         child: ElevatedButton(
           onPressed: widget.onTap,
           style: ElevatedButton.styleFrom(
@@ -559,7 +515,7 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
                 ? AppTheme.primaryColor
                 : AppTheme.primaryColor.withOpacity(0.9),
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: context.height * 0.009),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
