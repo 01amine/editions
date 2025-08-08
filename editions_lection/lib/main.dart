@@ -7,7 +7,7 @@ import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/signup_screen.dart';
-import 'features/home/presentation/bloc/home_bloc.dart';
+import 'features/home/presentation/bloc/home_bloc/home_bloc.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';

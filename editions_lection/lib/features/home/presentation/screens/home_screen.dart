@@ -1,6 +1,6 @@
 import 'package:editions_lection/core/extensions/extensions.dart';
 import 'package:editions_lection/core/theme/theme.dart';
-import 'package:editions_lection/features/home/presentation/bloc/home_bloc.dart';
+import 'package:editions_lection/features/home/presentation/bloc/home_bloc/home_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:editions_lection/features/home/presentation/widgets/cards_list.dart';
