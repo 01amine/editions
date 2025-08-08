@@ -270,9 +270,9 @@ class _AnimatedMaterialCardState extends State<AnimatedMaterialCard>
         child: Stack(
           children: [
             // Main image or placeholder
-            widget.material.fileUrl?.isNotEmpty == true
+            widget.material.imageUrls.isNotEmpty == true
                 ? Image.network(
-                    widget.material.fileUrl!,
+                    widget.material.imageUrls[0],
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,

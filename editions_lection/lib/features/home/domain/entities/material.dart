@@ -4,7 +4,7 @@ class MaterialEntity extends Equatable {
   final String id;
   final String title;
   final String? description;
-  final String? fileUrl;
+  final List<String> imageUrls;
   final String materialType;
   final double priceDzd;
   final DateTime createdAt;
@@ -13,7 +13,7 @@ class MaterialEntity extends Equatable {
     required this.id,
     required this.title,
     this.description,
-    this.fileUrl,
+    required this.imageUrls,
     required this.materialType,
     required this.priceDzd,
     required this.createdAt,
@@ -24,7 +24,8 @@ class MaterialEntity extends Equatable {
       id: json['_id'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
-      fileUrl: json['file_url'] as String?,
+      imageUrls: List<String>.from(json['image_urls'] as List),
+      
       materialType: json['material_type'] as String,
       priceDzd: (json['price_dzd'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -36,7 +37,8 @@ class MaterialEntity extends Equatable {
       '_id': id,
       'title': title,
       'description': description,
-      'file_url': fileUrl,
+      'image_urls': imageUrls,
+      
       'material_type': materialType,
       'price_dzd': priceDzd,
       'created_at': createdAt.toIso8601String(),
@@ -45,5 +47,5 @@ class MaterialEntity extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, title, description, fileUrl, materialType, priceDzd, createdAt];
+      [id, title, description, imageUrls,  materialType, priceDzd, createdAt];
 }
