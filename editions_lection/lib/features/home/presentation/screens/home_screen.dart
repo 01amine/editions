@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _navigateToMaterialDetails(MaterialEntity material) {
     // TODO: Implement navigation to material details screen
-    Navigator.pushNamed(context, '/material-details', arguments: material.id);
+    Navigator.pushNamed(context, '/book_details_screen', arguments: material.id);
   }
 
   void _onSearchChanged(String query) {

@@ -33,7 +33,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           id: '1',
           title: 'Book Title 1',
           description: 'Description for book 1',
-          imageUrls: ['https://covers.openlibrary.org/b/id/15094106-L.jpg'],
+          imageUrls: [
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg'
+          ],
           materialType: 'book',
           priceDzd: 1500.00,
           createdAt: DateTime.now(),
@@ -42,7 +47,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           id: '2',
           title: 'Book Title 2',
           description: 'Description for book 2',
-          imageUrls: ['https://covers.openlibrary.org/b/id/15094106-L.jpg'],
+          imageUrls: [
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg'
+          ],
           materialType: 'book',
           priceDzd: 1200.00,
           createdAt: DateTime.now().subtract(const Duration(days: 1)),
@@ -54,7 +64,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           id: '3',
           title: 'Polycopie Title 1',
           description: 'Description for polycopie 1',
-          imageUrls: ['https://covers.openlibrary.org/b/id/15094106-L.jpg'],
+          imageUrls: [
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg'
+          ],
           materialType: 'polycopie',
           priceDzd: 500.00,
           createdAt: DateTime.now().subtract(const Duration(days: 2)),
@@ -63,7 +79,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           id: '4',
           title: 'Polycopie Title 2',
           description: 'Description for polycopie 2',
-          imageUrls: ['https://covers.openlibrary.org/b/id/15094106-L.jpg'],
+          imageUrls: [
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg',
+            'https://covers.openlibrary.org/b/id/15094106-L.jpg'
+          ],
           materialType: 'polycopie',
           priceDzd: 750.00,
           createdAt: DateTime.now().subtract(const Duration(days: 3)),

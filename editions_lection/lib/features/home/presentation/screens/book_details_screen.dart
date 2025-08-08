@@ -51,16 +51,30 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.theme.scaffoldBackgroundColor,
+      backgroundColor: AppTheme.backgroundColor,
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: CustomScrollView(
           slivers: [
-            _buildSliverAppBar(context),
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  IconButton(
+                    icon: Container(
+                      padding: EdgeInsets.all(context.width * 0.02),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                   _buildImageGallery(context),
                   _buildBookInfo(context),
                   _buildDescription(context),
@@ -75,92 +89,6 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: context.height * 0.1,
-      floating: true,
-      pinned: true,
-      backgroundColor: AppTheme.primaryColor,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: Container(
-          padding: EdgeInsets.all(context.width * 0.02),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      actions: [
-        IconButton(
-          icon: Container(
-            padding: EdgeInsets.all(context.width * 0.02),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.favorite_border,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Ajouté aux favoris!'),
-                backgroundColor: AppTheme.primaryColor,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-        ),
-        SizedBox(width: context.width * 0.04),
-      ],
-      flexibleSpace: FlexibleSpaceBar(
-        title: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: context.width * 0.04,
-            vertical: context.height * 0.01,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            widget.book.title,
-            style: context.theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        centerTitle: true,
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppTheme.primaryColor,
-                AppTheme.primaryColor.withOpacity(0.8),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildImageGallery(BuildContext context) {
     if (widget.book.imageUrls.isEmpty) {
       return _buildPlaceholderImage(context);
@@ -168,20 +96,20 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
 
     return Container(
       height: context.height * 0.4,
-      margin: EdgeInsets.all(context.width * 0.04),
+      margin: EdgeInsets.all(context.width * 0.05),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.2),
-            blurRadius: 15,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+            spreadRadius: 0,
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
             PageView.builder(
@@ -197,22 +125,24 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
                   tag: 'book_image_${widget.book.id}_$index',
                   child: Image.network(
                     widget.book.imageUrls[index],
-                    fit: BoxFit.cover,
+                    fit: BoxFit
+                        .contain, // Changed from BoxFit.cover to show full image
                     width: double.infinity,
                     height: double.infinity,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.shimmerColor.withOpacity(0.3),
-                              AppTheme.shimmerColor.withOpacity(0.6),
-                            ],
-                          ),
+                          color: AppTheme.primaryColor.withOpacity(0.05),
                         ),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor:
+                                AppTheme.primaryColor.withOpacity(0.2),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.primaryColor),
+                            strokeWidth: 3,
+                          ),
                         ),
                       );
                     },
@@ -222,7 +152,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
                 );
               },
             ),
-            
+
             // Image indicators
             if (widget.book.imageUrls.length > 1)
               Positioned(
@@ -235,15 +165,16 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
                     widget.book.imageUrls.length,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      margin: EdgeInsets.symmetric(horizontal: context.width * 0.01),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: context.width * 0.01),
                       width: _currentImageIndex == index
                           ? context.width * 0.08
                           : context.width * 0.02,
                       height: context.width * 0.02,
                       decoration: BoxDecoration(
                         color: _currentImageIndex == index
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.5),
+                            ? AppTheme.primaryColor
+                            : AppTheme.primaryColor.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -315,16 +246,13 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
   Widget _buildPlaceholderImage(BuildContext context) {
     return Container(
       height: context.height * 0.4,
-      margin: EdgeInsets.all(context.width * 0.04),
+      margin: EdgeInsets.all(context.width * 0.05),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor.withOpacity(0.1),
-            AppTheme.secondaryColor.withOpacity(0.15),
-          ],
+        borderRadius: BorderRadius.circular(12),
+        color: AppTheme.primaryColor.withOpacity(0.05),
+        border: Border.all(
+          color: AppTheme.primaryColor.withOpacity(0.2),
+          style: BorderStyle.solid,
         ),
       ),
       child: Center(
@@ -334,8 +262,15 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
             Container(
               padding: EdgeInsets.all(context.width * 0.08),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: AppTheme.surfaceColor,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 _getCategoryIcon(),
@@ -346,7 +281,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
             SizedBox(height: context.height * 0.02),
             Text(
               'Aucune image disponible',
-              style: context.theme.textTheme.bodyLarge?.copyWith(
+              style: context.theme.textTheme.bodyMedium?.copyWith(
                 color: AppTheme.primaryTextColor.withOpacity(0.7),
                 fontWeight: FontWeight.w600,
               ),
@@ -359,14 +294,14 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
 
   Widget _buildBookInfo(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: context.width * 0.04),
+      margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
       padding: EdgeInsets.all(context.width * 0.05),
       decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -447,27 +382,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
               ),
             ],
           ),
-
-          // Image count
-          if (widget.book.imageUrls.isNotEmpty) ...[
-            SizedBox(height: context.height * 0.01),
-            Row(
-              children: [
-                Icon(
-                  Icons.photo_library,
-                  color: AppTheme.secondaryTextColor,
-                  size: context.width * 0.045,
-                ),
-                SizedBox(width: context.width * 0.02),
-                Text(
-                  '${widget.book.imageUrls.length} image${widget.book.imageUrls.length > 1 ? 's' : ''}',
-                  style: context.theme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.secondaryTextColor,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          // Removed the image count section as requested
         ],
       ),
     );
@@ -479,14 +394,14 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
     }
 
     return Container(
-      margin: EdgeInsets.all(context.width * 0.04),
+      margin: EdgeInsets.all(context.width * 0.05),
       padding: EdgeInsets.all(context.width * 0.05),
       decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -506,7 +421,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
               SizedBox(width: context.width * 0.02),
               Text(
                 'Description',
-                style: context.theme.textTheme.titleLarge?.copyWith(
+                style: context.theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryTextColor,
                 ),
@@ -528,14 +443,14 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
 
   Widget _buildOrderSection(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: context.width * 0.04),
+      margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
       padding: EdgeInsets.all(context.width * 0.05),
       decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -553,9 +468,9 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
-                elevation: 0,
+                elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               icon: _isOrderLoading
@@ -572,7 +487,9 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
                       size: context.width * 0.05,
                     ),
               label: Text(
-                _isOrderLoading ? 'Commande en cours...' : 'Commander maintenant',
+                _isOrderLoading
+                    ? 'Commande en cours...'
+                    : 'Commander maintenant',
                 style: context.theme.textTheme.labelLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -580,77 +497,8 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
               ),
             ),
           ),
-          SizedBox(height: context.height * 0.015),
-
-          // Contact Options
-          Row(
-            children: [
-              Expanded(
-                child: _buildContactButton(
-                  context,
-                  icon: Icons.phone,
-                  label: 'Appeler',
-                  color: AppTheme.successColor,
-                  onTap: () => _handleContact(context, 'phone'),
-                ),
-              ),
-              SizedBox(width: context.width * 0.03),
-              Expanded(
-                child: _buildContactButton(
-                  context,
-                  icon: Icons.message,
-                  label: 'Message',
-                  color: AppTheme.infoColor,
-                  onTap: () => _handleContact(context, 'message'),
-                ),
-              ),
-            ],
-          ),
+          // Removed the contact options (Appeler and Message buttons) as requested
         ],
-      ),
-    );
-  }
-
-  Widget _buildContactButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: context.height * 0.015,
-          horizontal: context.width * 0.03,
-        ),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: context.width * 0.05,
-            ),
-            SizedBox(width: context.width * 0.02),
-            Text(
-              label,
-              style: context.theme.textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -694,10 +542,20 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
 
   String _formatDate(DateTime date) {
     final months = [
-      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+      'janvier',
+      'février',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'août',
+      'septembre',
+      'octobre',
+      'novembre',
+      'décembre'
     ];
-    
+
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
@@ -718,8 +576,9 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
         context: context,
         builder: (context) => AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
           ),
+          backgroundColor: AppTheme.surfaceColor,
           title: Row(
             children: [
               Icon(
@@ -730,19 +589,25 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
               SizedBox(width: context.width * 0.02),
               Text(
                 'Commande confirmée',
-                style: context.theme.textTheme.titleLarge?.copyWith(
+                style: context.theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryTextColor,
                 ),
               ),
             ],
           ),
           content: Text(
             'Votre commande pour "${widget.book.title}" a été enregistrée. Nous vous contacterons bientôt.',
-            style: context.theme.textTheme.bodyMedium,
+            style: context.theme.textTheme.bodyMedium?.copyWith(
+              color: AppTheme.primaryTextColor,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.primaryColor,
+              ),
               child: Text(
                 'OK',
                 style: context.theme.textTheme.labelLarge?.copyWith(
@@ -755,23 +620,6 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
         ),
       );
     }
-  }
-
-  void _handleContact(BuildContext context, String type) {
-    String message = type == 'phone'
-        ? 'Fonction d\'appel à implémenter'
-        : 'Fonction de message à implémenter';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppTheme.infoColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
   }
 }
 
