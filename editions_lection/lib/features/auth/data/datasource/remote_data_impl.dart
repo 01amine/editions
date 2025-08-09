@@ -46,8 +46,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       Uri.parse('$baseUrl/users/register'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'fullName': fullName,
-        'phoneNumber': phoneNumber,
+        'full_name': fullName,
+        'phone_number': phoneNumber,
         'email': email,
         'password': password,
         'studyYear': studyYear,
