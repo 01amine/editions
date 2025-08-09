@@ -38,13 +38,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await loginUser(
       LoginParams(email: event.email, password: event.password),
     );
-    result.fold(
-      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
-      (authResponse) async {
-        await saveToken(authResponse.token);
-        emit(AuthSuccess(authResponse: authResponse));
-      },
-    );
+
+    if (result.isLeft()) {
+      final failure = result.fold((l) => l, (r) => null);
+      emit(AuthError(message: _mapFailureToMessage(failure!)));
+    } else {
+      final authResponse = result.fold((l) => null, (r) => r);
+      await saveToken(authResponse!.token);
+      emit(AuthSuccess(authResponse: authResponse));
+    }
   }
 
   Future<void> _onSignupRequested(
@@ -62,13 +64,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         specialite: event.specialite,
       ),
     );
-    result.fold(
-      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
-      (authResponse) async {
-        await saveToken(authResponse.token);
-        emit(AuthSuccess(authResponse: authResponse));
-      },
-    );
+
+    if (result.isLeft()) {
+      final failure = result.fold((l) => l, (r) => null);
+      emit(AuthError(message: _mapFailureToMessage(failure!)));
+    } else {
+      final authResponse = result.fold((l) => null, (r) => r);
+
+      await saveToken(authResponse!.token);
+
+      emit(AuthSuccess(authResponse: authResponse));
+    }
   }
 
   Future<void> _onLogoutRequested(
