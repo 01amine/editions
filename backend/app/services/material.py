@@ -11,6 +11,9 @@ class materialService:
         material_type: Optional[str] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
+        subject: Optional[str] = None,
+        annee: Optional[str] = None,
+        specialite: Optional[str] = None,
         date: Optional[datetime] = None,
         skip: int = 0,
         limit: int = 10
@@ -20,6 +23,9 @@ class materialService:
             material_type=material_type,
             min_price=min_price,
             max_price=max_price,
+            subject=subject,
+            annee=annee,
+            specialite=specialite,
             date=date,
             skip=skip,
             limit=limit
@@ -34,6 +40,9 @@ class materialService:
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
         date: Optional[datetime] = None,
+        subject: Optional[str] = None,
+        annee: Optional[str] = None,
+        specialite: Optional[str] = None,
         skip: int = 0,
         limit: int = 10
     ) -> List[Material]:
@@ -51,7 +60,12 @@ class materialService:
                 query["price_dzd"]["$gte"] = min_price
             if max_price is not None:
                 query["price_dzd"]["$lte"] = max_price
-
+        if subject:
+            query["module"] = subject
+        if annee:
+            query["study_year"] = annee
+        if specialite:
+            query["specialite"] = specialite
         if date:
             query["created_at"] = date
 

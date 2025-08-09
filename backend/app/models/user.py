@@ -17,6 +17,8 @@ class User(Document):
     isblocked : bool = False
     full_name: Optional[str]
     phone_number: Optional[str]
+    study_year: Optional[str] = None
+    specialite: Optional[str] = None
     roles: List[Role] = [Role.USER]
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -26,6 +28,9 @@ class UserCreate(BaseModel):
     full_name: str
     phone_number: str
     password: str
+    study_year: Optional[str] = None
+    specialite: Optional[str] = None
+    
     
 class UserLogin(BaseModel):
     email: str

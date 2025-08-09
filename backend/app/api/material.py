@@ -24,6 +24,9 @@ async def get_materials_user(
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     date: Optional[datetime] = Query(None),
+    subject: Optional[str] = Query(None),
+    annee: Optional[str] = Query(None),
+    specialite: Optional[str] = Query(None),
     skip: int = 0,
     limit: int = 10,
 ):
@@ -33,6 +36,9 @@ async def get_materials_user(
         min_price=min_price,
         max_price=max_price,
         date=date,
+        annee=annee,
+        subject=subject,
+        specialite=specialite,
         skip=skip,
         limit=limit,
     )
@@ -125,6 +131,7 @@ async def get_by_type(type: str, user: User = role_required(Role.ADMIN, Role.Sup
 async def get_materials_admin(
     title: Optional[str] = Query(None),
     material_type: Optional[str] = Query(None),
+    
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     date: Optional[datetime] = Query(None),
@@ -190,6 +197,9 @@ async def update_material(
     description: Optional[str] = Form(None),
     material_type: Optional[str] = Form(None),
     price_dzd: Optional[float] = Form(None),
+    year_study: Optional[str] = Form(None),
+    specialite: Optional[str] = Form(None),
+    module: Optional[str] = Form(None),
     user: User = role_required(Role.ADMIN, Role.Super_Admin),
 ):
  
@@ -203,6 +213,12 @@ async def update_material(
         updates["material_type"] = material_type
     if price_dzd is not None:
         updates["price_dzd"] = price_dzd
+    if year_study is not None:
+        updates["study_year"] = year_study
+    if specialite is not None:
+        updates["specialite"] = specialite
+    if module is not None:
+        updates["module"] = module
 
     if file:
         pdf_name = f"{uuid.uuid4().hex}_{file.filename}"

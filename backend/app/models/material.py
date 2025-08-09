@@ -6,6 +6,9 @@ from pydantic import BaseModel, Field
 
 class Material(Document):
     title: str
+    study_year: Optional[str]
+    specialite : Optional[str] 
+    module : Optional[str] = None
     description: Optional[str]
     image_urls: List[str] = []
     material_type: str     # "polycopie" or "book"
@@ -23,6 +26,9 @@ class materialUser(BaseModel):
     description: Optional[str]
     image_urls: List[str] = []
     material_type: str     # "polycopie" or "book"
+    module : Optional[str] = None
+    study_year: Optional[str] = None
+    specialite: Optional[str] = None
     price_dzd: float 
     created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now())
     model_config = {
