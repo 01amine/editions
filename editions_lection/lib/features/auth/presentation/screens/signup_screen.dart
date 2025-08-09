@@ -21,6 +21,8 @@ class _SignupScreenState extends State<SignupScreen>
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _studyYearController = TextEditingController();
+  final TextEditingController _specialiteController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // Error messages
@@ -70,6 +72,8 @@ class _SignupScreenState extends State<SignupScreen>
     _passwordController.dispose();
     _fadeController.dispose();
     _slideController.dispose();
+    _studyYearController.dispose();
+    _specialiteController.dispose();
     super.dispose();
   }
 
@@ -164,10 +168,11 @@ class _SignupScreenState extends State<SignupScreen>
       context.read<AuthBloc>().add(
             SignupRequested(
               fullName: _fullNameController.text.trim(),
-              birthday: _birthdayController.text.trim(),
               phoneNumber: _phoneNumberController.text.trim(),
               email: _emailController.text.trim(),
               password: _passwordController.text.trim(),
+              studyYear: _studyYearController.text.trim(),
+              specialite: _specialiteController.text.trim(),
             ),
           );
     }
@@ -360,6 +365,36 @@ class _SignupScreenState extends State<SignupScreen>
               TextInputType.visiblePassword,
               true,
               Icons.lock_outline,
+              isTablet,
+            ),
+
+            SizedBox(height: context.height * 0.025),
+            _buildFieldSection(
+              context,
+              theme,
+              "Année d'étude",
+              "Entrez votre année d'étude...",
+              _studyYearController,
+              null, // No error handling for this for now
+              TextInputType.text,
+              false,
+              Icons.school_outlined,
+              isTablet,
+            ),
+
+            SizedBox(height: context.height * 0.025),
+
+// Speciality field
+            _buildFieldSection(
+              context,
+              theme,
+              "Spécialité",
+              "Entrez votre spécialité...",
+              _specialiteController,
+              null, // No error handling for this for now
+              TextInputType.text,
+              false,
+              Icons.auto_stories_outlined,
               isTablet,
             ),
 

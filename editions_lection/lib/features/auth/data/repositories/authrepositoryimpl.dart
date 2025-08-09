@@ -43,6 +43,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String phoneNumber,
     required String email,
     required String password,
+    required String studyYear,
+    required String specialite,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -51,6 +53,8 @@ class AuthRepositoryImpl implements AuthRepository {
           phoneNumber: phoneNumber,
           email: email,
           password: password,
+          studyYear: studyYear,
+          specialite: specialite,
         );
         return Right(authResponse);
       } on ServerException catch (e) {

@@ -8,5 +8,7 @@ abstract class AuthRemoteDataSource {
     required String phoneNumber,
     required String email,
     required String password,
+    required String studyYear,
+    required String specialite,
   });
 }

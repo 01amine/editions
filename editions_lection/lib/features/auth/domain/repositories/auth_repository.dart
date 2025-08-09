@@ -7,10 +7,11 @@ abstract class AuthRepository {
       {required String email, required String password});
   Future<Either<Failure, AuthResponse>> signup({
     required String fullName,
-    
     required String phoneNumber,
     required String email,
     required String password,
+    required String studyYear,
+    required String specialite,
   });
   Future<Either<Failure, void>> saveToken(String token);
   Future<Either<Failure, String?>> getToken();

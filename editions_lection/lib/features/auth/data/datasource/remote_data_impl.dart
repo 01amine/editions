@@ -39,6 +39,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String phoneNumber,
     required String email,
     required String password,
+    required String studyYear,
+    required String specialite,
   }) async {
     final response = await client.post(
       Uri.parse('$baseUrl/users/register'),
@@ -48,6 +50,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'phoneNumber': phoneNumber,
         'email': email,
         'password': password,
+        'studyYear': studyYear,
+        'specialite': specialite,
       }),
     );
 
