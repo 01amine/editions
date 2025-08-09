@@ -130,17 +130,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToNotifications() {
-    // TODO: Implement navigation to notifications screen
     Navigator.pushNamed(context, '/notifications');
   }
 
   void _navigateToCommands() {
-    // TODO: Implement navigation to commands/orders screen
     Navigator.pushNamed(context, '/commands');
   }
 
   void _navigateToMaterialDetails(MaterialEntity material) {
-    // TODO: Implement navigation to material details screen
     Navigator.pushNamed(context, '/book_details_screen', arguments: material.id);
   }
 
