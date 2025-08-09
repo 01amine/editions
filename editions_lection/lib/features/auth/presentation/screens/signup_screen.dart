@@ -7,6 +7,9 @@ import '../../../../core/theme/theme.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/text_field.dart';
 
+// Import your speciality enum
+import '../../domain/entities/speciality.dart';
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -22,14 +25,18 @@ class _SignupScreenState extends State<SignupScreen>
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _studyYearController = TextEditingController();
-  final TextEditingController _specialiteController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // Dropdown for speciality
+  Speciality? _selectedSpeciality;
 
   // Error messages
   String? _fullNameError;
   String? _phoneNumberError;
   String? _emailError;
   String? _passwordError;
+  String? _studyYearError;
+  String? _specialityError;
 
   // Animation controllers
   late AnimationController _fadeController;
@@ -73,7 +80,6 @@ class _SignupScreenState extends State<SignupScreen>
     _fadeController.dispose();
     _slideController.dispose();
     _studyYearController.dispose();
-    _specialiteController.dispose();
     super.dispose();
   }
 
@@ -96,14 +102,39 @@ class _SignupScreenState extends State<SignupScreen>
     return password.length >= 6;
   }
 
+  // Study year validation function
+  bool _isValidStudyYear(String studyYear) {
+    if (studyYear.trim().isEmpty) return false;
+
+    final year = int.tryParse(studyYear.trim());
+    if (year == null) return false;
+
+    return year >= 1 && year <= 12;
+  }
+
+  // Helper function to get speciality display name
+  String _getSpecialityDisplayName(Speciality speciality) {
+    switch (speciality) {
+      case Speciality.medcine:
+        return 'Médecine';
+      case Speciality.pharmacie:
+        return 'Pharmacie';
+      case Speciality.dentaire:
+        return 'Dentaire';
+      case Speciality.pharmacieIndustrielle:
+        return 'Pharmacie Industrielle';
+    }
+  }
+
   // Validation function
   bool _validateForm() {
     setState(() {
       _fullNameError = null;
-
       _phoneNumberError = null;
       _emailError = null;
       _passwordError = null;
+      _studyYearError = null;
+      _specialityError = null;
     });
 
     bool isValid = true;
@@ -160,6 +191,27 @@ class _SignupScreenState extends State<SignupScreen>
       isValid = false;
     }
 
+    // Study year validation
+    if (_studyYearController.text.trim().isEmpty) {
+      setState(() {
+        _studyYearError = "L'année d'étude est requise";
+      });
+      isValid = false;
+    } else if (!_isValidStudyYear(_studyYearController.text.trim())) {
+      setState(() {
+        _studyYearError = "L'année d'étude doit être un nombre entre 1 et 12";
+      });
+      isValid = false;
+    }
+
+    // Speciality validation
+    if (_selectedSpeciality == null) {
+      setState(() {
+        _specialityError = "La spécialité est requise";
+      });
+      isValid = false;
+    }
+
     return isValid;
   }
 
@@ -172,7 +224,7 @@ class _SignupScreenState extends State<SignupScreen>
               email: _emailController.text.trim(),
               password: _passwordController.text.trim(),
               studyYear: _studyYearController.text.trim(),
-              specialite: _specialiteController.text.trim(),
+              specialite: _selectedSpeciality.toString().split('.').last,
             ),
           );
     }
@@ -369,14 +421,16 @@ class _SignupScreenState extends State<SignupScreen>
             ),
 
             SizedBox(height: context.height * 0.025),
+
+            // Study year field
             _buildFieldSection(
               context,
               theme,
               "Année d'étude",
-              "Entrez votre année d'étude...",
+              "Entrez votre année d'étude (1-12)...",
               _studyYearController,
-              null, // No error handling for this for now
-              TextInputType.text,
+              _studyYearError,
+              TextInputType.number,
               false,
               Icons.school_outlined,
               isTablet,
@@ -384,19 +438,8 @@ class _SignupScreenState extends State<SignupScreen>
 
             SizedBox(height: context.height * 0.025),
 
-// Speciality field
-            _buildFieldSection(
-              context,
-              theme,
-              "Spécialité",
-              "Entrez votre spécialité...",
-              _specialiteController,
-              null, // No error handling for this for now
-              TextInputType.text,
-              false,
-              Icons.auto_stories_outlined,
-              isTablet,
-            ),
+            // Speciality dropdown
+            _buildSpecialityDropdown(context, theme, isTablet),
 
             SizedBox(height: context.height * 0.025),
 
@@ -470,6 +513,122 @@ class _SignupScreenState extends State<SignupScreen>
             errorText: error,
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildSpecialityDropdown(
+      BuildContext context, ThemeData theme, bool isTablet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.auto_stories_outlined,
+                size: isTablet ? 20 : 18,
+                color: AppTheme.primaryColor,
+              ),
+              SizedBox(width: 8),
+              Text(
+                "Spécialité",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.primaryTextColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: isTablet ? 16 : 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: _specialityError != null
+                    ? AppTheme.errorColor.withOpacity(0.1)
+                    : AppTheme.primaryColor.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _specialityError != null
+                    ? AppTheme.errorColor
+                    : Colors.black,
+                width: _specialityError != null ? 1.5 : 1,
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<Speciality>(
+                value: _selectedSpeciality,
+                hint: Text(
+                  "Sélectionnez votre spécialité...",
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.secondaryTextColor,
+                    fontSize: isTablet ? 16 : 14,
+                  ),
+                ),
+                isExpanded: true,
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppTheme.primaryColor,
+                  size: isTablet ? 24 : 20,
+                ),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.primaryTextColor,
+                  fontSize: isTablet ? 16 : 14,
+                ),
+                dropdownColor: Colors.white,
+                items: Speciality.values.map((Speciality speciality) {
+                  return DropdownMenuItem<Speciality>(
+                    value: speciality,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        _getSpecialityDisplayName(speciality),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.primaryTextColor,
+                          fontSize: isTablet ? 16 : 14,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (Speciality? newValue) {
+                  setState(() {
+                    _selectedSpeciality = newValue;
+                    _specialityError =
+                        null; // Clear error when selection is made
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+        if (_specialityError != null) ...[
+          SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Text(
+              _specialityError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.errorColor,
+                fontSize: isTablet ? 13 : 12,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
