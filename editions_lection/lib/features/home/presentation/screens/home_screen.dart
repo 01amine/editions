@@ -1,9 +1,9 @@
 import 'package:editions_lection/core/extensions/extensions.dart';
 import 'package:editions_lection/core/theme/theme.dart';
-import 'package:editions_lection/features/home/presentation/bloc/home_bloc.dart';
+import 'package:editions_lection/features/home/presentation/blocs/home_bloc/home_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:editions_lection/features/home/presentation/widgets/material_list_view.dart';
+import 'package:editions_lection/features/home/presentation/widgets/cards_list.dart';
 
 import '../../domain/entities/material.dart';
 
@@ -139,9 +139,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     Navigator.pushNamed(context, '/commands');
   }
 
-  void _navigateToMaterialDetails(String materialId) {
+  void _navigateToMaterialDetails(MaterialEntity material) {
     // TODO: Implement navigation to material details screen
-    Navigator.pushNamed(context, '/material-details', arguments: materialId);
+    Navigator.pushNamed(context, '/book_details_screen', arguments: material.id);
   }
 
   void _onSearchChanged(String query) {
@@ -154,53 +154,56 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            context.read<HomeBloc>().add(FetchHomeData());
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.width * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: context.height * 0.02),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              context.read<HomeBloc>().add(FetchHomeData());
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: context.width * 0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: context.height * 0.02),
 
-                  // Animated Header
-                  SlideTransition(
-                    position: _headerSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _headerFadeAnimation,
-                      child: _buildHeader(),
+                    // Animated Header
+                    SlideTransition(
+                      position: _headerSlideAnimation,
+                      child: FadeTransition(
+                        opacity: _headerFadeAnimation,
+                        child: _buildHeader(),
+                      ),
                     ),
-                  ),
 
-                  SizedBox(height: context.height * 0.03),
+                    SizedBox(height: context.height * 0.03),
 
-                  // Animated Search Bar
-                  SlideTransition(
-                    position: _contentSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _contentFadeAnimation,
-                      child: _buildSearchBar(),
+                    // Animated Search Bar
+                    SlideTransition(
+                      position: _contentSlideAnimation,
+                      child: FadeTransition(
+                        opacity: _contentFadeAnimation,
+                        child: _buildSearchBar(),
+                      ),
                     ),
-                  ),
 
-                  SizedBox(height: context.height * 0.03),
+                    SizedBox(height: context.height * 0.03),
 
-                  // Animated Content Sections
-                  SlideTransition(
-                    position: _contentSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _contentFadeAnimation,
-                      child: _buildContentSections(),
+                    // Animated Content Sections
+                    SlideTransition(
+                      position: _contentSlideAnimation,
+                      child: FadeTransition(
+                        opacity: _contentFadeAnimation,
+                        child: _buildContentSections(),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -519,7 +522,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 if (materials.isEmpty)
                   _buildEmptyState(title)
                 else
-                  EnhancedMaterialListView(
+                  CardsList(
                     materials: materials,
                     onMaterialTap: _navigateToMaterialDetails,
                   ),

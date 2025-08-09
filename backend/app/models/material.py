@@ -15,7 +15,7 @@ class Material(Document):
     price_dzd: float 
     pdf_url: Optional[str]     
     created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now())
-    
+     
     
     class Settings:
         name = "material"
