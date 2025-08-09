@@ -29,3 +29,10 @@ final class AuthError extends AuthState {
   @override
   List<Object> get props => [message];
 }
+class UserLoaded extends AuthState {
+  final User user;
+  const UserLoaded(this.user);
+
+  @override
+  List<Object> get props => [user];
+}

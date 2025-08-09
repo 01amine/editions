@@ -5,7 +5,9 @@ import 'package:meta/meta.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/auth_response.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/usecases/clear_token.dart';
+import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/signup_user.dart';
 import '../../domain/usecases/save_token.dart';
@@ -18,16 +20,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignupUser signupUser;
   final SaveToken saveToken;
   final ClearToken clearToken;
+  final GetCurrentUser getCurrentUser;
 
   AuthBloc({
     required this.loginUser,
     required this.signupUser,
     required this.saveToken,
     required this.clearToken,
+    required this.getCurrentUser, 
   }) : super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<SignupRequested>(_onSignupRequested);
     on<LogoutRequested>(_onLogoutRequested);
+    on<GetCurrentUserEvent>((event, emit) async {
+      final result = await getCurrentUser(NoParams());
+      result.fold(
+        (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
+        (user) => emit(UserLoaded(user)),
+      );
+    });
   }
 
   Future<void> _onLoginRequested(

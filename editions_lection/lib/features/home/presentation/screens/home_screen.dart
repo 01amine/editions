@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:editions_lection/features/home/presentation/widgets/cards_list.dart';
 
+import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -113,9 +114,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  String _getUserName() {
-    // TODO: Get actual user name from AuthBloc
-    // For now, return a placeholder that could be replaced with actual auth data
+  String _getUserName(User? user) {
+    if (user != null) {
+      return user.fullName.split(' ')[0];
+    }
     return 'Utilisateur';
   }
 
@@ -138,7 +140,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToMaterialDetails(MaterialEntity material) {
-    Navigator.pushNamed(context, '/book_details_screen', arguments: material.id);
+    Navigator.pushNamed(context, '/book_details_screen',
+        arguments: material.id);
   }
 
   void _onSearchChanged(String query) {
@@ -174,7 +177,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       position: _headerSlideAnimation,
                       child: FadeTransition(
                         opacity: _headerFadeAnimation,
-                        child: _buildHeader(),
+                        child: BlocBuilder<HomeBloc, HomeState>(
+                          builder: (context, state) {
+                            User? user;
+                            if (state is HomeLoaded) {
+                              print(state.user);
+                              user = state.user;
+                            }
+                            return _buildHeader(user);
+                          },
+                        ),
                       ),
                     ),
 
@@ -209,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(User? user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -224,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               Text(
-                _getUserName(),
+                _getUserName(user),
                 style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

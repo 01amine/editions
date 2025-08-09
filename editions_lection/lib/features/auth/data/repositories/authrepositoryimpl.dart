@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:editions_lection/features/auth/domain/entities/user.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/network/network_info.dart';
@@ -6,7 +7,6 @@ import '../../domain/entities/auth_response.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasource/local_data.dart';
 import '../datasource/remote_data.dart';
-
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -91,6 +91,25 @@ class AuthRepositoryImpl implements AuthRepository {
       await localDataSource.clearToken();
       return const Right(null);
     } on CacheException {
+      return Left(CacheFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> getCurrentUser() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getToken();
+        if (token != null) {
+          final userModel = await remoteDataSource.getCurrentUser(token);
+          return Right(userModel);
+        } else {
+          return Left(CacheFailure());
+        }
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
       return Left(CacheFailure());
     }
   }

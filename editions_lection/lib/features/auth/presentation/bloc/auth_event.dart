@@ -42,3 +42,4 @@ class SignupRequested extends AuthEvent {
   @override
   List<Object> get props => [fullName, phoneNumber, email, password];
 }
+class GetCurrentUserEvent extends AuthEvent {}

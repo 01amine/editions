@@ -14,10 +14,12 @@ class HomeLoading extends HomeState {}
 class HomeLoaded extends HomeState {
   final List<MaterialEntity> books;
   final List<MaterialEntity> polycopies;
+  final User? user;
 
   const HomeLoaded({
     required this.books,
     required this.polycopies,
+    this.user,
   });
 
   @override

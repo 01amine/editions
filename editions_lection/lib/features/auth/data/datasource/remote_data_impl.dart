@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:editions_lection/features/auth/data/models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/errors/exceptions.dart';
@@ -61,6 +62,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException(
           message:
               json.decode(response.body)['message'] ?? 'Failed to sign up');
+    }
+  }
+
+  @override
+  Future<UserModel> getCurrentUser(String token) async {
+    final uri = Uri.parse('$baseUrl/users/me');
+
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': 'token=$token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print(data);
+      return UserModel.fromJson(data);
+    } else {
+      throw ServerException(
+        message: json.decode(response.body)['message'] ??
+            'Failed to fetch user data',
+      );
     }
   }
 }

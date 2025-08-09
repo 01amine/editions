@@ -1,4 +1,5 @@
 import '../models/auth_response_model.dart';
+import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> login(
@@ -11,4 +12,5 @@ abstract class AuthRemoteDataSource {
     required String studyYear,
     required String specialite,
   });
+  Future<UserModel> getCurrentUser(String token);
 }

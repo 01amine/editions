@@ -12,6 +12,7 @@ import '../features/auth/data/datasource/remote_data_impl.dart';
 import '../features/auth/data/repositories/authrepositoryimpl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/domain/usecases/clear_token.dart';
+import '../features/auth/domain/usecases/get_current_user.dart';
 import '../features/auth/domain/usecases/get_token.dart';
 import '../features/auth/domain/usecases/login_user.dart';
 import '../features/auth/domain/usecases/save_token.dart';
@@ -76,6 +77,8 @@ Future<void> init() async {
   sl.registerLazySingleton<SaveToken>(() => SaveToken(sl<AuthRepository>()));
   sl.registerLazySingleton<GetToken>(() => GetToken(sl<AuthRepository>()));
   sl.registerLazySingleton<ClearToken>(() => ClearToken(sl<AuthRepository>()));
+  sl.registerLazySingleton<GetCurrentUser>(
+      () => GetCurrentUser(sl<AuthRepository>()));
 
   // Onboarding Repository
   sl.registerLazySingleton<OnboardingRepository>(
@@ -99,7 +102,8 @@ Future<void> init() async {
       loginUser: sl<LoginUser>(),
       signupUser: sl<SignupUser>(),
       saveToken: sl<SaveToken>(),
-      clearToken: sl(),
+      clearToken: sl<ClearToken>(),
+      getCurrentUser: sl<GetCurrentUser>(),
     ),
   );
 
@@ -118,7 +122,13 @@ Future<void> init() async {
   );
 
   // BLoC
-  sl.registerFactory(() => HomeBloc(getBooks: sl(), getPolycopies: sl()));
+  sl.registerFactory<HomeBloc>(
+    () => HomeBloc(
+      getBooks: sl<GetBooks>(),
+      getPolycopies: sl<GetPolycopies>(),
+      getCurrentUser: sl<GetCurrentUser>(),
+    ),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => GetBooks(sl()));

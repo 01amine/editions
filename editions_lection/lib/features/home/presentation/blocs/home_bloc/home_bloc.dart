@@ -1,10 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:editions_lection/core/errors/failure.dart';
-//import 'package:editions_lection/core/usecase/usecase.dart';
+import 'package:editions_lection/core/usecase/usecase.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
 import 'package:editions_lection/features/home/domain/usecases/get_books.dart';
 import 'package:editions_lection/features/home/domain/usecases/get_polycopies.dart';
 import 'package:equatable/equatable.dart';
+
+import '../../../../auth/domain/entities/user.dart';
+import '../../../../auth/domain/usecases/get_current_user.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -12,20 +15,32 @@ part 'home_state.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetBooks getBooks;
   final GetPolycopies getPolycopies;
+  final GetCurrentUser getCurrentUser;
 
   HomeBloc({
     required this.getBooks,
     required this.getPolycopies,
+    required this.getCurrentUser,
   }) : super(HomeInitial()) {
     on<FetchHomeData>((event, emit) async {
       emit(HomeLoading());
 
-      // Commented out the original backend calls
-      // final booksResult = await getBooks(NoParams());
-      // final polycopiesResult = await getPolycopies(NoParams());
+      // Correctly fetch the user data
+      final userResult = await getCurrentUser(NoParams());
+      User? user; // Declare a nullable User variable
 
-      // Using fake data since the backend is not ready yet.
-      // Simulating a network delay
+      // Check if the userResult is a success (Right) and extract the user
+      userResult.fold(
+        (failure) {
+          // You could handle the failure here, but for now we'll proceed without a user
+          // For now, we'll just set the user to null if there's a failure
+        },
+        (retrievedUser) {
+          user = retrievedUser;
+        },
+      );
+
+      // Using fake data for books and polycopies
       await Future.delayed(const Duration(milliseconds: 500));
 
       final List<MaterialEntity> fakeBooks = [
@@ -92,24 +107,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         ),
       ];
 
-      // Emit the HomeLoaded state with fake data
-      emit(HomeLoaded(books: fakeBooks, polycopies: fakePolycopies));
-
-      // The original fold logic is no longer needed for fake data, but
-      // for demonstration, here's how it would have looked.
-      /*
-      booksResult.fold(
-        (failure) => emit(HomeFailure(message: _mapFailureToMessage(failure))),
-        (books) {
-          polycopiesResult.fold(
-            (failure) =>
-                emit(HomeFailure(message: _mapFailureToMessage(failure))),
-            (polycopies) =>
-                emit(HomeLoaded(books: books, polycopies: polycopies)),
-          );
-        },
-      );
-      */
+      // Emit the HomeLoaded state with the fake data and the fetched user
+      emit(HomeLoaded(books: fakeBooks, polycopies: fakePolycopies, user: user));
     });
   }
 
