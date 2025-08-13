@@ -68,20 +68,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> getCurrentUser(String token) async {
     final uri = Uri.parse('$baseUrl/users/me');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization':
+          'Bearer $token', // Corrected: sending the token in the Authorization header
+    };
+
+    // Log the request details for debugging
+    print('Sending GET request to: $uri');
+    print('Headers: $headers');
 
     final response = await client.get(
       uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': 'token=$token',
-      },
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data);
+      print('Response data: $data');
       return UserModel.fromJson(data);
     } else {
+      print('Error fetching user: ${response.statusCode}, ${response.body}');
       throw ServerException(
         message: json.decode(response.body)['message'] ??
             'Failed to fetch user data',

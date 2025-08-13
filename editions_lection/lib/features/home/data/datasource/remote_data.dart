@@ -38,7 +38,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<List<MaterialEntity>> getPolycopies() async {
     final response = await client.get(
-      Uri.parse('$baseUrl/materials?material_type=polycopie'),
+      Uri.parse('$baseUrl/materials/filter/user?material_type=polycopie'),
     );
 
     if (response.statusCode == 200) {
