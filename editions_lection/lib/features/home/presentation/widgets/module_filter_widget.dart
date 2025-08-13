@@ -24,13 +24,12 @@ class _ModuleFilterWidgetState extends State<ModuleFilterWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(
@@ -58,117 +57,37 @@ class _ModuleFilterWidgetState extends State<ModuleFilterWidget>
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Container(
+        height: 50,
         margin: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            if (_isExpanded) _buildModulesList(),
-          ],
-        ),
-      ),
-    );
-  }
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: context.width * 0.05),
+          itemCount: widget.showAllOption
+              ? widget.modules.length + 1
+              : widget.modules.length,
+          itemBuilder: (context, index) {
+            if (widget.showAllOption && index == 0) {
+              return _buildModuleChip(
+                'Tous',
+                isSelected: widget.selectedModule == null,
+                onTap: () => widget.onModuleChanged(null),
+                isAllOption: true,
+                isFirst: true,
+              );
+            }
 
-  Widget _buildHeader() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isExpanded = !_isExpanded;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(
-              Icons.filter_list_rounded,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Filtrer par module',
-                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.primaryTextColor,
-                    ),
-                  ),
-                  if (widget.selectedModule != null)
-                    Text(
-                      widget.selectedModule!,
-                      style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            AnimatedRotation(
-              turns: _isExpanded ? 0.5 : 0,
-              duration: const Duration(milliseconds: 300),
-              child: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppTheme.primaryTextColor.withOpacity(0.7),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+            final moduleIndex = widget.showAllOption ? index - 1 : index;
+            final module = widget.modules[moduleIndex];
 
-  Widget _buildModulesList() {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: Column(
-        children: [
-          Container(
-            height: 1,
-            width: double.infinity,
-            color: AppTheme.primaryTextColor.withOpacity(0.1),
-            margin: const EdgeInsets.only(bottom: 12),
-          ),
-          SizedBox(
-            height: context.height * 0.25,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  if (widget.showAllOption)
-                    _buildModuleChip(
-                      'Tous les modules',
-                      isSelected: widget.selectedModule == null,
-                      onTap: () => widget.onModuleChanged(null),
-                      isAllOption: true,
-                    ),
-                  ...widget.modules.map((module) => _buildModuleChip(
-                        module,
-                        isSelected: widget.selectedModule == module,
-                        onTap: () => widget.onModuleChanged(module),
-                      )),
-                ],
-              ),
-            ),
-          ),
-        ],
+            return _buildModuleChip(
+              module,
+              isSelected: widget.selectedModule == module,
+              onTap: () => widget.onModuleChanged(module),
+              isLast: moduleIndex == widget.modules.length - 1,
+            );
+          },
+        ),
       ),
     );
   }
@@ -178,74 +97,68 @@ class _ModuleFilterWidgetState extends State<ModuleFilterWidget>
     required bool isSelected,
     required VoidCallback onTap,
     bool isAllOption = false,
+    bool isFirst = false,
+    bool isLast = false,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(
+        right: isLast ? 0 : 12,
+        left: isFirst ? 0 : 0,
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(25),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? AppTheme.primaryColor.withOpacity(0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
+              color: isSelected ? AppTheme.primaryColor : Colors.white,
+              borderRadius: BorderRadius.circular(25),
               border: Border.all(
                 color: isSelected
                     ? AppTheme.primaryColor
-                    : AppTheme.primaryTextColor.withOpacity(0.1),
+                    : AppTheme.primaryTextColor.withOpacity(0.2),
                 width: isSelected ? 2 : 1,
               ),
+              boxShadow: [
+                if (isSelected)
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                else
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+              ],
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? AppTheme.primaryColor : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected 
-                          ? AppTheme.primaryColor 
-                          : AppTheme.primaryTextColor.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          size: 12,
-                          color: Colors.white,
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    module,
-                    style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                      color: isSelected
-                          ? AppTheme.primaryColor
-                          : AppTheme.primaryTextColor,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    ),
-                  ),
-                ),
                 if (isAllOption)
-                  Icon(
-                    Icons.apps_rounded,
-                    size: 16,
-                    color: isSelected
-                        ? AppTheme.primaryColor
-                        : AppTheme.primaryTextColor.withOpacity(0.5),
+                  Container(
+                    margin: const EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.apps_rounded,
+                      size: 16,
+                      color: isSelected
+                          ? Colors.white
+                          : AppTheme.primaryTextColor.withOpacity(0.7),
+                    ),
                   ),
+                Text(
+                  module,
+                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                    color:
+                        isSelected ? Colors.white : AppTheme.primaryTextColor,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),

@@ -88,6 +88,9 @@ class materialService:
         image_urls: List[str],
         material_type: str,
         price_dzd: float,
+        study_year: str, 
+        specialite: str,
+        module: Optional[str] = None,
     ) -> Material:
         material = Material(
             
@@ -97,6 +100,9 @@ class materialService:
             pdf_url=pdf_url,
             material_type=material_type,
             price_dzd=price_dzd,
+            study_year=study_year, 
+            specialite=specialite,
+            module=module,
         )
         await material.insert()
         return material

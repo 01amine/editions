@@ -1,3 +1,4 @@
+import 'package:editions_lection/core/constants/end_points.dart';
 import 'package:editions_lection/core/extensions/extensions.dart';
 import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
@@ -162,6 +163,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
   }
 
   Widget _buildImageSection(BuildContext context) {
+    String baseUrl = EndPoints.baseUrl;
     return Container(
       height: context.height * 0.22,
       width: double.infinity,
@@ -181,20 +183,21 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
         child: Stack(
           children: [
             // Main image or placeholder
-            widget.material.imageUrls.isNotEmpty
-                ? Image.network(
-                    widget.material.imageUrls[0],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return _buildShimmerPlaceholder();
-                    },
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildStyledPlaceholder(),
-                  )
-                : _buildStyledPlaceholder(),
+            if (widget.material.imageUrls.isNotEmpty)
+              Image.network(
+                '$baseUrl/materials/${widget.material.imageUrls[0]}/get_image',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return _buildShimmerPlaceholder();
+                },
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildStyledPlaceholder(),
+              )
+            else
+              _buildStyledPlaceholder(),
 
             // Overlay with gradient
             Positioned.fill(

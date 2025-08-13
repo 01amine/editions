@@ -3,6 +3,8 @@ import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/end_points.dart';
+
 class BookDetailsScreen extends StatefulWidget {
   final MaterialEntity book;
 
@@ -93,7 +95,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
     if (widget.book.imageUrls.isEmpty) {
       return _buildPlaceholderImage(context);
     }
-
+    String baseUrl = EndPoints.baseUrl;
     return Container(
       height: context.height * 0.4,
       margin: EdgeInsets.all(context.width * 0.05),
@@ -124,9 +126,8 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
                 return Hero(
                   tag: 'book_image_${widget.book.id}_$index',
                   child: Image.network(
-                    widget.book.imageUrls[index],
-                    fit: BoxFit
-                        .contain, // Changed from BoxFit.cover to show full image
+                    '$baseUrl/materials/${widget.book.imageUrls[index]}/get_image',
+                    fit: BoxFit.contain,
                     width: double.infinity,
                     height: double.infinity,
                     loadingBuilder: (context, child, loadingProgress) {

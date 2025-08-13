@@ -1,6 +1,6 @@
 {
   "medecine": {
-    "1ere": [
+    "1": [
       "Anatomie",
       "Histologie", 
       "Embryologie",
@@ -14,7 +14,7 @@
       "Biomathématique",
       "Physiologie générale"
     ],
-    "2eme": [
+    "2": [
       "Prothèse dentaire",
       "Anatomie dentaire",
       "OCE",
@@ -29,7 +29,7 @@
       "Anatomie humaine",
       "Parodontologie"
     ],
-    "3eme": [
+    "3": [
       "ODF",
       "Prothèse",
       "Oxyologie",
@@ -42,7 +42,7 @@
       "Pharmacologie",
       "OCE"
     ],
-    "4eme": [
+    "4": [
       "Prothèse",
       "Implantologie",
       "ODF",
@@ -54,7 +54,7 @@
       "Pathologie Bucco Dentaire",
       "Pathologie Médicale"
     ],
-    "5eme": [
+    "5": [
       "Pathologie",
       "ODF",
       "Implantologie",
@@ -67,7 +67,7 @@
     ]
   },
   "pharmacie": {
-    "1ere": [
+    "1": [
       "Chimie générale",
       "Chimie organique",
       "Anatomie",
@@ -80,7 +80,7 @@
       "Langue française",
       "Physique"
     ],
-    "2eme": [
+    "2": [
       "Chimie analytique",
       "Chimie Minérale",
       "Biochimie",
@@ -90,7 +90,7 @@
       "Physiopathologie",
       "Langue anglaise"
     ],
-    "3eme": [
+    "3": [
       "Pharmacologie",
       "Chimie thérapeutique",
       "Chimie analytique",
@@ -98,14 +98,14 @@
       "Pharmacognosie",
       "Sémiologie"
     ],
-    "4eme": [
+    "4": [
       "Microbiologie",
       "Biochimie",
       "Immunologie",
       "Parasitologie",
       "Hemobiologie"
     ],
-    "5eme": [
+    "5": [
       "Toxicologie",
       "Hydrologie bromatologie",
       "Pharmacie clinique",
@@ -117,7 +117,7 @@
     ]
   },
   "dentaire": {
-    "1ere": [
+    "1": [
       "Anatomie",
       "Histologie",
       "Embryologie",
@@ -131,7 +131,7 @@
       "Biomathématique",
       "Physiologie générale"
     ],
-    "2eme": [
+    "2": [
       "Prothèse dentaire",
       "Anatomie dentaire",
       "OCE",
@@ -146,7 +146,7 @@
       "Anatomie humaine",
       "Parodontologie"
     ],
-    "3eme": [
+    "3": [
       "ODF",
       "Prothèse",
       "Oxyologie",
@@ -159,7 +159,7 @@
       "Pharmacologie",
       "OCE"
     ],
-    "4eme": [
+    "4": [
       "Prothèse",
       "Implantologie",
       "ODF",
@@ -171,7 +171,7 @@
       "Pathologie Bucco Dentaire",
       "Pathologie Médicale"
     ],
-    "5eme": [
+    "5": [
       "Pathologie",
       "ODF",
       "Implantologie",
@@ -184,7 +184,7 @@
     ]
   },
   "pharmacieIndustrielle": {
-    "1ere": [
+    "1": [
       "Chimie générale",
       "Chimie organique",
       "Biologie végétale",
@@ -200,7 +200,7 @@
       "Méthodes physiques",
       "Histoire des science médicale et pharmaceutique"
     ],
-    "2eme": [
+    "2": [
       "Science bioactives naturelle",
       "Pharmacologie générale",
       "Science biologique",
@@ -215,7 +215,7 @@
       "Formes pharmaceutiques",
       "Normes et guidelines"
     ],
-    "3eme": [
+    "3": [
       "Biotechnologie",
       "Production pharmaceutique",
       "Contrôle de qualité",

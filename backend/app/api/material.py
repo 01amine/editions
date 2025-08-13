@@ -45,12 +45,15 @@ async def get_materials_user(
     
 @router.post("/", response_model=Material)
 async def create_material(
-    file: UploadFile = File(...),  
-    images: List[UploadFile] = File(...),  
+    file: UploadFile = File(...), 
+    images: List[UploadFile] = File(...), 
     title: str = Form(...),
     description: str = Form(...),
     material_type: str = Form(...),
     price_dzd: float = Form(...),
+    study_year: str = Form(...), 
+    specialite: str = Form(...),
+    module: Optional[str] = Form(None), 
     user: User = role_required(Role.ADMIN, Role.Super_Admin),
 ):
     pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
@@ -69,6 +72,9 @@ async def create_material(
         price_dzd=price_dzd,
         image_urls=image_urls,
         pdf_url=pdf_url,
+        study_year=study_year, 
+        specialite=specialite,
+        module=module,
     )
     return material
 
