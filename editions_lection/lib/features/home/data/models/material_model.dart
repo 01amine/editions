@@ -23,7 +23,7 @@ class MaterialModel extends MaterialEntity {
       materialType: json['material_type'],
       priceDzd: json['price_dzd'],
       createdAt: DateTime.parse(json['created_at']),
-      studyYear: json['study_year'],
+      studyYear: json['study_year'].toString(),
       specialite: json['specialite'],
       module: json['module'],
     );
@@ -39,7 +39,7 @@ class MaterialModel extends MaterialEntity {
       'material_type': materialType,
       'price_dzd': priceDzd,
       'created_at': createdAt.toIso8601String(),
-      'study_year': studyYear,
+      'study_year': studyYear.toString(),
       'specialite': specialite,
       'module': module,
     };

@@ -51,7 +51,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'phone_number': phoneNumber,
         'email': email,
         'password': password,
-        'studyYear': studyYear,
+        'study_year': studyYear,
         'specialite': specialite,
       }),
     );
