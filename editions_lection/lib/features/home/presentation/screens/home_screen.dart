@@ -4,7 +4,9 @@ import 'package:editions_lection/features/home/presentation/blocs/home_bloc/home
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:editions_lection/features/home/presentation/widgets/cards_list.dart';
+import 'package:editions_lection/features/home/presentation/widgets/module_filter_widget.dart';
 
+import '../../../../modules/module_service.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/material.dart';
 
@@ -25,6 +27,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TextEditingController _searchController;
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
+
+  // Module filter state
+  List<String> _availableModules = [];
+  String? _selectedModule;
+  bool _isModulesLoading = true;
 
   @override
   void initState() {
@@ -86,12 +93,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Fetch data and start animations
     context.read<HomeBloc>().add(FetchHomeData());
     _startAnimations();
+    _loadUserModules();
   }
 
   void _startAnimations() async {
     await _headerAnimationController.forward();
     await Future.delayed(const Duration(milliseconds: 200));
     _contentAnimationController.forward();
+  }
+
+  Future<void> _loadUserModules() async {
+    try {
+      setState(() {
+        _isModulesLoading = true;
+      });
+
+      final homeState = context.read<HomeBloc>().state;
+      if (homeState is HomeLoaded && homeState.user != null) {
+        final user = homeState.user!;
+
+        // Get modules for user's specialty and year
+        final modules = await CurriculumService.getModulesForUser(
+          user.specialite,
+          user.studyYear,
+        );
+
+        setState(() {
+          _availableModules = modules;
+          _isModulesLoading = false;
+        });
+      } else {
+        // If user data is not available yet, wait for it
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _loadUserModules();
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading user modules: $e');
+      setState(() {
+        _isModulesLoading = false;
+      });
+    }
   }
 
   @override
@@ -152,6 +196,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  void _onModuleFilterChanged(String? module) {
+    setState(() {
+      _selectedModule = module;
+    });
+
+    context.read<HomeBloc>().add(FetchHomeData());
+  }
+
+  List<MaterialEntity> _filterMaterialsByModule(
+      List<MaterialEntity> materials) {
+    if (_selectedModule == null) {
+      return materials;
+    }
+    return materials.where((material) {
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -162,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: RefreshIndicator(
             onRefresh: () async {
               context.read<HomeBloc>().add(FetchHomeData());
+              await _loadUserModules();
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -183,6 +246,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             if (state is HomeLoaded) {
                               print(state.user);
                               user = state.user;
+                              // Load modules when user data is available
+                              if (_availableModules.isEmpty &&
+                                  !_isModulesLoading) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  _loadUserModules();
+                                });
+                              }
                             }
                             return _buildHeader(user);
                           },
@@ -198,6 +269,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: FadeTransition(
                         opacity: _contentFadeAnimation,
                         child: _buildSearchBar(),
+                      ),
+                    ),
+
+                    SizedBox(height: context.height * 0.02),
+
+                    // Module Filter Widget
+                    SlideTransition(
+                      position: _contentSlideAnimation,
+                      child: FadeTransition(
+                        opacity: _contentFadeAnimation,
+                        child: _buildModuleFilter(),
                       ),
                     ),
 
@@ -221,6 +303,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildModuleFilter() {
+    if (_isModulesLoading) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Chargement des modules...',
+              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                color: AppTheme.primaryTextColor.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ModuleFilterWidget(
+      modules: _availableModules,
+      selectedModule: _selectedModule,
+      onModuleChanged: _onModuleFilterChanged,
+      showAllOption: true,
+    );
+  }
+
   Widget _buildHeader(User? user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -241,6 +370,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              if (user?.specialite != null && user?.studyYear != null)
+                Text(
+                  '${CurriculumService.getSpecialtyDisplayName(user!.specialite)} - ${CurriculumService.getYearDisplayName(user.studyYear)}',
+                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
             ],
           ),
         ),
@@ -467,18 +604,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildLoadedState(HomeLoaded state) {
+    // Filter materials based on selected module
+    final filteredBooks = _filterMaterialsByModule(state.books);
+    final filteredPolycopies = _filterMaterialsByModule(state.polycopies);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Show filter status if a module is selected
+        if (_selectedModule != null)
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.filter_alt_outlined,
+                  size: 16,
+                  color: AppTheme.primaryColor,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Module: $_selectedModule',
+                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: () => _onModuleFilterChanged(null),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         _buildSectionWithAnimation(
           title: "Livres populaires",
-          materials: state.books,
+          materials: filteredBooks,
           delay: const Duration(milliseconds: 200),
         ),
         SizedBox(height: context.height * 0.03),
         _buildSectionWithAnimation(
           title: "Polycopiés",
-          materials: state.polycopies,
+          materials: filteredPolycopies,
           delay: const Duration(milliseconds: 400),
         ),
         SizedBox(height: context.height * 0.05),
@@ -544,6 +726,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildEmptyState(String section) {
+    final isFiltered = _selectedModule != null;
+
     return Container(
       height: context.height * 0.2,
       width: double.infinity,
@@ -559,17 +743,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.library_books_outlined,
+            isFiltered
+                ? Icons.search_off_outlined
+                : Icons.library_books_outlined,
             size: 48,
             color: AppTheme.primaryTextColor.withOpacity(0.5),
           ),
           SizedBox(height: context.height * 0.01),
           Text(
-            'Aucun ${section.toLowerCase()} disponible',
+            isFiltered
+                ? 'Aucun ${section.toLowerCase()} pour le module "$_selectedModule"'
+                : 'Aucun ${section.toLowerCase()} disponible',
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.primaryTextColor.withOpacity(0.7),
             ),
+            textAlign: TextAlign.center,
           ),
+          if (isFiltered) ...[
+            SizedBox(height: context.height * 0.01),
+            TextButton(
+              onPressed: () => _onModuleFilterChanged(null),
+              child: Text(
+                'Afficher tous les supports',
+                style: TextStyle(
+                  color: AppTheme.primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
