@@ -8,3 +8,12 @@ abstract class HomeEvent extends Equatable {
 }
 
 class FetchHomeData extends HomeEvent {}
+
+class SearchMaterialsEvent extends HomeEvent {
+  final String query;
+
+  const SearchMaterialsEvent({required this.query});
+
+  @override
+  List<Object> get props => [query];
+}

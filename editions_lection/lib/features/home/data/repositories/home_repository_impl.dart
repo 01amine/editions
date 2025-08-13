@@ -32,6 +32,17 @@ class HomeRepositoryImpl implements HomeRepository {
     }
   }
   
+  @override
+  Future<Either<Failure, List<MaterialEntity>>> searchMaterialsByTitle(String title) async {
+    try {
+      final materials = await remoteDataSource.searchMaterialsByTitle(title);
+      return Right(materials);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+  
+  @override
   Future<Either<Failure, bool>> createOrder(List<String> materialIds) async {
     try {
       final result = await remoteDataSource.createOrder(materialIds);

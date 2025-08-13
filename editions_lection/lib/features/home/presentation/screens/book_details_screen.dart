@@ -389,7 +389,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
   }
 
   Widget _buildDescription(BuildContext context) {
-    if (widget.book.description == null || widget.book.description!.isEmpty) {
+    if (widget.book.description.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -430,7 +430,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
           ),
           SizedBox(height: context.height * 0.015),
           Text(
-            widget.book.description!,
+            widget.book.description,
             style: context.theme.textTheme.bodyLarge?.copyWith(
               height: 1.6,
               color: AppTheme.primaryTextColor,

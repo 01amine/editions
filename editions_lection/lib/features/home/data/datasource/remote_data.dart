@@ -8,6 +8,7 @@ import '../../domain/entities/material.dart';
 abstract class HomeRemoteDataSource {
   Future<List<MaterialEntity>> getBooks();
   Future<List<MaterialEntity>> getPolycopies();
+  Future<List<MaterialEntity>> searchMaterialsByTitle(String title);
   Future<bool> createOrder(List<String> materialIds);
 }
 
@@ -20,7 +21,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<List<MaterialEntity>> getBooks() async {
     final response = await client.get(
-      Uri.parse('$baseUrl/materials?material_type=book'),
+      Uri.parse('$baseUrl/materials/filter/user?material_type=book'),
     );
 
     if (response.statusCode == 200) {
@@ -29,7 +30,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .toList();
       return materials;
     } else {
-      throw ServerException(message: json.decode(response.body)['message'] ?? 'Server Error');
+      throw ServerException(
+          message: json.decode(response.body)['message'] ?? 'Server Error');
     }
   }
 
@@ -45,7 +47,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .toList();
       return materials;
     } else {
-      throw ServerException(message: json.decode(response.body)['message'] ?? 'Server Error');
+      throw ServerException(
+          message: json.decode(response.body)['message'] ?? 'Server Error');
     }
   }
 
@@ -60,7 +63,25 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (response.statusCode == 200) {
       return true;
     } else {
-      throw ServerException(message: json.decode(response.body)['message'] ?? 'Server Error');
+      throw ServerException(
+          message: json.decode(response.body)['message'] ?? 'Server Error');
+    }
+  }
+
+  @override
+  Future<List<MaterialEntity>> searchMaterialsByTitle(String title) async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/materials/filter/user?title=$title'),
+    );
+
+    if (response.statusCode == 200) {
+      final materials = (json.decode(response.body) as List)
+          .map((e) => MaterialEntity.fromJson(e))
+          .toList();
+      return materials;
+    } else {
+      throw ServerException(
+          message: json.decode(response.body)['message'] ?? 'Server Error');
     }
   }
 }

@@ -1,0 +1,233 @@
+{
+  "medecine": {
+    "1ere": [
+      "Anatomie",
+      "Histologie", 
+      "Embryologie",
+      "Cytologie",
+      "Génétique",
+      "Déontologie",
+      "Biophysique",
+      "Physique",
+      "Chimie",
+      "Biochimie",
+      "Biomathématique",
+      "Physiologie générale"
+    ],
+    "2eme": [
+      "Prothèse dentaire",
+      "Anatomie dentaire",
+      "OCE",
+      "Biomatériaux",
+      "ODF",
+      "Histologie",
+      "Physiologie Spécial",
+      "Microbiologie",
+      "Pathologie",
+      "Hygiène",
+      "Immunologie",
+      "Anatomie humaine",
+      "Parodontologie"
+    ],
+    "3eme": [
+      "ODF",
+      "Prothèse",
+      "Oxyologie",
+      "Radiologie",
+      "Parodontologie",
+      "Anapath",
+      "Anesthésiologie",
+      "Occluso",
+      "Pathologie",
+      "Pharmacologie",
+      "OCE"
+    ],
+    "4eme": [
+      "Prothèse",
+      "Implantologie",
+      "ODF",
+      "Parodontologie",
+      "OCE",
+      "Dentologie",
+      "Odontologie gériatrique",
+      "OP",
+      "Pathologie Bucco Dentaire",
+      "Pathologie Médicale"
+    ],
+    "5eme": [
+      "Pathologie",
+      "ODF",
+      "Implantologie",
+      "Prothèse",
+      "Pathologie",
+      "OCE",
+      "OPS",
+      "OP",
+      "Ergonomie"
+    ]
+  },
+  "pharmacie": {
+    "1ere": [
+      "Chimie générale",
+      "Chimie organique",
+      "Anatomie",
+      "Biologie végétale",
+      "Embryologie et histologie",
+      "Cytologie et physiologie cellulaire",
+      "Biomathématique, informatique et biostatistique",
+      "Histoire de la pharmacie",
+      "Physiologie",
+      "Langue française",
+      "Physique"
+    ],
+    "2eme": [
+      "Chimie analytique",
+      "Chimie Minérale",
+      "Biochimie",
+      "Botanique",
+      "Biophysique",
+      "Génétique",
+      "Physiopathologie",
+      "Langue anglaise"
+    ],
+    "3eme": [
+      "Pharmacologie",
+      "Chimie thérapeutique",
+      "Chimie analytique",
+      "Pharmacie galénique",
+      "Pharmacognosie",
+      "Sémiologie"
+    ],
+    "4eme": [
+      "Microbiologie",
+      "Biochimie",
+      "Immunologie",
+      "Parasitologie",
+      "Hemobiologie"
+    ],
+    "5eme": [
+      "Toxicologie",
+      "Hydrologie bromatologie",
+      "Pharmacie clinique",
+      "Épidémiologie",
+      "Gestion pharmaceutique",
+      "Droit pharmaceutique",
+      "Pharmacie hospitalière",
+      "Pharmacie industrielle"
+    ]
+  },
+  "dentaire": {
+    "1ere": [
+      "Anatomie",
+      "Histologie",
+      "Embryologie",
+      "Cytologie",
+      "Génétique",
+      "Déontologie",
+      "Biophysique",
+      "Physique",
+      "Chimie",
+      "Biochimie",
+      "Biomathématique",
+      "Physiologie générale"
+    ],
+    "2eme": [
+      "Prothèse dentaire",
+      "Anatomie dentaire",
+      "OCE",
+      "Biomatériaux",
+      "ODF",
+      "Histologie",
+      "Physiologie Spécial",
+      "Microbiologie",
+      "Pathologie",
+      "Hygiène",
+      "Immunologie",
+      "Anatomie humaine",
+      "Parodontologie"
+    ],
+    "3eme": [
+      "ODF",
+      "Prothèse",
+      "Oxyologie",
+      "Radiologie",
+      "Parodontologie",
+      "Anapath",
+      "Anesthésiologie",
+      "Occluso",
+      "Pathologie",
+      "Pharmacologie",
+      "OCE"
+    ],
+    "4eme": [
+      "Prothèse",
+      "Implantologie",
+      "ODF",
+      "Parodontologie",
+      "OCE",
+      "Dentologie",
+      "Odontologie gériatrique",
+      "OP",
+      "Pathologie Bucco Dentaire",
+      "Pathologie Médicale"
+    ],
+    "5eme": [
+      "Pathologie",
+      "ODF",
+      "Implantologie",
+      "Prothèse",
+      "Pathologie",
+      "OCE",
+      "OPS",
+      "OP",
+      "Ergonomie"
+    ]
+  },
+  "pharmacieIndustrielle": {
+    "1ere": [
+      "Chimie générale",
+      "Chimie organique",
+      "Biologie végétale",
+      "Biologie animale",
+      "Biostatistique",
+      "Logiciels et outils informatiques",
+      "Terminologie médico pharmaceutique",
+      "Anglais",
+      "Chimie inorganique",
+      "Anatomie - physiologie - physiopathologie",
+      "Taxonomie et systématique végétale",
+      "Méthodes chimiques",
+      "Méthodes physiques",
+      "Histoire des science médicale et pharmaceutique"
+    ],
+    "2eme": [
+      "Science bioactives naturelle",
+      "Pharmacologie générale",
+      "Science biologique",
+      "Méthodes séparatives",
+      "Méthodes spectrales",
+      "Opérations pharmaceutiques",
+      "Bonnes pratiques",
+      "Anglais",
+      "Phytothérapie aromatique",
+      "Pharmacologie spéciale",
+      "Analyses biologiques",
+      "Formes pharmaceutiques",
+      "Normes et guidelines"
+    ],
+    "3eme": [
+      "Biotechnologie",
+      "Production pharmaceutique",
+      "Contrôle de qualité",
+      "Économie de la santé",
+      "Métrologie qualification et validation",
+      "Management qualité",
+      "HSE",
+      "Législation et code du travail",
+      "Gestes sanitaires",
+      "Langues étrangères",
+      "Insertion professionnelle",
+      "Technique de rédaction"
+    ]
+  }
+}

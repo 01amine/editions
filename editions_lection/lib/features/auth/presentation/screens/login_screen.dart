@@ -362,7 +362,20 @@ class _LoginScreenState extends State<LoginScreen>
       BuildContext context, ThemeData theme, bool isTablet) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        if (state is AuthSuccess) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppTheme.errorColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
       },
       builder: (context, state) {
         return Container(

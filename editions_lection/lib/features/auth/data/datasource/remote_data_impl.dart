@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:editions_lection/features/auth/data/models/user_model.dart';
 import 'package:http/http.dart' as http;
-
 
 import '../../../../core/errors/exceptions.dart';
 import '../models/auth_response_model.dart';
@@ -8,7 +8,7 @@ import 'remote_data.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final http.Client client;
-  final String baseUrl; 
+  final String baseUrl;
 
   AuthRemoteDataSourceImpl({required this.client, required this.baseUrl});
 
@@ -18,7 +18,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     final response = await client.post(
-      Uri.parse('$baseUrl/auth/login'), 
+      Uri.parse('$baseUrl/users/login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'email': email,
@@ -29,7 +29,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (response.statusCode == 200) {
       return AuthResponseModel.fromJson(json.decode(response.body));
     } else {
-      throw ServerException(message: json.decode(response.body)['message'] ?? 'Failed to log in');
+      throw ServerException(
+          message: json.decode(response.body)['message'] ?? 'Failed to log in');
     }
   }
 
@@ -39,23 +40,52 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String phoneNumber,
     required String email,
     required String password,
+    required String studyYear,
+    required String specialite,
   }) async {
     final response = await client.post(
-      Uri.parse('$baseUrl/auth/signup'), 
+      Uri.parse('$baseUrl/users/register'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'fullName': fullName,
-        
-        'phoneNumber': phoneNumber,
+        'full_name': fullName,
+        'phone_number': phoneNumber,
         'email': email,
         'password': password,
+        'studyYear': studyYear,
+        'specialite': specialite,
       }),
     );
 
-    if (response.statusCode == 200) { 
+    if (response.statusCode == 200) {
       return AuthResponseModel.fromJson(json.decode(response.body));
     } else {
-      throw ServerException(message: json.decode(response.body)['message'] ?? 'Failed to sign up');
+      throw ServerException(
+          message:
+              json.decode(response.body)['message'] ?? 'Failed to sign up');
+    }
+  }
+
+  @override
+  Future<UserModel> getCurrentUser(String token) async {
+    final uri = Uri.parse('$baseUrl/users/me');
+
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': 'token=$token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print(data);
+      return UserModel.fromJson(data);
+    } else {
+      throw ServerException(
+        message: json.decode(response.body)['message'] ??
+            'Failed to fetch user data',
+      );
     }
   }
 }
