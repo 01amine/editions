@@ -18,6 +18,7 @@ const mockAppointments = [
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState(mockAppointments)
+  
 
   const handleCreateAppointment = (newAppointment: any) => {
     setAppointments([...appointments, { ...newAppointment, _id: Date.now().toString() }])
