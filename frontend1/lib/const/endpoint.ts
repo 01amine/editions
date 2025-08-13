@@ -5,7 +5,7 @@ export const API_ENDPOINTS = {
     ME: '/users/me',
   },
   APPOINTMENTS: {
-    ROOT: '/appointments',
+    ROOT: '/appointments/',
     BY_ID: (id: string) => `/appointments/${id}`,
   },
   MATERIALS: {
