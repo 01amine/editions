@@ -212,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return materials.where((material) {
       return true;
     }).toList();
-  }
+  } 
 
   @override
   Widget build(BuildContext context) {
