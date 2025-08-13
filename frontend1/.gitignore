@@ -1,1 +1,6 @@
 .next
+# Ignore node_modules directory
+node_modules/
+
+# Optionally, specifically ignore the large file just in case
+frontend1/node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node
