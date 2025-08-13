@@ -34,6 +34,8 @@ async def register_user(data: UserCreate):
         hashed_password=hash_password(data.password),
         full_name=data.full_name,
         phone_number=data.phone_number,
+        specialite=data.specialite,
+        study_year=data.study_year
     )
     await user.insert()
     access_token = create_access_token(data={"sub": str(user.id)})
