@@ -23,6 +23,7 @@ import '../features/home/data/repositories/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
 import '../features/home/domain/usecases/get_books.dart';
 import '../features/home/domain/usecases/get_polycopies.dart';
+import '../features/home/domain/usecases/search_materials.dart';
 import '../features/home/presentation/blocs/home_bloc/home_bloc.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
@@ -127,12 +128,15 @@ Future<void> init() async {
       getBooks: sl<GetBooks>(),
       getPolycopies: sl<GetPolycopies>(),
       getCurrentUser: sl<GetCurrentUser>(),
+      searchMaterials: sl<SearchMaterials>(),
     ),
   );
 
   // Use cases
   sl.registerLazySingleton(() => GetBooks(sl()));
   sl.registerLazySingleton(() => GetPolycopies(sl()));
+  sl.registerLazySingleton(() =>
+      SearchMaterials(sl())); // Corrected: Added SearchMaterials registration
 
   // Repositories
   sl.registerLazySingleton<HomeRepository>(
