@@ -15,11 +15,12 @@ from app.models.material import Material
 from app.models.order import Order
 from app.api.notif import router as notif_router
 from app.models.notification import notification
-
+from fastapi.middleware.cors import CORSMiddleware
 
 
 mongo_client = AsyncMongoClient(settings.MONGO_URI)
 mongo_db = mongo_client[settings.MONGO_DB]
+
 
 async def init_mongo():
     await init_beanie(database=mongo_db, document_models=[User,Material,Order,Appointment,notification])
@@ -38,7 +39,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],  
+)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(user_router)
 app.include_router(appointement_router)
