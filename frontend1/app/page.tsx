@@ -7,8 +7,8 @@ import LoginPage from "@/components/auth/login-page"
 import StatsCards from "@/components/dashboard/stats-cards"
 import RecentOrders from "@/components/dashboard/recent-orders"
 import { PieChartComponent, BarChartComponent, LineChartComponent } from "@/components/ui/chart"
+import { useIsAuthenticated } from "@/hooks/queries/useAuth"
 
-// Mock data - replace with actual API calls
 const mockStats = {
   totalUsers: 1247,
   totalMaterials: 89,
@@ -93,11 +93,14 @@ const revenueData = [
 ]
 
 export default function DashboardPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+const { isAuthenticated, isLoading } = useIsAuthenticated();
 
-  if (!isLoggedIn) {
-    return <LoginPage onLogin={() => setIsLoggedIn(true)} />
-  }
+if (isLoading) {
+  return <div className="flex items-center justify-center h-screen">Chargement...</div>
+}
+if (!isAuthenticated) {
+  return <LoginPage onLogin={() => {}} />
+}
 
   return (
     <AdminLayout>

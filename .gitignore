@@ -1,0 +1,5 @@
+frontend1/node_modules/
+# Ignore node_modules directory
+frontend1/node_modules/*
+# Ignore all files in node_modules
+# except for the package.json file

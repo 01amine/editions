@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from 'lucide-react'
 import Image from "next/image"
+import { uselogin } from "@/hooks/queries/useAuth"
 
 interface LoginPageProps {
   onLogin: () => void
@@ -19,21 +20,29 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const loginMutation = uselogin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    loginMutation.mutate(
+      {email,password},
+      {
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email === "admin@lectio.com" && password === "admin123") {
-        onLogin()
-      } else {
-        setError("Email ou mot de passe incorrect")
+        onSuccess: () => {
+          setIsLoading(false)
+          onLogin()
+        },
+        onError: (error: any) => {
+          setIsLoading(false)
+          setError(error.response?.data?.message || "Une erreur s'est produite")
+        },
+        onSettled: () => {
+          setEmail("")
+          setPassword("")
+        }
       }
-      setIsLoading(false)
-    }, 1000)
+    )
+  
   }
 
   return (
@@ -109,13 +118,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             >
               {isLoading ? "Connexion..." : "Se connecter"}
             </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Identifiants de test: admin@lectio.com / admin123
-            </p>
-          </div>
+          </form>     
         </CardContent>
       </Card>
     </div>
