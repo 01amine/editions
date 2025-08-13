@@ -57,6 +57,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           materialType: 'book',
           priceDzd: 1500.00,
           createdAt: DateTime.now(),
+          studyYear: '1',
+          specialite: 'pharmacie',
+          module: 'biochimie',
         ),
         MaterialEntity(
           id: '2',
@@ -71,6 +74,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           materialType: 'book',
           priceDzd: 1200.00,
           createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          studyYear: '1', specialite: 'pharmacie', module: 'anatomie',
         ),
       ];
 
@@ -89,6 +93,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           materialType: 'polycopie',
           priceDzd: 500.00,
           createdAt: DateTime.now().subtract(const Duration(days: 2)),
+          studyYear: '1',
+          specialite: 'pharmacie',
+          module: 'biochimie',
         ),
         MaterialEntity(
           id: '4',
@@ -104,11 +111,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           materialType: 'polycopie',
           priceDzd: 750.00,
           createdAt: DateTime.now().subtract(const Duration(days: 3)),
+          studyYear: '2',
+          specialite: 'medecine',
+          module: 'biochemie',
         ),
       ];
 
       // Emit the HomeLoaded state with the fake data and the fetched user
-      emit(HomeLoaded(books: fakeBooks, polycopies: fakePolycopies, user: user));
+      emit(
+          HomeLoaded(books: fakeBooks, polycopies: fakePolycopies, user: user));
     });
   }
 

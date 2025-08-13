@@ -398,7 +398,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
           ),
 
           // Author or subject info
-          if (widget.material.description?.isNotEmpty == true) ...[
+          if (widget.material.description.isNotEmpty == true) ...[
             SizedBox(height: context.height * 0.005),
             Container(
               padding: EdgeInsets.symmetric(
@@ -414,7 +414,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                 ),
               ),
               child: Text(
-                widget.material.description!,
+                widget.material.description,
                 style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                   color: AppTheme.primaryTextColor.withOpacity(0.8),
                   fontWeight: FontWeight.w500,
@@ -477,9 +477,9 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
+
           SizedBox(height: context.height * 0.008),
-          
+
           // Order Button
           Expanded(
             child: SizedBox(

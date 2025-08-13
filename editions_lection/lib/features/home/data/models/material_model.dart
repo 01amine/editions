@@ -2,22 +2,17 @@ import 'package:editions_lection/features/home/domain/entities/material.dart';
 
 class MaterialModel extends MaterialEntity {
   const MaterialModel({
-    required String id,
-    required String title,
-    required String description,
-    required List<String> imageUrls,
-    required String materialType,
-    required double priceDzd,
-    required DateTime createdAt,
-  }) : super(
-          id: id,
-          title: title,
-          description: description,
-          imageUrls: imageUrls,
-          materialType: materialType,
-          priceDzd: priceDzd,
-          createdAt: createdAt,
-        );
+    required super.id,
+    required super.title,
+    required super.description,
+    required super.imageUrls,
+    required super.materialType,
+    required super.priceDzd,
+    required super.createdAt,
+    required super.studyYear,
+    required super.specialite,
+    required super.module,
+  });
 
   factory MaterialModel.fromJson(Map<String, dynamic> json) {
     return MaterialModel(
@@ -28,9 +23,13 @@ class MaterialModel extends MaterialEntity {
       materialType: json['material_type'],
       priceDzd: json['price_dzd'],
       createdAt: DateTime.parse(json['created_at']),
+      studyYear: json['study_year'],
+      specialite: json['specialite'],
+      module: json['module'],
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
@@ -40,6 +39,9 @@ class MaterialModel extends MaterialEntity {
       'material_type': materialType,
       'price_dzd': priceDzd,
       'created_at': createdAt.toIso8601String(),
+      'study_year': studyYear,
+      'specialite': specialite,
+      'module': module,
     };
   }
 }
