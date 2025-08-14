@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:editions_lection/core/extensions/extensions.dart';
 import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/presentation/blocs/home_bloc/home_bloc.dart';
@@ -27,6 +29,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TextEditingController _searchController;
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
+
+  Timer? _debounceTimer;
+  final Duration _debounceDuration = const Duration(milliseconds: 500);
 
   // Module filter state
   List<String> _availableModules = [];
@@ -189,11 +194,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onSearchChanged(String query) {
-    // TODO: Implement search functionality
-    // You might want to add a search event to your bloc
-    if (query.isNotEmpty) {
-      // context.read<HomeBloc>().add(SearchMaterials(query: query));
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer!.cancel();
     }
+
+    _debounceTimer = Timer(_debounceDuration, () {
+      if (query.isNotEmpty) {
+        context.read<HomeBloc>().add(SearchMaterialsEvent(query: query));
+
+        setState(() {});
+      } else {
+        context.read<HomeBloc>().add(FetchHomeData());
+      }
+    });
   }
 
   void _onModuleFilterChanged(String? module) {
@@ -209,8 +222,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_selectedModule == null) {
       return materials;
     }
+
+    final normalizedSelectedModule = _selectedModule!.trim().toLowerCase();
     return materials.where((material) {
-      return material.module == _selectedModule;
+      final normalizedMaterialModule = material.module.trim().toLowerCase();
+      return normalizedMaterialModule == normalizedSelectedModule;
     }).toList();
   }
 
@@ -561,14 +577,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         if (state is HomeLoading) {
+          // We will keep this loading state as is.
           return _buildLoadingState();
         } else if (state is HomeLoaded) {
+          // Check if there are search results and if a search is active.
+          if (_searchController.text.isNotEmpty &&
+              state.searchResults != null) {
+            // Pass the filtered list (books) and polycopies if a filter is active
+            // and if the search results contain both.
+            // In this case, we'll build a separate UI for search results.
+            return _buildSearchResults(state.searchResults!);
+          }
+          // If no search is active, build the regular loaded state.
           return _buildLoadedState(state);
         } else if (state is HomeFailure) {
           return _buildErrorState(state);
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+
+  Widget _buildSearchResults(List<MaterialEntity> searchResults) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Résultats de recherche",
+          style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: context.height * 0.015),
+        if (searchResults.isEmpty)
+          _buildEmptyState("recherche")
+        else
+          CardsList(
+            materials: searchResults,
+            onMaterialTap: _navigateToMaterialDetails,
+          ),
+        SizedBox(height: context.height * 0.05),
+      ],
     );
   }
 
