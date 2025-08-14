@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.config import settings
 from app.deps.auth import role_required
 from app.utils import send_email
+from bson import ObjectId
 
 router = APIRouter( prefix="/users", tags=["Users"])
 
@@ -99,6 +100,7 @@ async def add_admin(user: User = role_required(Role.Super_Admin), user_id: str =
     await user.save()
     return user
 
+
 @router.delete("/remove-admin/{user_id}")
 async def remove_admin(user: User = role_required(Role.Super_Admin), user_id: str = None):
     user = await User.find_one({"_id": user_id})
@@ -107,6 +109,7 @@ async def remove_admin(user: User = role_required(Role.Super_Admin), user_id: st
     user.role = Role.USER
     await user.save()
     return user
+
 
 @router.post("/block/{user_id}")
 async def block_user(user: User = role_required(Role.Super_Admin), user_id: str = None):
@@ -117,6 +120,7 @@ async def block_user(user: User = role_required(Role.Super_Admin), user_id: str 
     await user.save()
     return user
 
+
 @router.put("/unblock/{user_id}")
 async def unblock_user(user: User = role_required(Role.Super_Admin), user_id: str = None):
     user = await User.find_one({"_id": user_id})
@@ -126,23 +130,25 @@ async def unblock_user(user: User = role_required(Role.Super_Admin), user_id: st
     await user.save()
     return user
 
+
 @router.get("/all-users", response_model=List[User])
 async def get_all_users_paginated(user: User = role_required(Role.Super_Admin,Role.ADMIN),
                                   skip: int = 0, limit: int = 10):
     return await User.find().skip(skip).limit(limit).to_list()
 
+
 @router.get("/all-admins", response_model=List[User])
 async def get_all_admins(user: User = role_required(Role.Super_Admin)):
     return await User.find({"role": Role.ADMIN}).to_list()
+
 
 @router.get("/all-students", response_model=List[User])
 async def get_all_students_paginated(user: User = role_required(Role.Super_Admin, Role.ADMIN), skip: int = 0, limit: int = 10):
     return await User.find({"role": Role.USER}).skip(skip).limit(limit).to_list()
 
+
 @router.post("/me-super-admin")
 async def make_me_super_admin(user: User = Depends(get_current_user)):
- 
-
     if Role.Super_Admin not in user.roles:
         user.roles.append(Role.Super_Admin) 
         await user.save()
@@ -183,3 +189,15 @@ async def reset_password(data: ResetPasswordRequest):
     user.hashed_password = hash_password(data.new_password)
     await user.save()
     return {"message": "Password successfully reset"}
+
+
+@router.get("/get-user/{user_id}", response_model=User)
+async def get_user(user_id:str, current_user:User = role_required(Role.Super_Admin, Role.ADMIN)):
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    user = await User.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+    

@@ -19,6 +19,11 @@ export async function getAppointmentsPaginated(
         params: { skip, limit },
       }
     );
+    if (!data) {
+      throw new Error("Failed to fetch appointments");
+    }
+    
+
     return data;
   }
 

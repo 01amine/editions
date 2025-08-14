@@ -1,18 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { CalendarDays } from 'lucide-react'
+import { AppointementGetResponseWithUser } from "@/lib/types/appointments"
 
-interface Appointment {
-  _id: string
-  student: { _id: string; full_name: string; email: string }
-  order_id: string
-  scheduled_at: string
-  location: string
-  status: string
-}
+
 
 interface AppointmentsListProps {
-  appointments: Appointment[]
+  appointments: AppointementGetResponseWithUser
 }
 
 export default function AppointmentsList({ appointments }: AppointmentsListProps) {
@@ -35,7 +29,7 @@ export default function AppointmentsList({ appointments }: AppointmentsListProps
                   </Avatar>
                   <div>
                     <p className="font-medium">{appointment.student.full_name}</p>
-                    <p className="text-sm text-gray-500">Commande #{appointment.order_id}</p>
+                    <p className="text-sm text-gray-500">Commande #{appointment.order.id}</p>
                     <p className="text-sm text-gray-500">{appointment.location}</p>
                   </div>
                 </div>

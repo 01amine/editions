@@ -3,10 +3,11 @@ export const API_ENDPOINTS = {
     LOGIN: '/users/login',
     LOGOUT: '/users/logout',
     ME: '/users/me',
+    GET_USER : (userId: string) => `/users/get-user/${userId}`,
   },
   APPOINTMENTS: {
-    ROOT: '/appointments/',
-    BY_ID: (id: string) => `/appointments/${id}`,
+    ROOT: '/appointements/',
+    BY_ID: (id: string) => `/appointements/${id}`,
   },
   MATERIALS: {
     ROOT: '/materials',

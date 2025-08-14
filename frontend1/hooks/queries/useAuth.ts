@@ -1,4 +1,4 @@
-import { get_me, login, logout } from "@/lib/api/auth";
+import { get_me, getUserbyId, login, logout } from "@/lib/api/auth";
 import { authRegsiter, User } from "@/lib/types/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -43,4 +43,13 @@ export function uselogin(){
         }
         
      })
+}
+export function GetUser(userId: string) {
+    return useQuery<User>({
+        queryKey: ['user', userId],
+        queryFn: () => getUserbyId(userId),
+        staleTime: 1000 * 60 * 5,
+        retry: false,
+        enabled: !!userId, 
+    });
 }

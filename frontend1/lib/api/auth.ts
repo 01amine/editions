@@ -15,3 +15,11 @@ export async function get_me(): Promise<User> {
 export async function logout(): Promise<void> {
     await client.post(API_ENDPOINTS.AUTH.LOGOUT);
 }
+
+export async function getUserbyId(userId: string): Promise<UserApiResponse> {
+    const { data } = await client.get<UserApiResponse>(API_ENDPOINTS.AUTH.GET_USER(userId));
+    if (!data) {
+        throw new Error("User not found");
+    }
+    return data;
+}

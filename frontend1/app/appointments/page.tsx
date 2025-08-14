@@ -1,34 +1,25 @@
 "use client"
-
-import { useState } from "react"
-import AdminLayout from "@/components/layout/admin-layout"
 import AppointmentsHeader from "@/components/appointments/appointments-header"
 import AppointmentsList from "@/components/appointments/appointments-list"
-
-const mockAppointments = [
-  {
-    _id: "1",
-    student: { _id: "1", full_name: "Ahmed Benali", email: "ahmed@example.com" },
-    order_id: "1",
-    scheduled_at: "2024-01-20T14:00:00Z",
-    location: "Bureau d'impression - Bâtiment A",
-    status: "scheduled"
-  }
-]
+import AdminLayout from "@/components/layout/admin-layout"
+import { useCreateAppointment, useGetAppointmentsWithUser } from "@/hooks/queries/useappointement"
 
 export default function AppointmentsPage() {
-  const [appointments, setAppointments] = useState(mockAppointments)
-  
-
+  const { data: appointments, isLoading, error } = useGetAppointmentsWithUser(0, 10)
+  const createAppointment = useCreateAppointment()
   const handleCreateAppointment = (newAppointment: any) => {
-    setAppointments([...appointments, { ...newAppointment, _id: Date.now().toString() }])
+    createAppointment.mutate(newAppointment)
   }
 
   return (
     <AdminLayout>
       <div className="space-y-6">
         <AppointmentsHeader onCreateAppointment={handleCreateAppointment} />
-        <AppointmentsList appointments={appointments} />
+
+        {isLoading && <p>Loading appointments...</p>}
+        {error && <p className="text-red-500">Failed to load appointments</p>}
+
+        {appointments && <AppointmentsList appointments={appointments} />}
       </div>
     </AdminLayout>
   )
