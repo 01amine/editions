@@ -166,7 +166,7 @@ class CommandCard extends StatelessWidget {
                   ),
                 ],
               ),
-            )).toList(),
+            )),
           ],
         ),
       ),

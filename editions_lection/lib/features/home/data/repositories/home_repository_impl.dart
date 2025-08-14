@@ -8,14 +8,16 @@ import 'package:editions_lection/core/errors/exceptions.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
 
 import '../../../../core/network/network_info.dart';
+import '../../../auth/data/datasource/local_data.dart';
 import '../../domain/entities/order.dart';
 import '../models/order_model.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource remoteDataSource;
   final NetworkInfo networkInfo;
+  final AuthLocalDataSource localDataSource;
 
-  HomeRepositoryImpl(this.networkInfo, {required this.remoteDataSource});
+  HomeRepositoryImpl(this.networkInfo, this.localDataSource, {required this.remoteDataSource});
 
   @override
   Future<Either<Failure, List<MaterialEntity>>> getBooks() async {
@@ -52,8 +54,14 @@ class HomeRepositoryImpl implements HomeRepository {
     if (await networkInfo.isConnected) {
       try {
         final orderModels = orders.map((e) => OrderCreateModel(materialId: e.materialId, quantity: e.quantity)).toList();
-        final result = await remoteDataSource.createOrder(orderModels);
-        return Right(result);
+        final token = await localDataSource.getToken();
+        if(token != null){
+          final result = await remoteDataSource.createOrder(orderModels, token);
+          return Right(result);
+        }else {
+          return Left(CacheFailure());
+        }
+        
       } on ServerException catch (e) {
         return Left(ServerFailure(message: e.message));
       }
@@ -63,17 +71,22 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<OrderEntity>>> getOrders() async {
-    if (await networkInfo.isConnected) {
-      try {
-        final remoteOrders = await remoteDataSource.getOrders();
-        return Right(remoteOrders);
-      } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+Future<Either<Failure, List<OrderEntity>>> getOrders() async {
+  if (await networkInfo.isConnected) {
+    try {
+      final token = await localDataSource.getToken();
+      if (token != null) {
+        final orders = await remoteDataSource.getOrders(token);
+        return Right(orders);
+      } else {
+        return Left(CacheFailure());
       }
-    } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
     }
+  } else {
+    return Left(ServerFailure(message: 'No internet connection'));
   }
+}
 
 }

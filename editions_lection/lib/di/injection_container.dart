@@ -148,7 +148,11 @@ Future<void> init() async {
 
   // Repositories
   sl.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(sl(), remoteDataSource: sl()),
+    () => HomeRepositoryImpl(
+      sl<NetworkInfo>(),
+      sl<AuthLocalDataSource>(), // FIX: Added missing dependency
+      remoteDataSource: sl<HomeRemoteDataSource>(),
+    ),
   );
 
   // Data sources

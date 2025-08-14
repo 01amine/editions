@@ -11,8 +11,8 @@ abstract class HomeRemoteDataSource {
   Future<List<MaterialEntity>> getBooks();
   Future<List<MaterialEntity>> getPolycopies();
   Future<List<MaterialEntity>> searchMaterialsByTitle(String title);
-  Future<bool> createOrder(List<OrderCreateModel> orders);
-  Future<List<OrderEntity>> getOrders();
+  Future<List<OrderEntity>> getOrders(String token);
+  Future<bool> createOrder(List<OrderCreateModel> orders, String token);
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -56,10 +56,15 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 
   @override
-  Future<bool> createOrder(List<OrderCreateModel> orders) async {
+  Future<bool> createOrder(List<OrderCreateModel> orders, String token) async {
     final response = await client.post(
-      Uri.parse('$baseUrl/orders'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse(
+        '$baseUrl/orders',
+      ),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: json.encode(orders.map((e) => e.toJson()).toList()),
     );
 
@@ -89,9 +94,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 
   @override
-  Future<List<OrderEntity>> getOrders() async {
+  Future<List<OrderEntity>> getOrders(String token) async {
     final response = await client.get(
       Uri.parse('$baseUrl/orders/my'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
     );
 
     if (response.statusCode == 200) {

@@ -71,7 +71,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final headers = {
       'Content-Type': 'application/json',
       'Authorization':
-          'Bearer $token', // Corrected: sending the token in the Authorization header
+          'Bearer $token', 
     };
 
     // Log the request details for debugging
