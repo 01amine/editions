@@ -7,10 +7,15 @@ import 'package:editions_lection/core/errors/failure.dart';
 import 'package:editions_lection/core/errors/exceptions.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
 
+import '../../../../core/network/network_info.dart';
+import '../../domain/entities/order.dart';
+import '../models/order_model.dart';
+
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
-  HomeRepositoryImpl({required this.remoteDataSource});
+  HomeRepositoryImpl(this.networkInfo, {required this.remoteDataSource});
 
   @override
   Future<Either<Failure, List<MaterialEntity>>> getBooks() async {
@@ -43,12 +48,32 @@ class HomeRepositoryImpl implements HomeRepository {
   }
   
   @override
-  Future<Either<Failure, bool>> createOrder(List<String> materialIds) async {
-    try {
-      final result = await remoteDataSource.createOrder(materialIds);
-      return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+  Future<Either<Failure, bool>> createOrder(List<OrderCreateEntity> orders) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final orderModels = orders.map((e) => OrderCreateModel(materialId: e.materialId, quantity: e.quantity)).toList();
+        final result = await remoteDataSource.createOrder(orderModels);
+        return Right(result);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>> getOrders() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteOrders = await remoteDataSource.getOrders();
+        return Right(remoteOrders);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return Left(ServerFailure(message: 'No internet connection'));
+    }
+  }
+
 }

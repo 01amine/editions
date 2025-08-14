@@ -11,6 +11,7 @@ import 'package:editions_lection/features/home/presentation/widgets/module_filte
 import '../../../../modules/module_service.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/material.dart';
+import '../blocs/commands_bloc/commands_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -97,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Fetch data and start animations
     context.read<HomeBloc>().add(FetchHomeData());
+    context.read<CommandsBloc>().add(FetchOrdersEvent());
     _startAnimations();
     _loadUserModules();
   }
@@ -175,16 +177,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return 3; // Placeholder value
   }
 
-  int _getCommandCount() {
-    // TODO: Get actual command count from CommandBloc
-    return 2; // Placeholder value
-  }
-
   void _navigateToNotifications() {
     Navigator.pushNamed(context, '/notifications');
   }
 
   void _navigateToCommands() {
+    context.read<CommandsBloc>().add(FetchOrdersEvent());
     Navigator.pushNamed(context, '/commands');
   }
 
@@ -240,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: RefreshIndicator(
             onRefresh: () async {
               context.read<HomeBloc>().add(FetchHomeData());
+              context.read<CommandsBloc>().add(FetchOrdersEvent());
               await _loadUserModules();
             },
             child: SingleChildScrollView(
@@ -406,11 +405,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               badgeCount: _getNotificationCount(),
             ),
             SizedBox(width: context.width * 0.02),
-            _buildAnimatedIconButtonWithBadge(
-              icon: Icons.book_outlined,
-              onPressed: _navigateToCommands,
-              delay: const Duration(milliseconds: 700),
-              badgeCount: _getCommandCount(),
+            BlocBuilder<CommandsBloc, CommandsState>(
+              builder: (context, commandsState) {
+                int commandCount = 0;
+                if (commandsState is CommandsLoaded) {
+                  commandCount = commandsState.deliveredCount;
+                }
+                return _buildAnimatedIconButtonWithBadge(
+                  icon: Icons.book_outlined,
+                  onPressed: _navigateToCommands,
+                  delay: const Duration(milliseconds: 700),
+                  badgeCount: commandCount,
+                );
+              },
             ),
           ],
         ),
@@ -577,18 +584,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         if (state is HomeLoading) {
-          // We will keep this loading state as is.
           return _buildLoadingState();
         } else if (state is HomeLoaded) {
-          // Check if there are search results and if a search is active.
           if (_searchController.text.isNotEmpty &&
               state.searchResults != null) {
-            // Pass the filtered list (books) and polycopies if a filter is active
-            // and if the search results contain both.
-            // In this case, we'll build a separate UI for search results.
             return _buildSearchResults(state.searchResults!);
           }
-          // If no search is active, build the regular loaded state.
+
           return _buildLoadedState(state);
         } else if (state is HomeFailure) {
           return _buildErrorState(state);

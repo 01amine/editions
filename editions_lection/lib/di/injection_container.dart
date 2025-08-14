@@ -21,7 +21,9 @@ import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/home/data/datasource/remote_data.dart';
 import '../features/home/data/repositories/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
+import '../features/home/domain/usecases/create_order.dart';
 import '../features/home/domain/usecases/get_books.dart';
+import '../features/home/domain/usecases/get_orders.dart';
 import '../features/home/domain/usecases/get_polycopies.dart';
 import '../features/home/domain/usecases/search_materials.dart';
 import '../features/home/presentation/blocs/home_bloc/home_bloc.dart';
@@ -32,6 +34,7 @@ import '../features/onboarding/domain/usecases/save_onboarding_seen.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/splash/domain/is_user_loged_in.dart';
 import '../features/splash/presentation/bloc/splash_bloc.dart';
+import '../features/home/presentation/blocs/commands_bloc/commands_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -96,6 +99,8 @@ Future<void> init() async {
   sl.registerLazySingleton<IsUserLoggedIn>(
     () => IsUserLoggedIn(sl<AuthRepository>()),
   );
+  sl.registerLazySingleton(() => CreateOrder(repository: sl()));
+  sl.registerLazySingleton(() => GetOrders(repository: sl()));
 
   // BLoCs
   sl.registerFactory<AuthBloc>(
@@ -131,16 +136,19 @@ Future<void> init() async {
       searchMaterials: sl<SearchMaterials>(),
     ),
   );
+  sl.registerFactory(() => CommandsBloc(
+        createOrder: sl(),
+        getOrders: sl(),
+      ));
 
   // Use cases
   sl.registerLazySingleton(() => GetBooks(sl()));
   sl.registerLazySingleton(() => GetPolycopies(sl()));
-  sl.registerLazySingleton(() =>
-      SearchMaterials(sl())); // Corrected: Added SearchMaterials registration
+  sl.registerLazySingleton(() => SearchMaterials(sl()));
 
   // Repositories
   sl.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(remoteDataSource: sl()),
+    () => HomeRepositoryImpl(sl(), remoteDataSource: sl()),
   );
 
   // Data sources
