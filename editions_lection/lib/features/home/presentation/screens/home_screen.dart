@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:editions_lection/core/extensions/extensions.dart';
 import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/presentation/blocs/home_bloc/home_bloc.dart';
@@ -9,6 +11,7 @@ import 'package:editions_lection/features/home/presentation/widgets/module_filte
 import '../../../../modules/module_service.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/material.dart';
+import '../blocs/commands_bloc/commands_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TextEditingController _searchController;
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
+
+  Timer? _debounceTimer;
+  final Duration _debounceDuration = const Duration(milliseconds: 500);
 
   // Module filter state
   List<String> _availableModules = [];
@@ -92,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Fetch data and start animations
     context.read<HomeBloc>().add(FetchHomeData());
+    context.read<CommandsBloc>().add(FetchOrdersEvent());
     _startAnimations();
     _loadUserModules();
   }
@@ -170,16 +177,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return 3; // Placeholder value
   }
 
-  int _getCommandCount() {
-    // TODO: Get actual command count from CommandBloc
-    return 2; // Placeholder value
-  }
-
   void _navigateToNotifications() {
     Navigator.pushNamed(context, '/notifications');
   }
 
   void _navigateToCommands() {
+    context.read<CommandsBloc>().add(FetchOrdersEvent());
     Navigator.pushNamed(context, '/commands');
   }
 
@@ -189,11 +192,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onSearchChanged(String query) {
-    // TODO: Implement search functionality
-    // You might want to add a search event to your bloc
-    if (query.isNotEmpty) {
-      // context.read<HomeBloc>().add(SearchMaterials(query: query));
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer!.cancel();
     }
+
+    _debounceTimer = Timer(_debounceDuration, () {
+      if (query.isNotEmpty) {
+        context.read<HomeBloc>().add(SearchMaterialsEvent(query: query));
+
+        setState(() {});
+      } else {
+        context.read<HomeBloc>().add(FetchHomeData());
+      }
+    });
   }
 
   void _onModuleFilterChanged(String? module) {
@@ -209,8 +220,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_selectedModule == null) {
       return materials;
     }
+
+    final normalizedSelectedModule = _selectedModule!.trim().toLowerCase();
     return materials.where((material) {
-      return material.module == _selectedModule;
+      final normalizedMaterialModule = material.module.trim().toLowerCase();
+      return normalizedMaterialModule == normalizedSelectedModule;
     }).toList();
   }
 
@@ -224,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: RefreshIndicator(
             onRefresh: () async {
               context.read<HomeBloc>().add(FetchHomeData());
+              context.read<CommandsBloc>().add(FetchOrdersEvent());
               await _loadUserModules();
             },
             child: SingleChildScrollView(
@@ -390,11 +405,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               badgeCount: _getNotificationCount(),
             ),
             SizedBox(width: context.width * 0.02),
-            _buildAnimatedIconButtonWithBadge(
-              icon: Icons.book_outlined,
-              onPressed: _navigateToCommands,
-              delay: const Duration(milliseconds: 700),
-              badgeCount: _getCommandCount(),
+            BlocBuilder<CommandsBloc, CommandsState>(
+              builder: (context, commandsState) {
+                int commandCount = 0;
+                if (commandsState is CommandsLoaded) {
+                  commandCount = commandsState.deliveredCount;
+                }
+                return _buildAnimatedIconButtonWithBadge(
+                  icon: Icons.book_outlined,
+                  onPressed: _navigateToCommands,
+                  delay: const Duration(milliseconds: 700),
+                  badgeCount: commandCount,
+                );
+              },
             ),
           ],
         ),
@@ -563,12 +586,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (state is HomeLoading) {
           return _buildLoadingState();
         } else if (state is HomeLoaded) {
+          if (_searchController.text.isNotEmpty &&
+              state.searchResults != null) {
+            return _buildSearchResults(state.searchResults!);
+          }
+
           return _buildLoadedState(state);
         } else if (state is HomeFailure) {
           return _buildErrorState(state);
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+
+  Widget _buildSearchResults(List<MaterialEntity> searchResults) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Résultats de recherche",
+          style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: context.height * 0.015),
+        if (searchResults.isEmpty)
+          _buildEmptyState("recherche")
+        else
+          CardsList(
+            materials: searchResults,
+            onMaterialTap: _navigateToMaterialDetails,
+          ),
+        SizedBox(height: context.height * 0.05),
+      ],
     );
   }
 

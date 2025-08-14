@@ -1,4 +1,5 @@
 import 'package:editions_lection/features/home/presentation/screens/book_details_screen.dart';
+import 'package:editions_lection/features/home/presentation/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +9,9 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/signup_screen.dart';
 import 'features/home/domain/entities/material.dart';
+import 'features/home/presentation/blocs/commands_bloc/commands_bloc.dart';
 import 'features/home/presentation/blocs/home_bloc/home_bloc.dart';
+import 'features/home/presentation/screens/commands_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -46,6 +49,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (_) => di.sl<HomeBloc>(),
         ),
+        BlocProvider(
+          create: (_) => di.sl<CommandsBloc>(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -78,6 +84,14 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (context) =>
                     BookDetailsScreen(book: book as MaterialEntity),
+              );
+            case '/commands':
+              return MaterialPageRoute(
+                builder: (context) => const CommandsScreen(),
+              );
+            case '/notification':
+              return MaterialPageRoute(
+                builder: (context) => const NotificationsScreen(),
               );
             default:
               return MaterialPageRoute(

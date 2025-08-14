@@ -31,10 +31,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final userResult = await getCurrentUser(NoParams());
       User? user;
       userResult.fold(
-            (failure) {
-          
-        },
-            (retrievedUser) {
+        (failure) {},
+        (retrievedUser) {
           user = retrievedUser;
         },
       );
@@ -43,15 +41,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final polycopiesResult = await getPolycopies(NoParams());
 
       booksResult.fold(
-            (failure) {
+        (failure) {
           emit(HomeFailure(message: _mapFailureToMessage(failure)));
         },
-            (books) {
+        (books) {
           polycopiesResult.fold(
-                (failure) {
+            (failure) {
               emit(HomeFailure(message: _mapFailureToMessage(failure)));
             },
-                (polycopies) {
+            (polycopies) {
               emit(
                 HomeLoaded(books: books, polycopies: polycopies, user: user),
               );
@@ -66,10 +64,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final currentState = state as HomeLoaded;
         final searchResult = await searchMaterials(event.query);
         searchResult.fold(
-              (failure) {
+          (failure) {
             emit(HomeFailure(message: _mapFailureToMessage(failure)));
           },
-              (results) {
+          (results) {
             emit(currentState.copyWith(searchResults: results));
           },
         );
