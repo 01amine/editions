@@ -59,7 +59,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   Future<bool> createOrder(List<OrderCreateModel> orders, String token) async {
     final response = await client.post(
       Uri.parse(
-        '$baseUrl/orders',
+        '$baseUrl/orders/',
       ),
       headers: {
         'Content-Type': 'application/json',

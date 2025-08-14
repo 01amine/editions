@@ -3,6 +3,10 @@ import 'package:editions_lection/core/extensions/extensions.dart';
 import 'package:editions_lection/core/theme/theme.dart';
 import 'package:editions_lection/features/home/domain/entities/material.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../domain/entities/order.dart';
+import '../blocs/commands_bloc/commands_bloc.dart';
 
 class CardsList extends StatelessWidget {
   final List<MaterialEntity> materials;
@@ -545,7 +549,16 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Add order logic here
+                context.read<CommandsBloc>().add(
+                      CreateOrderEvent(
+                        orders: [
+                          OrderCreateEntity(
+                            materialId: widget.material.id,
+                            quantity: 1,
+                          ),
+                        ],
+                      ),
+                    );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Commande ajoutée au panier!'),
