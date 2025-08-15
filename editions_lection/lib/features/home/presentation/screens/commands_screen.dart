@@ -169,7 +169,10 @@ class _CommandsScreenState extends State<CommandsScreen>
                       Icons.arrow_back_ios_rounded,
                       color: AppTheme.primaryTextColor,
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      FocusScope.of(context).unfocus();
+                    },
                     iconSize: 24,
                   ),
                 ),

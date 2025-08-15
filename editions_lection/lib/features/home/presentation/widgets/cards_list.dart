@@ -494,7 +494,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
               child: OutlinedButton(
                 onPressed: () {
                   // Handle order action
-                  _showOrderDialog(context);
+                  _showEnhancedOrderDialog(context);
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.primaryColor,
@@ -532,43 +532,272 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
     );
   }
 
-  void _showOrderDialog(BuildContext context) {
-    showDialog(
+  void _showEnhancedOrderDialog(BuildContext context) {
+    showGeneralDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Commander ${widget.material.title}'),
-          content: Text(
-            'Voulez-vous commander ce livre pour ${widget.material.priceDzd.toInt()} DA?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                context.read<CommandsBloc>().add(
-                      CreateOrderEvent(
-                        orders: [
-                          OrderCreateEntity(
-                            materialId: widget.material.id,
-                            quantity: 1,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Container();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(context.width * 0.06),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header with icon
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: Icon(
+                          Icons.shopping_cart_rounded,
+                          size: 40,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+
+                      SizedBox(height: context.height * 0.02),
+
+                      // Title
+                      Text(
+                        'Confirmer la commande',
+                        style: AppTheme.lightTheme.textTheme.headlineSmall
+                            ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryTextColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: context.height * 0.015),
+
+                      // Content
+                      Container(
+                        padding: EdgeInsets.all(context.width * 0.04),
+                        decoration: BoxDecoration(
+                          color: AppTheme.backgroundColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  _getCategoryIcon(),
+                                  color: AppTheme.primaryColor,
+                                  size: 24,
+                                ),
+                                SizedBox(width: context.width * 0.03),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget.material.title,
+                                        style: AppTheme
+                                            .lightTheme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        _getCategoryName(),
+                                        style: AppTheme
+                                            .lightTheme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: AppTheme.secondaryTextColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: context.height * 0.015),
+
+                            // Price row
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: context.width * 0.04,
+                                vertical: context.height * 0.01,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.successColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Prix total:',
+                                    style: AppTheme
+                                        .lightTheme.textTheme.titleMedium
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${widget.material.priceDzd.toInt()} DZD',
+                                    style: AppTheme
+                                        .lightTheme.textTheme.titleLarge
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.successColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: context.height * 0.025),
+
+                      // Action buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                FocusScope.of(context).unfocus();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: context.height * 0.015),
+                                side: BorderSide(
+                                  color: AppTheme.secondaryTextColor
+                                      .withOpacity(0.3),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Annuler',
+                                style: AppTheme.lightTheme.textTheme.labelLarge
+                                    ?.copyWith(
+                                  color: AppTheme.secondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: context.width * 0.03),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                context.read<CommandsBloc>().add(
+                                      CreateOrderEvent(
+                                        orders: [
+                                          OrderCreateEntity(
+                                            materialId: widget.material.id,
+                                            quantity: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                FocusScope.of(context).unfocus();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            'Commande ajoutée au panier!',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: AppTheme.successColor,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primaryColor,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: context.height * 0.015),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 2,
+                              ),
+                              child: Text(
+                                'Commander',
+                                style: AppTheme.lightTheme.textTheme.labelLarge
+                                    ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Commande ajoutée au panier!'),
-                    backgroundColor: AppTheme.primaryColor,
+                    ],
                   ),
-                );
-              },
-              child: const Text('Commander'),
+                ),
+              ),
             ),
-          ],
+          ),
         );
       },
     );
