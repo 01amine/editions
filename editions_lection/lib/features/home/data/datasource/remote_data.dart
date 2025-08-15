@@ -104,11 +104,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     );
 
     if (response.statusCode == 200) {
+      print('Response: ${response.body}');
       final orders = (json.decode(response.body) as List)
           .map((e) => OrderModel.fromJson(e))
           .toList();
       return orders;
     } else {
+      print('Error: ${response.body}');
       throw ServerException(
           message: json.decode(response.body)['message'] ?? 'Server Error');
     }

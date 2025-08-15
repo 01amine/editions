@@ -8,8 +8,8 @@ class MaterialEntity extends Equatable {
   final String materialType;
   final double priceDzd;
   final DateTime createdAt;
-  final String studyYear; 
-  final String specialite; 
+  final String studyYear;
+  final String specialite;
   final String module;
 
   const MaterialEntity({
@@ -30,13 +30,15 @@ class MaterialEntity extends Equatable {
       id: json['_id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
-      imageUrls: List<String>.from(json['image_urls'] as List),
+      imageUrls: json['image_urls'] != null
+          ? List<String>.from(json['image_urls'] as List)
+          : [],
       materialType: json['material_type'] as String,
       priceDzd: (json['price_dzd'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
-      studyYear: json['study_year'] as String, 
-      specialite: json['specialite'] as String,
-      module: json['module'] as String, 
+      studyYear: json['study_year'] as String? ?? '',
+      specialite: json['specialite'] as String? ?? '',
+      module: json['module'] as String? ?? '',
     );
   }
 

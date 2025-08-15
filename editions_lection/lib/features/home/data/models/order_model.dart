@@ -25,7 +25,7 @@ class OrderModel extends OrderEntity {
         (json['item'] as List).map((e) => OrderItemModel.fromJson(e)).toList();
 
     return OrderModel(
-      id: json['id'],
+      id: json['_id'],
       items: items,
       status: json['status'],
       appointmentDate: json['appointment_date'] != null

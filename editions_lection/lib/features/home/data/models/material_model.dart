@@ -19,13 +19,15 @@ class MaterialModel extends MaterialEntity {
       id: json['_id'],
       title: json['title'],
       description: json['description'],
-      imageUrls: json['imageUrls'],
+      imageUrls: json['image_urls'] != null
+          ? List<String>.from(json['image_urls'])
+          : [],
       materialType: json['material_type'],
       priceDzd: json['price_dzd'],
       createdAt: DateTime.parse(json['created_at']),
-      studyYear: json['study_year'].toString(),
-      specialite: json['specialite'],
-      module: json['module'],
+      studyYear: json['study_year']?.toString() ?? '',
+      specialite: json['specialite']?.toString() ?? '',
+      module: json['module']?.toString() ?? '',
     );
   }
 
@@ -35,11 +37,11 @@ class MaterialModel extends MaterialEntity {
       '_id': id,
       'title': title,
       'description': description,
-      'imageUrls': imageUrls,
+      'image_urls': imageUrls,
       'material_type': materialType,
       'price_dzd': priceDzd,
       'created_at': createdAt.toIso8601String(),
-      'study_year': studyYear.toString(),
+      'study_year': studyYear,
       'specialite': specialite,
       'module': module,
     };
