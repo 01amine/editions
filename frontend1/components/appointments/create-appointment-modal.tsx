@@ -6,17 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-// Mock data
-const mockUsers = [
-  { _id: "1", full_name: "Ahmed Benali", roles: ["user"] },
-  { _id: "2", full_name: "Fatima Zohra", roles: ["user"] }
-]
-
-const mockOrders = [
-  { _id: "1", status: "ready", item: [{ title: "Anatomie Humaine" }] },
-  { _id: "2", status: "ready", item: [{ title: "Pharmacologie" }] }
-]
+import { useGetStudents } from "@/hooks/queries/useAuth"
+import { getOrdersForStudent } from "@/hooks/queries/useorder"
+import { summarizeOrder } from "@/lib/utils"
 
 interface CreateAppointmentModalProps {
   isOpen: boolean
@@ -25,26 +17,15 @@ interface CreateAppointmentModalProps {
 }
 
 export default function CreateAppointmentModal({ isOpen, onClose, onCreateAppointment }: CreateAppointmentModalProps) {
-  const [selectedStudent, setSelectedStudent] = useState("")
+  const {data: students } = useGetStudents(0, 1000)
+  const [id, setId] = useState("")
+  const { data : Orders } = getOrdersForStudent(id)
   const [selectedOrder, setSelectedOrder] = useState("")
   const [appointmentTime, setAppointmentTime] = useState("")
   const [location, setLocation] = useState("Bureau d'impression - Bâtiment A")
 
   const handleSubmit = () => {
-    const student = mockUsers.find(u => u._id === selectedStudent)
-    const newAppointment = {
-      student: { _id: selectedStudent, full_name: student?.full_name || "", email: "" },
-      order_id: selectedOrder,
-      scheduled_at: appointmentTime,
-      location,
-      status: "scheduled"
-    }
-    
-    onCreateAppointment(newAppointment)
-    onClose()
-    setSelectedStudent("")
-    setSelectedOrder("")
-    setAppointmentTime("")
+console.log("Creating appointment with data:")
   }
 
   return (
@@ -59,14 +40,14 @@ export default function CreateAppointmentModal({ isOpen, onClose, onCreateAppoin
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="student" className="text-right">Étudiant</Label>
-            <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+            <Select value={id} onValueChange={setId}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Sélectionner un étudiant" />
               </SelectTrigger>
               <SelectContent>
-                {mockUsers.filter(u => !u.roles.includes('admin')).map((user) => (
-                  <SelectItem key={user._id} value={user._id}>
-                    {user.full_name}
+                {students?.map((student) => (
+                  <SelectItem key={student._id} value={student._id}>
+                    {student.full_name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -79,11 +60,13 @@ export default function CreateAppointmentModal({ isOpen, onClose, onCreateAppoin
                 <SelectValue placeholder="Sélectionner une commande" />
               </SelectTrigger>
               <SelectContent>
-                {mockOrders.filter(o => o.status === "ready").map((order) => (
-                  <SelectItem key={order._id} value={order._id}>
-                    Commande #{order._id} - {order.item.length} article(s)
+               {
+                Orders?.map((order)=>(
+                  <SelectItem key={order.id} value={order.id}>
+                   {summarizeOrder(order)}
                   </SelectItem>
-                ))}
+                ))
+               }
               </SelectContent>
             </Select>
           </div>

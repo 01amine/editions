@@ -23,3 +23,13 @@ export async function getUserbyId(userId: string): Promise<UserApiResponse> {
     }
     return data;
 }
+
+export async function getStudents(skip: number = 0, limit: number = 10): Promise<User[]> {
+    const { data } = await client.get<UserApiResponse[]>(API_ENDPOINTS.AUTH.ALL_STUDENTS, {
+        params: { skip, limit },
+    });
+    if (!data) {
+        throw new Error("No students found");
+    }
+    return data;
+}

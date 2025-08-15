@@ -1,6 +1,7 @@
-import { get_me, getUserbyId, login, logout } from "@/lib/api/auth";
+import { get_me, getStudents, getUserbyId, login, logout } from "@/lib/api/auth";
 import { authRegsiter, User } from "@/lib/types/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { sk } from "date-fns/locale";
 
 
 export function useCurrentUser(){
@@ -51,5 +52,14 @@ export function GetUser(userId: string) {
         staleTime: 1000 * 60 * 5,
         retry: false,
         enabled: !!userId, 
+    });
+}
+
+export function useGetStudents(skip = 0, limit = 10) {
+    return useQuery<User[]>({
+        queryKey: ['students'],
+        queryFn: () => getStudents( skip, limit),
+        staleTime: 1000 * 60 * 5,
+        retry: false,
     });
 }

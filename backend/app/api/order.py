@@ -66,3 +66,14 @@ async def mark_delivered(
     if not order:
         raise HTTPException(status_code=400, detail="Order not in ready state or admin mismatch")
     return order
+
+
+@router.get("/{user_id}", response_model=List[Order])
+async def get_user_orders(
+    user_id: str,
+    user: User = role_required(Role.ADMIN, Role.Super_Admin)
+):
+    orders = await orderService.get_orders_by_student(user_id)
+    if not orders:
+        raise HTTPException(status_code=404, detail="No orders found for this user")
+    return [serialize_order(order) for order in orders]
