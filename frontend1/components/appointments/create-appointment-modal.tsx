@@ -44,12 +44,10 @@ export default function CreateAppointmentModal({
   const [location, setLocation] = useState(
     "Bureau d'impression - Bâtiment A"
   );
-  if (isLoading || isLoadingOrders) {
-    return <p>Chargement...</p>;
-  }
-  if (error || errorOrders) {
-    return <p className="text-red-500">Erreur lors du chargement des données</p>;
-  }
+if (isLoading) return <p>Chargement...</p>;
+if (error) return <p className="text-red-500">Erreur lors du chargement des étudiants</p>;
+const isOrdersNotFound = errorOrders && (errorOrders as any)?.response?.status === 404;
+
   const handleSubmit = () => {
     // if (!id || !selectedOrder || !appointmentTime) {
     //   console.warn("Missing required fields");
@@ -96,18 +94,24 @@ export default function CreateAppointmentModal({
             <Label htmlFor="order" className="text-right">
               Commande
             </Label>
-            <Select value={selectedOrder} onValueChange={setSelectedOrder}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Sélectionner une commande" />
-              </SelectTrigger>
-              <SelectContent>
-                {orders?.map((order) => (
-                  <SelectItem key={order.id} value={order.id}>
-                    {summarizeOrder(order)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+<Select value={selectedOrder} onValueChange={setSelectedOrder}>
+  <SelectTrigger className="col-span-3">
+    <SelectValue placeholder="Sélectionner une commande" />
+  </SelectTrigger>
+  <SelectContent>
+    {isLoadingOrders && <SelectItem disabled value="loading">Chargement...</SelectItem>}
+
+    {isOrdersNotFound && (
+      <SelectItem disabled value="none">Aucune commande disponible</SelectItem>
+    )}
+
+    {!isOrdersNotFound && orders?.map((order) => (
+      <SelectItem key={order.id} value={order.id}>
+        {summarizeOrder(order)}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
