@@ -148,7 +148,8 @@ class _SplashScreenState extends State<SplashScreen>
                           color: Colors.white,
                         ),
                   ),
-                  backgroundColor: const Color(0xFFD32F2F), // Error color from theme
+                  backgroundColor:
+                      const Color(0xFFD32F2F), // Error color from theme
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -188,13 +189,15 @@ class _SplashScreenState extends State<SplashScreen>
                                       borderRadius: BorderRadius.circular(40),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF2E7D32).withOpacity(0.15),
+                                          color: const Color(0xFF2E7D32)
+                                              .withOpacity(0.15),
                                           blurRadius: 30,
                                           spreadRadius: 5,
                                           offset: const Offset(0, 8),
                                         ),
                                         BoxShadow(
-                                          color: const Color(0xFF4CAF50).withOpacity(0.1),
+                                          color: const Color(0xFF4CAF50)
+                                              .withOpacity(0.1),
                                           blurRadius: 60,
                                           spreadRadius: 10,
                                           offset: const Offset(0, 4),
@@ -225,28 +228,18 @@ class _SplashScreenState extends State<SplashScreen>
                               opacity: _logoOpacityAnimation.value,
                               child: Column(
                                 children: [
-                                  Text(
-                                    'Lectio',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displayLarge
-                                        ?.copyWith(
-                                          color: const Color(0xFF2E7D32), // Primary green
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.5,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE8F5E8), // Light green background
+                                      color: const Color(
+                                          0xFFE8F5E8), // Light green background
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: const Color(0xFF4CAF50).withOpacity(0.3),
+                                        color: const Color(0xFF4CAF50)
+                                            .withOpacity(0.3),
                                         width: 1,
                                       ),
                                     ),
@@ -256,7 +249,8 @@ class _SplashScreenState extends State<SplashScreen>
                                           .textTheme
                                           .titleMedium
                                           ?.copyWith(
-                                            color: const Color(0xFF1B5E20), // Dark green
+                                            color: const Color(
+                                                0xFF1B5E20), // Dark green
                                             fontWeight: FontWeight.w600,
                                             letterSpacing: 0.3,
                                           ),
@@ -269,7 +263,8 @@ class _SplashScreenState extends State<SplashScreen>
                                         .textTheme
                                         .bodyMedium
                                         ?.copyWith(
-                                          color: const Color(0xFF5A5A5A), // Secondary text
+                                          color: const Color(
+                                              0xFF5A5A5A), // Secondary text
                                           letterSpacing: 0.2,
                                         ),
                                   ),
@@ -299,12 +294,14 @@ class _SplashScreenState extends State<SplashScreen>
                                         color: Colors.white,
                                         borderRadius: BorderRadius.circular(25),
                                         border: Border.all(
-                                          color: const Color(0xFF4CAF50).withOpacity(0.2),
+                                          color: const Color(0xFF4CAF50)
+                                              .withOpacity(0.2),
                                           width: 2,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFF2E7D32).withOpacity(0.1),
+                                            color: const Color(0xFF2E7D32)
+                                                .withOpacity(0.1),
                                             blurRadius: 20,
                                             spreadRadius: 2,
                                             offset: const Offset(0, 4),
@@ -316,14 +313,15 @@ class _SplashScreenState extends State<SplashScreen>
                                         height: 28,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 3,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
                                             Color(0xFF2E7D32), // Primary green
                                           ),
                                         ),
                                       ),
                                     ),
                                     const SizedBox(height: 24),
-                                    
+
                                     // Loading text with academic feel
                                     Text(
                                       'Préparation de votre bibliothèque...',
@@ -369,7 +367,8 @@ class _SplashScreenState extends State<SplashScreen>
                                   Icon(
                                     Icons.school,
                                     size: 16,
-                                    color: const Color(0xFF4CAF50).withOpacity(0.8),
+                                    color: const Color(0xFF4CAF50)
+                                        .withOpacity(0.8),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
