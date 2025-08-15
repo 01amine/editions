@@ -144,7 +144,7 @@ async def get_all_admins(user: User = role_required(Role.Super_Admin)):
 
 @router.get("/all-students", response_model=List[User])
 async def get_all_students_paginated(user: User = role_required(Role.Super_Admin, Role.ADMIN), skip: int = 0, limit: int = 10):
-    return await User.find({"role": Role.USER}).skip(skip).limit(limit).to_list()
+     return await User.find({"roles": Role.USER.value}).skip(skip).limit(limit).to_list()
 
 
 @router.post("/me-super-admin")

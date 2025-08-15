@@ -61,5 +61,6 @@ export function useGetStudents(skip = 0, limit = 10) {
         queryFn: () => getStudents( skip, limit),
         staleTime: 1000 * 60 * 5,
         retry: false,
+        refetchOnWindowFocus: false,
     });
 }

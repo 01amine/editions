@@ -1,7 +1,7 @@
 import { get_order_per_student } from "@/lib/api/order";
 import { useQuery } from "@tanstack/react-query";
 
-export  function getOrdersForStudent(
+export  function useOrdersForStudent(
     studentId: string,
 )
 {
