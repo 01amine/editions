@@ -305,7 +305,7 @@ class _CommandsScreenState extends State<CommandsScreen>
   }
 
   Widget _buildLoadingState() {
-    return Container(
+    return SizedBox(
       height: context.height * 0.4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
