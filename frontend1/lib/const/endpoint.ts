@@ -13,7 +13,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/appointements/${id}`,
   },
   MATERIALS: {
-    ROOT: '/materials',
+    ROOT: '/materials/',
+    
+
   },
   ORDERS: {
     ROOT: '/orders',

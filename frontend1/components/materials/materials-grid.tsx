@@ -3,26 +3,18 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Eye, Edit, Trash2 } from 'lucide-react'
 import Image from "next/image"
+import { MaterialsAdmin } from "@/lib/types/material"
 
-interface Material {
-  _id: string
-  title: string
-  description: string
-  material_type: string
-  price_dzd: number
-  image_urls: string[]
-  created_at: string
-}
 
 interface MaterialsGridProps {
-  materials: Material[]
+  materials: MaterialsAdmin[]
 }
 
 export default function MaterialsGrid({ materials }: MaterialsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
       {materials.map((material) => (
-        <Card key={material._id} className="overflow-hidden">
+        <Card key={material.id} className="overflow-hidden">
           <div className="aspect-[3/4] relative">
             {material.image_urls.length > 1 ? (
               <div className="grid grid-cols-2 gap-1 h-full">

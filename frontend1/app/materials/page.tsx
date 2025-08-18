@@ -6,6 +6,7 @@ import MaterialsHeader from "@/components/materials/materials-header"
 import MaterialsGrid from "@/components/materials/materials-grid"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChartComponent, BarChartComponent } from "@/components/ui/chart"
+import { useGetMaterials } from "@/hooks/queries/useMaterial"
 
 const mockMaterials = [
   {
@@ -50,10 +51,13 @@ export default function MaterialsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [sortBy, setSortBy] = useState("title")
+  const { data, isLoading, isError, error } = useGetMaterials(10, 0);
 
-  // Filter, search and sort logic
+
+
   const filteredMaterials = useMemo(() => {
-    let filtered = mockMaterials.filter(material => {
+    if (!data) return []
+    let filtered = data.filter(material => {
       const matchesSearch = 
         material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         material.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -63,7 +67,6 @@ export default function MaterialsPage() {
       return matchesSearch && matchesType
     })
 
-    // Sort logic
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "title":
@@ -82,7 +85,7 @@ export default function MaterialsPage() {
     })
 
     return filtered
-  }, [searchTerm, typeFilter, sortBy])
+  }, [data,searchTerm, typeFilter, sortBy])
 
   // Chart data
   const typeData = [
