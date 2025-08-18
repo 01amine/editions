@@ -8,44 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PieChartComponent, BarChartComponent } from "@/components/ui/chart"
 import { useGetMaterials } from "@/hooks/queries/useMaterial"
 
-const mockMaterials = [
-  {
-    _id: "1",
-    title: "Anatomie Humaine - 5ème Edition",
-    description: "Manuel complet d'anatomie pour étudiants en médecine",
-    material_type: "Livre",
-    price_dzd: 2500,
-    image_urls: ["/placeholder-lfrkp.png", "/placeholder-a131f.png", "/placeholder-lfrkp.png"],
-    created_at: "2024-01-10T09:00:00Z"
-  },
-  {
-    _id: "2",
-    title: "Cours de Physiologie",
-    description: "Polycopié de physiologie générale",
-    material_type: "PDF",
-    price_dzd: 1200,
-    image_urls: ["/placeholder-a131f.png", "/placeholder-lfrkp.png"],
-    created_at: "2024-01-12T11:30:00Z"
-  },
-  {
-    _id: "3",
-    title: "Pharmacologie Clinique",
-    description: "Guide pratique de pharmacologie pour étudiants",
-    material_type: "Livre",
-    price_dzd: 3000,
-    image_urls: ["/placeholder-lfrkp.png"],
-    created_at: "2024-01-08T14:20:00Z"
-  },
-  {
-    _id: "4",
-    title: "Cardiologie Interventionnelle",
-    description: "Techniques modernes en cardiologie",
-    material_type: "PDF",
-    price_dzd: 1800,
-    image_urls: ["/placeholder-a131f.png", "/placeholder-lfrkp.png", "/placeholder-a131f.png"],
-    created_at: "2024-01-15T16:45:00Z"
-  }
-]
+
 
 export default function MaterialsPage() {
   const [searchTerm, setSearchTerm] = useState("")
