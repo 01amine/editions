@@ -60,7 +60,6 @@ const mockOrders = [
   }
 ]
 
-// Chart data based on API structure
 const orderStatusData = [
   { name: 'En attente', value: mockOrders.filter(o => o.status === 'pending').length },
   { name: 'Impression', value: mockOrders.filter(o => o.status === 'printing').length },

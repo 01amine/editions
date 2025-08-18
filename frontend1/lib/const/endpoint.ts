@@ -13,8 +13,11 @@ export const API_ENDPOINTS = {
   },
   MATERIALS: {
     ROOT: '/materials/',
-      GET_IMAGE: (fileId: string) => `materials/${fileId}/get_image`,
+
+    GET_IMAGE: (fileId: string) => `materials/${fileId}/get_image`,
     GET_FILE: (fileId: string) => `materials/${fileId}/get_file`,
+    BY_ID : (id: string) => `/materials/${id}`,
+    BY_ID_ADMIN : (id: string) => `/materials/${id}/admin`,
 
 
   },

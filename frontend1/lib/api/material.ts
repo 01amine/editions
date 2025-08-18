@@ -12,3 +12,19 @@ export async function getMaterials(limit : number = 10, skip : number = 0): Prom
     return data;
    
 }
+
+export async function getMaterialById(id : string): Promise<MaterialsAdmin> {
+    const { data } = await client.get<MaterialsAdmin>(API_ENDPOINTS.MATERIALS.BY_ID_ADMIN(id));
+    if (!data) {
+        throw new Error("No material found");
+    }
+    return data;
+}
+
+export async function deleteMaterialById(id : string): Promise<void> {
+    await client.delete(API_ENDPOINTS.MATERIALS.BY_ID_ADMIN(id));
+}
+
+export async function editMaterialById(id : string, data : MaterialsAdmin): Promise<void> {
+    await client.put(API_ENDPOINTS.MATERIALS.BY_ID_ADMIN(id), data);
+}

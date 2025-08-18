@@ -11,6 +11,17 @@ interface MaterialsGridProps {
 }
 
 export default function MaterialsGrid({ materials }: MaterialsGridProps) {
+  const handleview = ()=>{
+    console.log("view")
+  }
+
+  const handleEdit = ()=>{
+    console.log("edit")
+  }
+
+  const handleDelete = ()=>{
+    console.log("delete")
+  }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
       {materials.map((material) => (
@@ -55,13 +66,13 @@ export default function MaterialsGrid({ materials }: MaterialsGridProps) {
               <span className="font-bold text-green-600">{material.price_dzd} DZD</span>
             </div>
             <div className="flex items-center justify-between mt-3 pt-3 border-t">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleview}>
                 <Eye className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleEdit}>
                 <Edit className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleDelete}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
