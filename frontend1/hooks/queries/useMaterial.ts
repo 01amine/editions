@@ -70,13 +70,13 @@ export function useDeleteMaterial() {
 export function useEditMaterial() {
   const queryClient = useQueryClient();
 
-  return useMutation<void , Error, EditMaterialVars>({
-    mutationFn: ({ id, data }) => editMaterialById(id, data),
+  return useMutation<void, Error, EditMaterialVars>({
+    mutationFn: (vars) => editMaterialById(vars),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["materials"] });
     },
     onError: (error) => {
-      console.error("Failed to delete material:", error);
+      console.error("Failed to update material:", error);
     },
   });
 }

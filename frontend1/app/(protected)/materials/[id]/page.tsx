@@ -31,9 +31,20 @@ export default function MaterialDetailPage() {
     study_year: "",
     specialite: "",
     module: "",
-    image_urls: [],
-    pdf_url: ""
   })
+
+  // State to track existing image URLs (from the database)
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([])
+  // State to track newly selected image files (not yet uploaded)
+  const [newImages, setNewImages] = useState<File[]>([])
+  // State for the new PDF file
+  const [newFile, setNewFile] = useState<File | null>(null)
+  // State to signal PDF removal
+  const [removePdf, setRemovePdf] = useState(false)
+  
+  // Use a state for the file input key to force a re-render and clear the input
+  const [imageInputKey, setImageInputKey] = useState(Date.now())
+
 
   useEffect(() => {
     if (material) {
@@ -45,9 +56,13 @@ export default function MaterialDetailPage() {
         study_year: material.study_year,
         specialite: material.specialite,
         module: material.module,
-        image_urls: material.image_urls,
-        pdf_url: material.pdf_url,
       })
+      // When data loads, set the existing images from the backend
+      setExistingImageUrls(material.image_urls)
+      // Reset new images and PDF state
+      setNewImages([])
+      setNewFile(null)
+      setRemovePdf(false)
     }
   }, [material])
 
@@ -69,29 +84,48 @@ export default function MaterialDetailPage() {
     }))
   }
 
-  const handleImageRemove = (urlToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      image_urls: prev.image_urls?.filter(url => url !== urlToRemove)
-    }))
+  // Handles removing an existing image from the display and the list to be sent to the backend
+  const handleExistingImageRemove = (urlToRemove: string) => {
+    setExistingImageUrls(prev => prev.filter(url => url !== urlToRemove))
   }
   
+  // Handles removing a newly added image from the display
+  const handleNewImageRemove = (fileToRemove: File) => {
+    setNewImages(prev => prev.filter(file => file !== fileToRemove));
+  }
+  
+  // Handles PDF removal
   const handleFileRemove = () => {
-      setFormData(prev => ({
-          ...prev,
-          pdf_url: ""
-      }))
+    setNewFile(null)
+    setRemovePdf(true)
   }
 
+  // Combines existing and new images for display
+  const allImagesForDisplay = [
+    ...existingImageUrls.map(url => ({ src: url, isNew: false })),
+    ...newImages.map(file => ({ src: URL.createObjectURL(file), isNew: true, file })),
+  ];
+
   const handleUpdate = () => {
-    mutate({ id, data: formData }, {
+    mutate({
+      id,
+      data: formData,
+      newImages,
+      existingImageUrls,
+      newFile,
+      removePdf
+    }, {
       onSuccess: () => {
         toast({
           title: "Success! 🎉",
           description: "Material updated successfully.",
         })
+        // Force re-render of file input to clear it
+        setImageInputKey(Date.now());
+        setNewImages([]);
       },
-      onError: () => {
+      onError: (err) => {
+        console.log(err)
         toast({
           title: "Error! 😞",
           description: "Failed to update material.",
@@ -121,7 +155,7 @@ export default function MaterialDetailPage() {
               <Input 
                 id="title" 
                 className="col-span-3" 
-                value={formData.title} 
+                value={formData.title || ''} 
                 onChange={handleChange} 
               />
             </div>
@@ -130,14 +164,14 @@ export default function MaterialDetailPage() {
               <Textarea 
                 id="description" 
                 className="col-span-3" 
-                value={formData.description} 
+                value={formData.description || ''} 
                 onChange={handleChange} 
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="material_type" className="md:text-right">Type</Label>
               <Select 
-                value={formData.material_type} 
+                value={formData.material_type || ''} 
                 onValueChange={handleSelectChange}
               >
                 <SelectTrigger className="col-span-3">
@@ -156,7 +190,7 @@ export default function MaterialDetailPage() {
                 id="price_dzd" 
                 type="number" 
                 className="col-span-3" 
-                value={formData.price_dzd} 
+                value={formData.price_dzd || 0} 
                 onChange={handleChange} 
               />
             </div>
@@ -165,7 +199,7 @@ export default function MaterialDetailPage() {
               <Input 
                 id="study_year" 
                 className="col-span-3" 
-                value={formData.study_year}
+                value={formData.study_year || ''}
                 onChange={handleChange}
               />
             </div>
@@ -174,7 +208,7 @@ export default function MaterialDetailPage() {
               <Input 
                 id="specialite" 
                 className="col-span-3" 
-                value={formData.specialite}
+                value={formData.specialite || ''}
                 onChange={handleChange}
               />
             </div>
@@ -183,7 +217,7 @@ export default function MaterialDetailPage() {
               <Input 
                 id="module" 
                 className="col-span-3" 
-                value={formData.module}
+                value={formData.module || ''}
                 onChange={handleChange}
               />
             </div>
@@ -198,12 +232,11 @@ export default function MaterialDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-4">
-              {
-              formData.image_urls?.length > 0 ? (
-                formData.image_urls.map((url, index) => (
+              {allImagesForDisplay.length > 0 ? (
+                allImagesForDisplay.map((image, index) => (
                   <div key={index} className="relative w-24 h-24 rounded-md overflow-hidden group">
                     <Image 
-                      src={url} 
+                      src={image.src} 
                       alt={`Material Image ${index + 1}`} 
                       fill 
                       className="object-cover"
@@ -212,7 +245,7 @@ export default function MaterialDetailPage() {
                       <Button 
                         variant="destructive" 
                         size="icon" 
-                        onClick={() => handleImageRemove(url)}
+                        onClick={() => image.isNew ? handleNewImageRemove(image.file) : handleExistingImageRemove(image.src)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -224,7 +257,19 @@ export default function MaterialDetailPage() {
               )}
             </div>
             <Label htmlFor="add-images" className="block mb-2">Ajouter de nouvelles images</Label>
-            <Input id="add-images" type="file" accept="image/*" multiple />
+            <Input 
+                key={imageInputKey} // Use key to force re-render and clear the input
+                id="add-images" 
+                type="file" 
+                accept="image/*" 
+                multiple
+                onChange={(e) => {
+                    if (e.target.files) {
+                        const newlySelectedFiles = Array.from(e.target.files);
+                        setNewImages(prevFiles => [...prevFiles, ...newlySelectedFiles]);
+                    }
+                }}
+            />
           </CardContent>
         </Card>
         
@@ -235,9 +280,12 @@ export default function MaterialDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {formData.pdf_url ? (
+            {/* Display either the new file or the existing one */}
+            {(newFile || (material.pdf_url && !removePdf)) ? (
                 <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="max-w-xs truncate">{formData.pdf_url}</Badge>
+                    <Badge variant="secondary" className="max-w-xs truncate">
+                        {newFile ? newFile.name : material.pdf_url}
+                    </Badge>
                     <Button variant="destructive" size="icon" onClick={handleFileRemove}>
                         <Trash2 className="w-4 h-4" />
                     </Button>
@@ -246,7 +294,17 @@ export default function MaterialDetailPage() {
                 <>
                     <p className="text-gray-500 text-sm mb-2">Aucun fichier PDF n'a été ajouté.</p>
                     <Label htmlFor="add-file" className="block mb-2">Ajouter un fichier PDF</Label>
-                    <Input id="add-file" type="file" accept=".pdf" />
+                    <Input 
+                        id="add-file" 
+                        type="file" 
+                        accept=".pdf"
+                        onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                                setNewFile(e.target.files[0]);
+                                setRemovePdf(false); 
+                            }
+                        }}
+                    />
                 </>
             )}
           </CardContent>

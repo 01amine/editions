@@ -259,7 +259,8 @@ async def update_material(
     
     removed_images = set(current_image_urls) - set(final_image_urls)
     for image_url in removed_images:
-        await image_bucket.delete(image_url)
+        object_name = image_url.split('/')[-1] 
+        await image_bucket.delete(object_name)
 
     if images:
         for image in images:

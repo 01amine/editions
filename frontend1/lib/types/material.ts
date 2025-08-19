@@ -31,3 +31,11 @@ export type MaterialUpdateData = {
   image_urls?: string[];
   pdf_url?: string;
 };
+export type EditMaterialVars = {
+  id: string;
+  data: MaterialUpdateData;
+  newImages: File[];
+  existingImageUrls: string[]; 
+  newFile: File | null;
+  removePdf: boolean; 
+};
