@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { ImageIcon, FileTextIcon, Save, Trash2, ArrowLeft } from 'lucide-react'
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 
 export default function MaterialDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -33,17 +33,11 @@ export default function MaterialDetailPage() {
     module: "",
   })
 
-  // State to track existing image URLs (from the database)
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([])
-  // State to track newly selected image files (not yet uploaded)
   const [newImages, setNewImages] = useState<File[]>([])
-  // State for the new PDF file
   const [newFile, setNewFile] = useState<File | null>(null)
-  // State to signal PDF removal
   const [removePdf, setRemovePdf] = useState(false)
-  
-  // Use a state for the file input key to force a re-render and clear the input
-  const [imageInputKey, setImageInputKey] = useState(Date.now())
+    const [imageInputKey, setImageInputKey] = useState(Date.now())
 
 
   useEffect(() => {
@@ -57,9 +51,7 @@ export default function MaterialDetailPage() {
         specialite: material.specialite,
         module: material.module,
       })
-      // When data loads, set the existing images from the backend
       setExistingImageUrls(material.image_urls)
-      // Reset new images and PDF state
       setNewImages([])
       setNewFile(null)
       setRemovePdf(false)
@@ -75,6 +67,7 @@ export default function MaterialDetailPage() {
       ...prev,
       [id]: id === "price_dzd" ? Number(value) : value
     }))
+
   }
 
   const handleSelectChange = (value: string) => {
@@ -84,23 +77,19 @@ export default function MaterialDetailPage() {
     }))
   }
 
-  // Handles removing an existing image from the display and the list to be sent to the backend
   const handleExistingImageRemove = (urlToRemove: string) => {
     setExistingImageUrls(prev => prev.filter(url => url !== urlToRemove))
   }
   
-  // Handles removing a newly added image from the display
   const handleNewImageRemove = (fileToRemove: File) => {
     setNewImages(prev => prev.filter(file => file !== fileToRemove));
   }
   
-  // Handles PDF removal
   const handleFileRemove = () => {
     setNewFile(null)
     setRemovePdf(true)
   }
 
-  // Combines existing and new images for display
   const allImagesForDisplay = [
     ...existingImageUrls.map(url => ({ src: url, isNew: false })),
     ...newImages.map(file => ({ src: URL.createObjectURL(file), isNew: true, file })),
@@ -116,22 +105,16 @@ export default function MaterialDetailPage() {
       removePdf
     }, {
       onSuccess: () => {
-        toast({
-          title: "Success! 🎉",
-          description: "Material updated successfully.",
-        })
-        // Force re-render of file input to clear it
         setImageInputKey(Date.now());
         setNewImages([]);
       },
       onError: (err) => {
         console.log(err)
-        toast({
-          title: "Error! 😞",
-          description: "Failed to update material.",
-          variant: "destructive",
-        })
       }
+    })
+    toast({
+      title: "Support mis à jour",
+      description: "Le support a bien été mis à jour.",
     })
   }
 

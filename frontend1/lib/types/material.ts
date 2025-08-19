@@ -16,10 +16,7 @@ export interface MaterialsAdmin extends Material {
 }
 
 
-export interface EditMaterialVars {
-  id: string;
-  data: MaterialsAdmin;
-}
+
 export type MaterialUpdateData = {
   title?: string;
   description?: string;
@@ -38,4 +35,21 @@ export type EditMaterialVars = {
   existingImageUrls: string[]; 
   newFile: File | null;
   removePdf: boolean; 
+};
+
+
+
+
+export type CreateMaterialVars = {
+  data: {
+    title: string;
+    description: string;
+    material_type: string;
+    price_dzd: number;
+    study_year: string;
+    specialite: string;
+    module?: string;
+  };
+  file: File;
+  images: File[];
 };

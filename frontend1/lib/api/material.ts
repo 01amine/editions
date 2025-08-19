@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../const/endpoint";
-import { MaterialsAdmin } from "../types/material";
+import { CreateMaterialVars, EditMaterialVars, MaterialsAdmin } from "../types/material";
 import client from "./clients";
 
 export async function getMaterials(limit : number = 10, skip : number = 0): Promise<MaterialsAdmin[]> {
@@ -60,4 +60,28 @@ export async function editMaterialById({
   formData.append('remove_pdf', String(removePdf));
 
   await client.patch(API_ENDPOINTS.MATERIALS.BY_ID(id), formData);
+}
+
+
+export async function createMaterial(
+  { data, file, images }: CreateMaterialVars
+): Promise<void> {
+  const formData = new FormData();
+
+  formData.append('title', data.title);
+  formData.append('description', data.description);
+  formData.append('material_type', data.material_type);
+  formData.append('price_dzd', String(data.price_dzd));
+  formData.append('study_year', data.study_year);
+  formData.append('specialite', data.specialite);
+  if (data.module) {
+    formData.append('module', data.module);
+  }
+
+  formData.append('file', file);
+  images.forEach(image => {
+    formData.append('images', image);
+  });
+
+  await client.post(API_ENDPOINTS.MATERIALS.ROOT, formData);
 }

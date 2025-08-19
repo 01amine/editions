@@ -1,7 +1,8 @@
-import { deleteMaterialById, editMaterialById, getMaterialById, getMaterials } from "@/lib/api/material";
+import { createMaterial, deleteMaterialById, editMaterialById, getMaterialById, getMaterials } from "@/lib/api/material";
 import { API_ENDPOINTS } from "@/lib/const/endpoint";
 import { MaterialsAdmin,EditMaterialVars } from "@/lib/types/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "../use-toast";
 
 export function useGetMaterials(limit: number = 10, skip: number = 0) {
   return useQuery<MaterialsAdmin[], Error>({
@@ -77,6 +78,30 @@ export function useEditMaterial() {
     },
     onError: (error) => {
       console.error("Failed to update material:", error);
+    },
+  });
+}
+
+export function useCreateMaterial() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: createMaterial,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+      toast({
+        title: "Succès! ",
+        description: "Le support a été ajouté avec succès.",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to create material:", error);
+      toast({
+        title: "Erreur! ",
+        description: "Échec de l'ajout du support. Veuillez réessayer.",
+        variant: "destructive",
+      });
     },
   });
 }
