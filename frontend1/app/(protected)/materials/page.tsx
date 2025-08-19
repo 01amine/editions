@@ -7,6 +7,7 @@ import MaterialsGrid from "@/components/materials/materials-grid"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChartComponent, BarChartComponent } from "@/components/ui/chart"
 import { useGetMaterials } from "@/hooks/queries/useMaterial"
+import { toast, useToast } from "@/components/ui/use-toast"
 
 
 
@@ -14,7 +15,8 @@ export default function MaterialsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [sortBy, setSortBy] = useState("title")
-  const { data, isLoading, isError, error } = useGetMaterials(10, 0);
+  const { toast } = useToast();
+  const { data, isLoading, isError, error, refetch } = useGetMaterials(10, 0);
 
 
 
@@ -25,7 +27,7 @@ export default function MaterialsPage() {
         material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         material.description.toLowerCase().includes(searchTerm.toLowerCase())
 
-      const matchesType = typeFilter === "all" || material.material_type === typeFilter
+      const matchesType = typeFilter === "all" || material.material_type.toLowerCase() === typeFilter
 
       return matchesSearch && matchesType
     })
@@ -50,12 +52,11 @@ export default function MaterialsPage() {
     return filtered
   }, [data,searchTerm, typeFilter, sortBy])
 
-  // Chart data
-  const typeData = [
-    { name: 'Livres', value: filteredMaterials.filter(m => m.material_type === 'Livre').length },
-    { name: 'PDF', value: filteredMaterials.filter(m => m.material_type === 'PDF').length },
-    { name: 'Polycopiés', value: filteredMaterials.filter(m => m.material_type === 'Polycopié').length },
-  ]
+const typeData = [
+  { name: 'Livres', value: filteredMaterials.filter(m => m.material_type.toLowerCase() === 'livre').length },
+  { name: 'PDF', value: filteredMaterials.filter(m => m.material_type.toLowerCase() === 'pdf').length },
+  { name: 'Polycopiés', value: filteredMaterials.filter(m => m.material_type.toLowerCase() === 'polycopie').length },
+];
 
   const priceRangeData = [
     { name: '< 1500 DZD', value: filteredMaterials.filter(m => m.price_dzd < 1500).length },
@@ -65,7 +66,12 @@ export default function MaterialsPage() {
   ]
 
   const handleRefresh = () => {
-    console.log("Refreshing materials...")
+    
+        refetch();
+    toast({
+      title: "material refreshed",
+      description: "Materials refreshed successfully.",
+    })
   }
 
   const handleExport = () => {
