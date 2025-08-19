@@ -1,28 +1,39 @@
+"use client";
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Eye, Edit, Trash2 } from 'lucide-react'
 import Image from "next/image"
+import { MaterialsAdmin } from "@/lib/types/material"
+import { useDeleteMaterial } from "@/hooks/queries/useMaterial"
+import { useRouter } from "next/navigation"
 
-interface Material {
-  _id: string
-  title: string
-  description: string
-  material_type: string
-  price_dzd: number
-  image_urls: string[]
-  created_at: string
-}
 
 interface MaterialsGridProps {
-  materials: Material[]
+  materials: MaterialsAdmin[]
 }
 
 export default function MaterialsGrid({ materials }: MaterialsGridProps) {
+const router = useRouter()
+
+  const deleteMutation = useDeleteMaterial()
+
+  const handleEdit = (id: string)=>{
+      router.push(`/materials/${id}`)
+
+  }
+
+const handleview = (id: string) => {
+  router.push(`/materials/${id}`)
+}
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id)
+  }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
       {materials.map((material) => (
-        <Card key={material._id} className="overflow-hidden">
+        <Card key={material.id} className="overflow-hidden">
           <div className="aspect-[3/4] relative">
             {material.image_urls.length > 1 ? (
               <div className="grid grid-cols-2 gap-1 h-full">
@@ -63,13 +74,13 @@ export default function MaterialsGrid({ materials }: MaterialsGridProps) {
               <span className="font-bold text-green-600">{material.price_dzd} DZD</span>
             </div>
             <div className="flex items-center justify-between mt-3 pt-3 border-t">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => handleview(material.id)}>
                 <Eye className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => handleEdit(material.id)}>
                 <Edit className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => handleDelete(material.id)} disabled={deleteMutation.isPending}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>

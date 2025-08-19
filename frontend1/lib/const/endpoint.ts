@@ -1,4 +1,3 @@
-import { ALL } from "dns";
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -13,10 +12,18 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/appointements/${id}`,
   },
   MATERIALS: {
-    ROOT: '/materials',
+    ROOT: '/materials/',
+
+    GET_IMAGE: (fileId: string) => `materials/${fileId}/get_image`,
+    GET_FILE: (fileId: string) => `materials/${fileId}/get_file`,
+    BY_ID : (id: string) => `/materials/${id}`,
+    BY_ID_ADMIN : (id: string) => `/materials/${id}/admin`,
+
+
   },
   ORDERS: {
     ROOT: '/orders',
+  
     BY_ID: (id: string) => `/orders/${id}`,
   },
 } as const;
