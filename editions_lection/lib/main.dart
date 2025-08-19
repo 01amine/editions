@@ -12,6 +12,7 @@ import 'features/auth/presentation/screens/signup_screen.dart';
 import 'features/home/domain/entities/material.dart';
 import 'features/home/presentation/blocs/commands_bloc/commands_bloc.dart';
 import 'features/home/presentation/blocs/home_bloc/home_bloc.dart';
+import 'features/home/presentation/blocs/notifications/notification_bloc.dart';
 import 'features/home/presentation/screens/commands_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
@@ -52,6 +53,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => di.sl<CommandsBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<NotificationBloc>(),
         ),
       ],
       child: MaterialApp(
