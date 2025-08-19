@@ -1,7 +1,7 @@
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 from fastapi import APIRouter, HTTPException, Depends
-from app.models.user import ResetPasswordRequest, Role, UserCreate, UserLogin
+from app.models.user import ResetPasswordRequest, Role, UserCreate, UserLogin, VerifyCodeRequest
 from app.services.auth import authenticate_user, create_access_token, get_reset_token, hash_password, verify_reset_token
 from app.models.user import User
 from app.deps.auth import get_current_user
@@ -10,6 +10,8 @@ from app.config import settings
 from app.deps.auth import role_required
 from app.utils import send_email
 from bson import ObjectId
+import random
+import datetime
 
 router = APIRouter( prefix="/users", tags=["Users"])
 
@@ -167,27 +169,39 @@ async def make_me_admin(user: User = Depends(get_current_user)):
 
 
 @router.post("/forget-password")
-async def forget_password(email:str):
+async def forget_password(email: str, background_tasks: BackgroundTasks):
     user = await User.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    token = get_reset_token(user.email)
-    await send_email(user.email, token)
-    return {"message": "Password reset email sent"}
+    
+    code = str(random.randint(1000, 9999))
+    
+    
+    user.reset_code = code
+    user.reset_code_expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=settings.PASSWORD_RESET_TOKEN_EXPIRES)
+    await user.save()
+
+    await send_email(user.email, code, background_tasks)
+    return {"message": "Password reset code sent to your email."}
 
 
 @router.post("/reset-password")
 async def reset_password(data: ResetPasswordRequest):
-    email = verify_reset_token(data.token)
-    if not email:
-        raise HTTPException(status_code=400, detail="Invalid or expired token")
-    
-    user = await User.find_one({"email": email})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    user = await User.find_one({"email": data.email})
+    if not user or not user.reset_code or not user.reset_code_expires:
+        raise HTTPException(status_code=400, detail="Password reset not requested or user not found.")
 
+    if user.reset_code != data.code:
+        raise HTTPException(status_code=400, detail="Invalid code.")
+
+    if datetime.datetime.utcnow() > user.reset_code_expires:
+        raise HTTPException(status_code=400, detail="Code has expired.")
+    
     user.hashed_password = hash_password(data.new_password)
+    user.reset_code = None  
+    user.reset_code_expires = None
     await user.save()
+
     return {"message": "Password successfully reset"}
 
 

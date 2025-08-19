@@ -20,6 +20,8 @@ class User(Document):
     study_year: Optional[str] = None
     specialite: Optional[str] = None
     roles: List[Role] = [Role.USER]
+    reset_code: Optional[str] = None
+    reset_code_expires: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -40,5 +42,11 @@ class ForgotPasswordRequest(BaseModel):
     email: EmailStr
     
 class ResetPasswordRequest(BaseModel):
-    token: str
+    email: str
+    code: str
     new_password: str
+    
+
+class VerifyCodeRequest(BaseModel):
+    email: str
+    code: str
