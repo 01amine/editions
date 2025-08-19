@@ -70,8 +70,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final uri = Uri.parse('$baseUrl/users/me');
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization':
-          'Bearer $token', 
+      'Authorization': 'Bearer $token',
     };
 
     // Log the request details for debugging
@@ -93,6 +92,42 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message: json.decode(response.body)['message'] ??
             'Failed to fetch user data',
       );
+    }
+  }
+  @override
+  Future<void> forgetPassword({required String email}) async {
+    final response = await client.post(
+      Uri.parse('$baseUrl/users/forget-password?email=$email'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      throw ServerException(
+          message: json.decode(response.body)['message'] ??
+              'Failed to send password reset email');
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final response = await client.post(
+      Uri.parse('$baseUrl/users/reset-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': email,
+        'code': code,
+        'new_password': newPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw ServerException(
+          message: json.decode(response.body)['message'] ??
+              'Failed to reset password');
     }
   }
 }

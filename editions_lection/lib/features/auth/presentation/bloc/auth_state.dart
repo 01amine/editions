@@ -36,3 +36,6 @@ class UserLoaded extends AuthState {
   @override
   List<Object> get props => [user];
 }
+final class PasswordResetCodeSent extends AuthState {}
+
+final class PasswordResetSuccess extends AuthState {}
