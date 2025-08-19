@@ -12,9 +12,11 @@ import '../features/auth/data/datasource/remote_data_impl.dart';
 import '../features/auth/data/repositories/authrepositoryimpl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/domain/usecases/clear_token.dart';
+import '../features/auth/domain/usecases/foget_password.dart';
 import '../features/auth/domain/usecases/get_current_user.dart';
 import '../features/auth/domain/usecases/get_token.dart';
 import '../features/auth/domain/usecases/login_user.dart';
+import '../features/auth/domain/usecases/reset_password.dart';
 import '../features/auth/domain/usecases/save_token.dart';
 import '../features/auth/domain/usecases/signup_user.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
@@ -82,6 +84,10 @@ Future<void> init() async {
   sl.registerLazySingleton<ClearToken>(() => ClearToken(sl<AuthRepository>()));
   sl.registerLazySingleton<GetCurrentUser>(
       () => GetCurrentUser(sl<AuthRepository>()));
+  sl.registerLazySingleton<ForgetPasswordUser>(
+      () => ForgetPasswordUser(sl<AuthRepository>()));
+  sl.registerLazySingleton<ResetPasswordUser>(
+      () => ResetPasswordUser(sl<AuthRepository>()));
 
   // Onboarding Repository
   sl.registerLazySingleton<OnboardingRepository>(
@@ -109,6 +115,8 @@ Future<void> init() async {
       saveToken: sl<SaveToken>(),
       clearToken: sl<ClearToken>(),
       getCurrentUser: sl<GetCurrentUser>(),
+      forgetPasswordUser: sl<ForgetPasswordUser>(),
+      resetPasswordUser: sl<ResetPasswordUser>(),
     ),
   );
 
@@ -149,7 +157,7 @@ Future<void> init() async {
   sl.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(
       sl<NetworkInfo>(),
-      sl<AuthLocalDataSource>(), // FIX: Added missing dependency
+      sl<AuthLocalDataSource>(),
       remoteDataSource: sl<HomeRemoteDataSource>(),
     ),
   );

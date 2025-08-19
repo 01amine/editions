@@ -274,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen>
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  // Handle forgot password
+                  Navigator.pushNamed(context, '/forgot_password');
                 },
                 child: Text(
                   "Mot de passe oublié ?",

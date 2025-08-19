@@ -48,6 +48,7 @@ dependencies:
   dio: ^5.8.0+1
   http: ^1.4.0
   flutter_lints: ^5.0.0
+  flutter_otp_text_field: ^1.5.1+1
 
 dev_dependencies:
   flutter_test:

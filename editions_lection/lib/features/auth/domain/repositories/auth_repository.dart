@@ -18,4 +18,11 @@ abstract class AuthRepository {
   Future<Either<Failure, String?>> getToken();
   Future<Either<Failure, void>> clearToken();
   Future<Either<Failure, User>> getCurrentUser();
+  Future<Either<Failure, void>> forgetPassword({required String email});
+
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  });
 }

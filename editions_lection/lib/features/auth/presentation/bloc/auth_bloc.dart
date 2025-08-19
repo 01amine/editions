@@ -7,8 +7,10 @@ import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/auth_response.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/clear_token.dart';
+import '../../domain/usecases/foget_password.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/login_user.dart';
+import '../../domain/usecases/reset_password.dart';
 import '../../domain/usecases/signup_user.dart';
 import '../../domain/usecases/save_token.dart';
 
@@ -21,13 +23,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SaveToken saveToken;
   final ClearToken clearToken;
   final GetCurrentUser getCurrentUser;
+  final ForgetPasswordUser forgetPasswordUser;
+  final ResetPasswordUser resetPasswordUser;
 
   AuthBloc({
     required this.loginUser,
     required this.signupUser,
     required this.saveToken,
     required this.clearToken,
-    required this.getCurrentUser, 
+    required this.getCurrentUser,
+    required this.forgetPasswordUser,
+    required this.resetPasswordUser,
   }) : super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<SignupRequested>(_onSignupRequested);
@@ -39,6 +45,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (user) => emit(UserLoaded(user)),
       );
     });
+    on<ForgetPasswordRequested>(_onForgetPasswordRequested);
+    on<ResetPasswordRequested>(_onResetPasswordRequested);
   }
 
   Future<void> _onLoginRequested(
@@ -97,6 +105,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
       (_) => emit(AuthInitial()),
+    );
+  }
+
+  Future<void> _onForgetPasswordRequested(
+    ForgetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await forgetPasswordUser(event.email);
+    result.fold(
+      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
+      (_) => emit(PasswordResetCodeSent()),
+    );
+  }
+
+  Future<void> _onResetPasswordRequested(
+    ResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await resetPasswordUser(ResetPasswordParams(
+        email: event.email, code: event.code, newPassword: event.newPassword));
+    result.fold(
+      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
+      (_) => emit(PasswordResetSuccess()),
     );
   }
 

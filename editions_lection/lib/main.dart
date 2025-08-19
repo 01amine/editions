@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/theme.dart';
 import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/screens/forgot_password_screen.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/signup_screen.dart';
 import 'features/home/domain/entities/material.dart';
@@ -92,6 +93,10 @@ class MyApp extends StatelessWidget {
             case '/notification':
               return MaterialPageRoute(
                 builder: (context) => const NotificationsScreen(),
+              );
+            case '/forgot_password':
+              return MaterialPageRoute(
+                builder: (context) => const ForgotPasswordScreen(),
               );
             default:
               return MaterialPageRoute(
