@@ -15,3 +15,4 @@ export default function Provider({ children }: ProviderProps) {
         </QueryClientProvider>
     )
 }
+

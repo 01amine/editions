@@ -1,160 +1,129 @@
 "use client"
 
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import AdminLayout from "@/components/layout/admin-layout"
-import LoginPage from "@/components/auth/login-page"
-import StatsCards from "@/components/dashboard/stats-cards"
-import RecentOrders from "@/components/dashboard/recent-orders"
-import { PieChartComponent, BarChartComponent, LineChartComponent } from "@/components/ui/chart"
-import { useIsAuthenticated } from "@/hooks/queries/useAuth"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Eye, EyeOff } from 'lucide-react'
+import Image from "next/image"
+import { uselogin } from "@/hooks/queries/useAuth"
+import { useRouter } from "next/navigation" 
 
-const mockStats = {
-  totalUsers: 1247,
-  totalMaterials: 89,
-  pendingOrders: 23,
-  todayAppointments: 8
-}
 
-const mockOrders = [
-  {
-    _id: "1",
-    student: { full_name: "Ahmed Benali", email: "ahmed@example.com" },
-    item: [
-      [{ title: "Anatomie Humaine", material_type: "Livre", price_dzd: 2500 }, 2],
-      [{ title: "Physiologie", material_type: "PDF", price_dzd: 1200 }, 1]
-    ],
-    status: "pending",
-    created_at: "2024-01-15T10:30:00Z",
-    appointment_date: null
-  },
-  {
-    _id: "2", 
-    student: { full_name: "Fatima Zohra", email: "fatima@example.com" },
-    item: [
-      [{ title: "Pharmacologie", material_type: "Livre", price_dzd: 3000 }, 1]
-    ],
-    status: "printing",
-    created_at: "2024-01-14T14:20:00Z",
-    appointment_date: null
-  },
-  {
-    _id: "3",
-    student: { full_name: "Yacine Meziani", email: "yacine@example.com" },
-    item: [
-      [{ title: "Cardiologie", material_type: "PDF", price_dzd: 1800 }, 1]
-    ],
-    status: "ready",
-    created_at: "2024-01-13T09:15:00Z",
-    appointment_date: null
-  },
-  {
-    _id: "4",
-    student: { full_name: "Amina Khelifi", email: "amina@example.com" },
-    item: [
-      [{ title: "Neurologie", material_type: "Livre", price_dzd: 3500 }, 1]
-    ],
-    status: "delivered",
-    created_at: "2024-01-12T16:45:00Z",
-    appointment_date: null
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const loginMutation = uselogin();
+  const router = useRouter()
+  const onLogin = () => {
+  router.push("/dashboard")
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    loginMutation.mutate(
+      {email,password},
+      {
+
+        onSuccess: () => {
+          setIsLoading(false)
+          onLogin()
+        },
+        onError: (error: any) => {
+          setIsLoading(false)
+          setError(error.response?.data?.message || "Une erreur s'est produite")
+        },
+        onSettled: () => {
+          setEmail("")
+          setPassword("")
+        }
+      }
+    )
+  
   }
-]
-
-const orderStatusData = [
-  { name: 'En attente', value: mockOrders.filter(o => o.status === 'pending').length },
-  { name: 'Impression', value: mockOrders.filter(o => o.status === 'printing').length },
-  { name: 'Prêt', value: mockOrders.filter(o => o.status === 'ready').length },
-  { name: 'Livré', value: mockOrders.filter(o => o.status === 'delivered').length },
-]
-
-const materialTypeData = [
-  { name: 'Livres', value: 45 },
-  { name: 'PDF', value: 32 },
-  { name: 'Polycopiés', value: 12 },
-]
-
-const monthlyOrdersData = [
-  { name: 'Jan', value: 65 },
-  { name: 'Fév', value: 78 },
-  { name: 'Mar', value: 90 },
-  { name: 'Avr', value: 81 },
-  { name: 'Mai', value: 95 },
-  { name: 'Juin', value: 87 },
-]
-
-const revenueData = [
-  { name: 'Jan', value: 125000 },
-  { name: 'Fév', value: 145000 },
-  { name: 'Mar', value: 165000 },
-  { name: 'Avr', value: 155000 },
-  { name: 'Mai', value: 175000 },
-  { name: 'Juin', value: 185000 },
-]
-
-export default function DashboardPage() {
-const { isAuthenticated, isLoading } = useIsAuthenticated();
-
-if (isLoading) {
-  return <div className="flex items-center justify-center h-screen">Chargement...</div>
-}
-if (!isAuthenticated) {
-  return <LoginPage onLogin={() => {}} />
-}
+  
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Tableau de bord</h2>
-        
-        {/* Stats Cards */}
-        <StatsCards stats={mockStats} />
-        
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Statut des commandes</CardTitle>
-              <CardDescription>Répartition des commandes par statut</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PieChartComponent data={orderStatusData} className="h-64" />
-            </CardContent>
-          </Card>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image 
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-f5LeSrdR2QWRhYoAV60ml8jY25FJNm.png" 
+              alt="Lectio Logo" 
+              width={150} 
+              height={50}
+              className="h-12 w-auto"
+            />
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            Administration Lectio
+          </CardTitle>
+          <CardDescription>
+            Connectez-vous à votre espace administrateur
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@lectio.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400" />
+                  )}
+                </Button>
+              </div>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Types de supports</CardTitle>
-              <CardDescription>Répartition des supports par type</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PieChartComponent data={materialTypeData} className="h-64" />
-            </CardContent>
-          </Card>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Évolution des commandes</CardTitle>
-              <CardDescription>Nombre de commandes par mois</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LineChartComponent data={monthlyOrdersData} className="h-64" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Chiffre d'affaires</CardTitle>
-              <CardDescription>Revenus mensuels en DZD</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BarChartComponent data={revenueData} className="h-64" />
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Recent Orders */}
-        <RecentOrders orders={mockOrders} />
-      </div>
-    </AdminLayout>
+            <Button 
+              type="submit" 
+              className="w-full bg-green-600 hover:bg-green-700" 
+              disabled={isLoading}
+            >
+              {isLoading ? "Connexion..." : "Se connecter"}
+            </Button>
+          </form>     
+        </CardContent>
+      </Card>
+    </div>
   )
 }

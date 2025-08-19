@@ -1,6 +1,6 @@
-import { deleteMaterialById, getMaterialById, getMaterials } from "@/lib/api/material";
+import { deleteMaterialById, editMaterialById, getMaterialById, getMaterials } from "@/lib/api/material";
 import { API_ENDPOINTS } from "@/lib/const/endpoint";
-import { MaterialsAdmin } from "@/lib/types/material";
+import { MaterialsAdmin,EditMaterialVars } from "@/lib/types/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useGetMaterials(limit: number = 10, skip: number = 0) {
@@ -29,7 +29,7 @@ export function useGetMaterials(limit: number = 10, skip: number = 0) {
   });
 }
 
-export async function useGetMaterialById(id:string){
+export  function useGetMaterialById(id:string){
     return useQuery<MaterialsAdmin>({
         queryKey: ["material", id],
         queryFn: () => getMaterialById(id),
@@ -52,3 +52,16 @@ export function useDeleteMaterial() {
   });
 }
 
+export function useEditMaterial() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void , Error, EditMaterialVars>({
+    mutationFn: ({ id, data }) => editMaterialById(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: (error) => {
+      console.error("Failed to delete material:", error);
+    },
+  });
+}

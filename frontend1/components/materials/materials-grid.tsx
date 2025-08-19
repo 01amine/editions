@@ -1,9 +1,12 @@
+"use client";
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Eye, Edit, Trash2 } from 'lucide-react'
 import Image from "next/image"
 import { MaterialsAdmin } from "@/lib/types/material"
+import { useDeleteMaterial } from "@/hooks/queries/useMaterial"
+import { useRouter } from "next/navigation"
 
 
 interface MaterialsGridProps {
@@ -11,16 +14,21 @@ interface MaterialsGridProps {
 }
 
 export default function MaterialsGrid({ materials }: MaterialsGridProps) {
-  const handleview = ()=>{
-    console.log("view")
+const router = useRouter()
+
+  const deleteMutation = useDeleteMaterial()
+
+  const handleEdit = (id: string)=>{
+      router.push(`/materials/${id}`)
+
   }
 
-  const handleEdit = ()=>{
-    console.log("edit")
-  }
+const handleview = (id: string) => {
+  router.push(`/materials/${id}`)
+}
 
-  const handleDelete = ()=>{
-    console.log("delete")
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id)
   }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
@@ -66,13 +74,13 @@ export default function MaterialsGrid({ materials }: MaterialsGridProps) {
               <span className="font-bold text-green-600">{material.price_dzd} DZD</span>
             </div>
             <div className="flex items-center justify-between mt-3 pt-3 border-t">
-              <Button variant="ghost" size="sm" onClick={handleview}>
+              <Button variant="ghost" size="sm" onClick={() => handleview(material.id)}>
                 <Eye className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleEdit}>
+              <Button variant="ghost" size="sm" onClick={() => handleEdit(material.id)}>
                 <Edit className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleDelete}>
+              <Button variant="ghost" size="sm" onClick={() => handleDelete(material.id)} disabled={deleteMutation.isPending}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>

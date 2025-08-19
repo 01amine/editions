@@ -8,7 +8,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Lectio - Administration",
   description: "Plateforme d'administration Lectio",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -19,7 +18,8 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={inter.className}>
-        <Provider>{children}
+        <Provider>
+          {children}
           </Provider>
         </body>
     </html>

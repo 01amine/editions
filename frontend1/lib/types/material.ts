@@ -14,3 +14,9 @@ export interface MaterialsAdmin extends Material {
   pdf_url: string;
   created_at: string;
 }
+
+
+export interface EditMaterialVars {
+  id: string;
+  data: MaterialsAdmin;
+}
