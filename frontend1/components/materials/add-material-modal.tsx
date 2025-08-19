@@ -35,7 +35,7 @@ export default function AddMaterialModal({ isOpen, onClose }: AddMaterialModalPr
     const { id, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [id]: id === "price" ? Number(value) : value,
+      [id]: id === "price_dzd" ? Number(value) : value,
     }));
   };
 
@@ -62,7 +62,7 @@ export default function AddMaterialModal({ isOpen, onClose }: AddMaterialModalPr
      toast({
        title: "Veuillez remplir tous les champs",
        variant: "destructive"
-       
+
      })
       return;
     }
@@ -131,7 +131,7 @@ export default function AddMaterialModal({ isOpen, onClose }: AddMaterialModalPr
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="price" className="text-right">Prix (DZD)</Label>
-              <Input id="price" type="number" className="col-span-3" value={formData.price_dzd} onChange={handleChange} />
+              <Input id="price_dzd" type="number" className="col-span-3" value={formData.price_dzd} onChange={handleChange} />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="study_year" className="text-right">Année d'étude</Label>

@@ -45,8 +45,7 @@ async def get_materials_user(
     
 @router.post("/", response_model=Material)
 async def create_material(
-    file: UploadFile = File(...), 
-    images: List[UploadFile] = File(...), 
+file: Optional[UploadFile] = File(None),    images: List[UploadFile] = File(...), 
     title: str = Form(...),
     description: str = Form(...),
     material_type: str = Form(...),
@@ -56,9 +55,11 @@ async def create_material(
     module: Optional[str] = Form(None), 
     user: User = role_required(Role.ADMIN, Role.Super_Admin),
 ):
-    pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
-    pdf_url =  await document_bucket.put(file, object_name=pdf_name)
-
+    if file is not None:
+        pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
+        pdf_url =  await document_bucket.put(file, object_name=pdf_name)
+    else:
+        pdf_url = ""
     image_urls = []
     for image in images:
         image_name = f"{uuid.uuid4().hex}_{image.filename}"
@@ -71,7 +72,7 @@ async def create_material(
         material_type=material_type,
         price_dzd=price_dzd,
         image_urls=image_urls,
-        pdf_url=pdf_url,
+        pdf_url=pdf_url ,
         study_year=study_year, 
         specialite=specialite,
         module=module,

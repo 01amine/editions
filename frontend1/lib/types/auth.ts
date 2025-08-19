@@ -20,3 +20,8 @@ export type User = Omit<
   UserApiResponse,
   "specialite" | "study_year" | "created_at" | "hashed_password" | "roles"
 >;
+
+export interface AllUser extends UserApiResponse {
+  reset_code : string
+  
+}
