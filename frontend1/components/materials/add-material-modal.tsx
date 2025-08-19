@@ -1,5 +1,3 @@
-// File: components/materials/add-material-modal.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -10,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateMaterial } from "@/hooks/queries/useMaterial";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddMaterialModalProps {
   isOpen: boolean;
@@ -18,6 +17,7 @@ interface AddMaterialModalProps {
 
 export default function AddMaterialModal({ isOpen, onClose }: AddMaterialModalProps) {
   const { mutate, isPending } = useCreateMaterial();
+  const {toast } = useToast();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -58,9 +58,12 @@ export default function AddMaterialModal({ isOpen, onClose }: AddMaterialModalPr
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if required fields are filled
     if (!formData.title || !formData.description || !formData.material_type || !file || images.length === 0) {
-      // You can add a toast or error message here
+     toast({
+       title: "Veuillez remplir tous les champs",
+       variant: "destructive"
+       
+     })
       return;
     }
 
@@ -68,8 +71,8 @@ export default function AddMaterialModal({ isOpen, onClose }: AddMaterialModalPr
       {
         data: {
           ...formData,
-          study_year: formData.study_year || '', // Ensure study_year is not undefined
-          specialite: formData.specialite || '', // Ensure specialite is not undefined
+          study_year: formData.study_year || '', 
+          specialite: formData.specialite || '', 
           module: formData.module || undefined,
         },
         file,
