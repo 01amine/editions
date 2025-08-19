@@ -20,3 +20,14 @@ export interface EditMaterialVars {
   id: string;
   data: MaterialsAdmin;
 }
+export type MaterialUpdateData = {
+  title?: string;
+  description?: string;
+  material_type?: string;
+  price_dzd?: number;
+  study_year?: string;
+  specialite?: string;
+  module?: string;
+  image_urls?: string[];
+  pdf_url?: string;
+};

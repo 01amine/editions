@@ -33,6 +33,21 @@ export  function useGetMaterialById(id:string){
     return useQuery<MaterialsAdmin>({
         queryKey: ["material", id],
         queryFn: () => getMaterialById(id),
+        select: (data) => {
+            const images =
+              data.image_urls.length > 0
+                ? data.image_urls.map(
+                    (file) =>
+                      `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.MATERIALS.GET_IMAGE(file)}`
+                  )
+                : ["/placeholder-lfrkp.png"]; 
+            return {
+              ...data,
+              id: (data as any)._id ?? data.id,
+              image_urls: images,
+              pdf_url: `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.MATERIALS.GET_FILE(data.pdf_url)}`,
+            };  
+        },
         staleTime: 1000 * 60 * 5,
         retry: false,
     })

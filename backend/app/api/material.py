@@ -206,46 +206,74 @@ async def update_material(
     year_study: Optional[str] = Form(None),
     specialite: Optional[str] = Form(None),
     module: Optional[str] = Form(None),
+    existing_image_urls: Optional[List[str]] = Form(None),
+    remove_pdf: Optional[bool] = Form(False),
+    
     user: User = role_required(Role.ADMIN, Role.Super_Admin),
 ):
- 
+    material_to_update = await materialService.get_material_by_id(material_id)
+    if not material_to_update:
+        raise HTTPException(status_code=404, detail="Material not found")
+        
     updates = {}
 
     if title is not None:
         updates["title"] = title
+    
     if description is not None:
         updates["description"] = description
+
     if material_type is not None:
         updates["material_type"] = material_type
+
     if price_dzd is not None:
         updates["price_dzd"] = price_dzd
+
     if year_study is not None:
         updates["study_year"] = year_study
+
     if specialite is not None:
         updates["specialite"] = specialite
+
     if module is not None:
         updates["module"] = module
 
-    if file:
+
+    if remove_pdf:
+        if material_to_update.pdf_url:
+            await document_bucket.delete(material_to_update.pdf_url)
+        updates["pdf_url"] = None
+    elif file:
+        # If a new PDF file is uploaded, delete the old one first
+        if material_to_update.pdf_url:
+            await document_bucket.delete_by_url(material_to_update.pdf_url)
         pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
         pdf_url = await document_bucket.put(file, object_name=pdf_name)
         updates["pdf_url"] = pdf_url
 
+    current_image_urls = material_to_update.image_urls or []
+    final_image_urls = []
+
+    if existing_image_urls is not None:
+        final_image_urls = existing_image_urls
+    
+    removed_images = set(current_image_urls) - set(final_image_urls)
+    for image_url in removed_images:
+        await image_bucket.delete(image_url)
+
     if images:
-        image_urls = []
         for image in images:
             image_name = f"{uuid.uuid4().hex}_{image.filename}"
             image_url = await image_bucket.put(image, object_name=image_name)
-            image_urls.append(image_url)
-        updates["image_urls"] = image_urls
+            final_image_urls.append(image_url)
 
+    updates["image_urls"] = final_image_urls
     material = await materialService.update_material(material_id, updates)
-
+    
     if not material:
-        raise HTTPException(status_code=404, detail="Material not found")
-
+        raise HTTPException(status_code=404, detail="Material not found after update")
+        
     return material
-
 
 @router.get("/{material_id}/user", response_model=materialUser)
 async def get_material_by_id_user(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):

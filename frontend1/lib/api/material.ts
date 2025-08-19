@@ -26,5 +26,5 @@ export async function deleteMaterialById(id : string): Promise<void> {
 }
 
 export async function editMaterialById(id : string, data : MaterialsAdmin): Promise<void> {
-    await client.put(API_ENDPOINTS.MATERIALS.BY_ID_ADMIN(id), data);
+    await client.patch(API_ENDPOINTS.MATERIALS.BY_ID(id), data);
 }
