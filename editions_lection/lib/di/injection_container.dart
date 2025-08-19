@@ -20,15 +20,20 @@ import '../features/auth/domain/usecases/reset_password.dart';
 import '../features/auth/domain/usecases/save_token.dart';
 import '../features/auth/domain/usecases/signup_user.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
+import '../features/home/data/datasource/notifications_remote_data_souce.dart';
 import '../features/home/data/datasource/remote_data.dart';
 import '../features/home/data/repositories/home_repository_impl.dart';
+import '../features/home/data/repositories/notifications_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
+import '../features/home/domain/repositories/notification_repository.dart';
 import '../features/home/domain/usecases/create_order.dart';
 import '../features/home/domain/usecases/get_books.dart';
+import '../features/home/domain/usecases/get_notifications.dart';
 import '../features/home/domain/usecases/get_orders.dart';
 import '../features/home/domain/usecases/get_polycopies.dart';
 import '../features/home/domain/usecases/search_materials.dart';
 import '../features/home/presentation/blocs/home_bloc/home_bloc.dart';
+import '../features/home/presentation/blocs/notifications/notification_bloc.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/domain/usecases/get_onboarding_seen.dart';
@@ -167,6 +172,25 @@ Future<void> init() async {
     () => HomeRemoteDataSourceImpl(
       client: sl<http.Client>(),
       baseUrl: EndPoints.baseUrl,
+    ),
+  );
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(
+      client: sl<http.Client>(),
+      baseUrl: EndPoints.baseUrl,
+    ),
+  );
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(
+      remoteDataSource: sl<NotificationRemoteDataSource>(),
+      networkInfo: sl<NetworkInfo>(),
+      localDataSource: sl<AuthLocalDataSource>(),
+    ),
+  );
+  sl.registerLazySingleton(() => GetNotificationsUseCase(sl<NotificationRepository>()));
+  sl.registerFactory<NotificationBloc>(
+    () => NotificationBloc(
+      getNotificationsUseCase: sl<GetNotificationsUseCase>(),
     ),
   );
 }

@@ -12,6 +12,7 @@ import '../../../../modules/module_service.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/material.dart';
 import '../blocs/commands_bloc/commands_bloc.dart';
+import '../blocs/notifications/notification_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ));
 
     _searchController = TextEditingController();
-
+    context.read<NotificationBloc>().add(StartNotificationPollingEvent());
     // Listen to search focus changes
     _searchFocusNode.addListener(() {
       setState(() {
@@ -151,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _contentAnimationController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    context.read<NotificationBloc>().add(StopNotificationPollingEvent());
     super.dispose();
   }
 
@@ -172,13 +174,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return 'Utilisateur';
   }
 
-  int _getNotificationCount() {
-    // TODO: Get actual notification count from NotificationBloc
-    return 3; // Placeholder value
-  }
-
   void _navigateToNotifications() {
-    Navigator.pushNamed(context, '/notifications');
+    Navigator.pushNamed(context, '/notification');
   }
 
   void _navigateToCommands() {
@@ -398,11 +395,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         Row(
           children: [
-            _buildAnimatedIconButtonWithBadge(
-              icon: Icons.notifications_outlined,
-              onPressed: _navigateToNotifications,
-              delay: const Duration(milliseconds: 600),
-              badgeCount: _getNotificationCount(),
+            BlocBuilder<NotificationBloc, NotificationState>(
+              builder: (context, state) {
+                int notificationCount = 0;
+                if (state is NotificationLoaded) {
+                  notificationCount = state.notifications.length;
+                }
+                return _buildAnimatedIconButtonWithBadge(
+                  icon: Icons.notifications_outlined,
+                  onPressed: _navigateToNotifications,
+                  delay: const Duration(milliseconds: 600),
+                  badgeCount: notificationCount, // Use the real count
+                );
+              },
             ),
             SizedBox(width: context.width * 0.02),
             BlocBuilder<CommandsBloc, CommandsState>(
