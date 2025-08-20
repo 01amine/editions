@@ -366,6 +366,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Profile Avatar Button
+        GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/profile'),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.primaryColor,
+              border: Border.all(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: _buildDefaultAvatar(user),
+          ),
+        ),
+        SizedBox(width: context.width * 0.03),
+        // User Info Section
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,6 +412,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ),
+        // Action Buttons
         Row(
           children: [
             BlocBuilder<NotificationBloc, NotificationState>(
@@ -405,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   icon: Icons.notifications_outlined,
                   onPressed: _navigateToNotifications,
                   delay: const Duration(milliseconds: 600),
-                  badgeCount: notificationCount, // Use the real count
+                  badgeCount: notificationCount,
                 );
               },
             ),
@@ -427,6 +447,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildDefaultAvatar(User? user) {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryColor,
+            AppTheme.secondaryColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child:
+            Icon(Icons.person_outline_rounded, size: 24, color: Colors.white),
+      ),
     );
   }
 
