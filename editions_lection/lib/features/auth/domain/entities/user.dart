@@ -7,6 +7,7 @@ class User extends Equatable {
   final String phoneNumber;
   final String studyYear;
   final String specialite;
+  final String area;
 
   const User(
       {required this.id,
@@ -14,7 +15,8 @@ class User extends Equatable {
       required this.fullName,
       required this.phoneNumber,
       required this.studyYear,
-      required this.specialite});
+      required this.specialite,
+      required this.area});
 
   @override
   List<Object?> get props => [
@@ -24,5 +26,6 @@ class User extends Equatable {
         phoneNumber,
         studyYear,
         specialite,
+        area,
       ];
 }

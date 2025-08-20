@@ -42,6 +42,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String studyYear,
     required String specialite,
+    required String area,
   }) async {
     final response = await client.post(
       Uri.parse('$baseUrl/users/register'),
@@ -53,6 +54,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'password': password,
         'study_year': studyYear,
         'specialite': specialite,
+        'area': area,
       }),
     );
 

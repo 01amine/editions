@@ -45,6 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String studyYear,
     required String specialite,
+    required String area,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -55,6 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
           password: password,
           studyYear: studyYear,
           specialite: specialite,
+          area: area,
         );
         return Right(authResponse);
       } on ServerException catch (e) {

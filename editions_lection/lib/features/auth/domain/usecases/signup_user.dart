@@ -20,6 +20,7 @@ class SignupUser implements UseCase<AuthResponse, SignupParams> {
       password: params.password,
       studyYear: params.studyYear,
       specialite: params.specialite,
+      area: params.area,
     );
   }
 }
@@ -31,6 +32,7 @@ class SignupParams extends Equatable {
   final String password;
   final String studyYear;
   final String specialite;
+  final String area;
 
   const SignupParams({
     required this.fullName,
@@ -39,8 +41,10 @@ class SignupParams extends Equatable {
     required this.password,
     required this.studyYear,
     required this.specialite,
+    required this.area,
   });
 
   @override
-  List<Object> get props => [fullName, phoneNumber, email, password];
+  List<Object> get props =>
+      [fullName, phoneNumber, email, password, studyYear, specialite, area];
 }

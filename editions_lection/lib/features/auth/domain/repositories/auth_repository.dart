@@ -13,6 +13,7 @@ abstract class AuthRepository {
     required String password,
     required String studyYear,
     required String specialite,
+    required String area,
   });
   Future<Either<Failure, void>> saveToken(String token);
   Future<Either<Failure, String?>> getToken();

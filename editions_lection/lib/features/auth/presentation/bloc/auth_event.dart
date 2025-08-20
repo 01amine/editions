@@ -29,6 +29,7 @@ class SignupRequested extends AuthEvent {
   final String password;
   final String studyYear;
   final String specialite;
+  final String area;
 
   const SignupRequested({
     required this.fullName,
@@ -37,6 +38,7 @@ class SignupRequested extends AuthEvent {
     required this.password,
     required this.studyYear,
     required this.specialite,
+    required this.area,
   });
 
   @override

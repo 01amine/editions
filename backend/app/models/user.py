@@ -22,6 +22,7 @@ class User(Document):
     roles: List[Role] = Field(default_factory=lambda: [Role.USER])    
     reset_code: Optional[str] = None
     reset_code_expires: Optional[datetime] = None
+    area: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -32,6 +33,7 @@ class UserCreate(BaseModel):
     password: str
     study_year: Optional[str] = None
     specialite: Optional[str] = None
+    area: str
     
     
 class UserLogin(BaseModel):

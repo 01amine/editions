@@ -11,6 +11,7 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String studyYear,
     required String specialite,
+    required String area,
   });
   Future<UserModel> getCurrentUser(String token);
   Future<void> forgetPassword({required String email});

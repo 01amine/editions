@@ -4,6 +4,7 @@ import 'package:editions_lection/core/extensions/extensions.dart';
 
 import '../../../../core/constants/images.dart';
 import '../../../../core/theme/theme.dart';
+import '../../domain/entities/area.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/text_field.dart';
 
@@ -26,9 +27,8 @@ class _SignupScreenState extends State<SignupScreen>
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _studyYearController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  // Dropdown for speciality
   Speciality? _selectedSpeciality;
+  Area? _selectedArea;
 
   // Error messages
   String? _fullNameError;
@@ -37,6 +37,7 @@ class _SignupScreenState extends State<SignupScreen>
   String? _passwordError;
   String? _studyYearError;
   String? _specialityError;
+  String? _areaError;
 
   // Animation controllers
   late AnimationController _fadeController;
@@ -126,6 +127,22 @@ class _SignupScreenState extends State<SignupScreen>
     }
   }
 
+  String _getAreaDisplayName(Area area) {
+    // Add this new function
+    switch (area) {
+      case Area.Alger:
+        return 'Alger';
+      case Area.Tipaza:
+        return 'Tipaza';
+      case Area.Tiziouzou:
+        return 'Tizi Ouzou';
+      case Area.Oran:
+        return 'Oran';
+      case Area.SidiBelAbbes:
+        return 'Sidi Bel Abbès';
+    }
+  }
+
   // Validation function
   bool _validateForm() {
     setState(() {
@@ -135,6 +152,7 @@ class _SignupScreenState extends State<SignupScreen>
       _passwordError = null;
       _studyYearError = null;
       _specialityError = null;
+      _areaError = null;
     });
 
     bool isValid = true;
@@ -211,6 +229,13 @@ class _SignupScreenState extends State<SignupScreen>
       });
       isValid = false;
     }
+    // Area validation
+    if (_selectedArea == null) {
+      setState(() {
+        _areaError = "La zone géographique est requise";
+      });
+      isValid = false;
+    }
 
     return isValid;
   }
@@ -225,6 +250,7 @@ class _SignupScreenState extends State<SignupScreen>
               password: _passwordController.text.trim(),
               studyYear: _studyYearController.text.trim(),
               specialite: _selectedSpeciality.toString().split('.').last,
+              area: _selectedArea.toString().split('.').last,
             ),
           );
     }
@@ -442,6 +468,9 @@ class _SignupScreenState extends State<SignupScreen>
             _buildSpecialityDropdown(context, theme, isTablet),
 
             SizedBox(height: context.height * 0.025),
+            _buildAreaDropdown(context, theme, isTablet),
+
+            SizedBox(height: context.height * 0.025),
 
             // Terms and conditions
             _buildTermsSection(context, theme, isTablet),
@@ -622,6 +651,119 @@ class _SignupScreenState extends State<SignupScreen>
             padding: const EdgeInsets.only(left: 16),
             child: Text(
               _specialityError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.errorColor,
+                fontSize: isTablet ? 13 : 12,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildAreaDropdown(
+      BuildContext context, ThemeData theme, bool isTablet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                size: isTablet ? 20 : 18,
+                color: AppTheme.primaryColor,
+              ),
+              SizedBox(width: 8),
+              Text(
+                "Zone géographique",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.primaryTextColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: isTablet ? 16 : 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: _areaError != null
+                    ? AppTheme.errorColor.withOpacity(0.1)
+                    : AppTheme.primaryColor.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _areaError != null ? AppTheme.errorColor : Colors.black,
+                width: _areaError != null ? 1.5 : 1,
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<Area>(
+                value: _selectedArea,
+                hint: Text(
+                  "Sélectionnez votre zone géographique...",
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.secondaryTextColor,
+                    fontSize: isTablet ? 16 : 14,
+                  ),
+                ),
+                isExpanded: true,
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppTheme.primaryColor,
+                  size: isTablet ? 24 : 20,
+                ),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.primaryTextColor,
+                  fontSize: isTablet ? 16 : 14,
+                ),
+                dropdownColor: Colors.white,
+                items: Area.values.map((Area area) {
+                  return DropdownMenuItem<Area>(
+                    value: area,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        _getAreaDisplayName(area),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.primaryTextColor,
+                          fontSize: isTablet ? 16 : 14,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (Area? newValue) {
+                  setState(() {
+                    _selectedArea = newValue;
+                    _areaError = null;
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+        if (_areaError != null) ...[
+          SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Text(
+              _areaError!,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: AppTheme.errorColor,
                 fontSize: isTablet ? 13 : 12,
