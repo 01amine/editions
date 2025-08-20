@@ -8,6 +8,7 @@ import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/screens/forgot_password_screen.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/profile_screen.dart';
 import 'features/auth/presentation/screens/signup_screen.dart';
 import 'features/home/domain/entities/material.dart';
 import 'features/home/presentation/blocs/commands_bloc/commands_bloc.dart';
@@ -101,6 +102,10 @@ class MyApp extends StatelessWidget {
             case '/forgot_password':
               return MaterialPageRoute(
                 builder: (context) => const ForgotPasswordScreen(),
+              );
+            case '/profile':
+              return MaterialPageRoute(
+                builder: (context) => const ProfileScreen(),
               );
             default:
               return MaterialPageRoute(
