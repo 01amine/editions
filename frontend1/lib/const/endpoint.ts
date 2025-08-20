@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
     ME: '/users/me',
     GET_USER : (userId: string) => `/users/get-user/${userId}`,
     ALL_STUDENTS: '/users/all-students',
+    ALL_USERS: '/users/all-users',
   },
   APPOINTMENTS: {
     ROOT: '/appointements/',

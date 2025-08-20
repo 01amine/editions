@@ -4,19 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Eye } from 'lucide-react'
+import { AllUser, User } from "@/lib/types/auth"
 
-interface User {
-  _id: string
-  full_name: string
-  email: string
-  phone_number: string
-  roles: string[]
-  isblocked: boolean
-  created_at: string
-}
 
 interface UsersTableProps {
-  users: User[]
+  users: AllUser[]
 }
 
 export default function UsersTable({ users }: UsersTableProps) {

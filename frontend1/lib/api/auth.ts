@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../const/endpoint";
-import { authRegsiter, User, UserApiResponse } from "../types/auth";
+import { AllUser, authRegsiter, User, UserApiResponse } from "../types/auth";
 import client from "../api/clients";
 
 export async function login(payload :authRegsiter): Promise<void> {
@@ -32,4 +32,22 @@ export async function getStudents(skip: number = 0, limit: number = 10): Promise
         throw new Error("No students found");
     }
     return data;
+}
+
+export async function getAllUsers(skip: number = 0, limit: number = 10): Promise<AllUser[]> {
+    try{
+    const { data } = await client.get<AllUser[]>(API_ENDPOINTS.AUTH.ALL_USERS, {
+        params: { skip, limit },
+    });
+    if (!data) {
+        throw new Error("No users found");
+    }
+    return data;
+}catch(e){
+    if (e.response?.status === 403) {
+        throw new Error("Unauthorized")
+    }
+    throw e
+}
+
 }

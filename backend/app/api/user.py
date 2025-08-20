@@ -28,6 +28,7 @@ async def add_user(user: UserCreate):
     return {"message": "User added successfully"}
 
 
+
 @router.post("/register")
 async def register_user(data: UserCreate):
     if await User.find_one({"email": data.email}):
@@ -94,28 +95,41 @@ async def logout_user():
 
 
 @router.post("/add-admin/{user_id}")
-async def add_admin(user: User = role_required(Role.Super_Admin), user_id: str = None):
-    user = await User.find_one({"_id": user_id})
+async def add_admin(
+     user_id: str,
+    user: User = role_required(Role.Super_Admin) 
+    ):
+    print (user_id)
+
+    user = await User.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    user.role = Role.ADMIN
+    user.roles.append(Role.ADMIN.value)
     await user.save()
     return user
 
+@router.delete("/{user_id}")
+async def delete_user(user_id: str):
+
+    user = await User.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    await user.delete()
+    return {"message": "User deleted successfully"}
 
 @router.delete("/remove-admin/{user_id}")
 async def remove_admin(user: User = role_required(Role.Super_Admin), user_id: str = None):
-    user = await User.find_one({"_id": user_id})
+    user = await User.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    user.role = Role.USER
+    user.roles.remove(Role.ADMIN.value)
     await user.save()
     return user
 
 
 @router.post("/block/{user_id}")
 async def block_user(user: User = role_required(Role.Super_Admin), user_id: str = None):
-    user = await User.find_one({"_id": user_id})
+    user = await User.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.isblocked = True
@@ -125,7 +139,7 @@ async def block_user(user: User = role_required(Role.Super_Admin), user_id: str 
 
 @router.put("/unblock/{user_id}")
 async def unblock_user(user: User = role_required(Role.Super_Admin), user_id: str = None):
-    user = await User.find_one({"_id": user_id})
+    user = await User.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.isblocked = False
@@ -134,7 +148,7 @@ async def unblock_user(user: User = role_required(Role.Super_Admin), user_id: st
 
 
 @router.get("/all-users", response_model=List[User])
-async def get_all_users_paginated(user: User = role_required(Role.Super_Admin,Role.ADMIN),
+async def get_all_users_paginated(user: User = role_required(Role.Super_Admin),
                                   skip: int = 0, limit: int = 10):
     return await User.find().skip(skip).limit(limit).to_list()
 

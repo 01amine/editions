@@ -19,7 +19,7 @@ class User(Document):
     phone_number: Optional[str]
     study_year: Optional[str] = None
     specialite: Optional[str] = None
-    roles: List[Role] = [Role.USER]
+    roles: List[Role] = Field(default_factory=lambda: [Role.USER])    
     reset_code: Optional[str] = None
     reset_code_expires: Optional[datetime] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

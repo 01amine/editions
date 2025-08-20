@@ -1,7 +1,6 @@
-import { get_me, getStudents, getUserbyId, login, logout } from "@/lib/api/auth";
-import { authRegsiter, User } from "@/lib/types/auth";
+import { get_me, getAllUsers, getStudents, getUserbyId, login, logout } from "@/lib/api/auth";
+import { AllUser, authRegsiter, User } from "@/lib/types/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { sk } from "date-fns/locale";
 
 
 export function useCurrentUser(){
@@ -63,4 +62,14 @@ export function useGetStudents(skip = 0, limit = 10) {
         retry: false,
         refetchOnWindowFocus: false,
     });
+}
+
+export function useGetAllUsers(skip = 0, limit = 10) {
+  return useQuery<AllUser[], Error>({
+    queryKey: ['users', skip, limit],
+    queryFn: () => getAllUsers(skip, limit),
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 }

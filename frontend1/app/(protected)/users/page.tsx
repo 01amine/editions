@@ -1,37 +1,55 @@
-"use client"
+"use client";
 
-import AdminLayout from "@/components/layout/admin-layout"
-import UsersHeader from "@/components/users/users-header"
-import UsersTable from "@/components/users/users-table"
-
-const mockUsers = [
-  {
-    _id: "1",
-    full_name: "Ahmed Benali",
-    email: "ahmed@example.com",
-    phone_number: "+213555123456",
-    roles: ["user"],
-    isblocked: false,
-    created_at: "2024-01-01T10:00:00Z"
-  },
-  {
-    _id: "2",
-    full_name: "Dr. Sarah Admin",
-    email: "sarah@lectio.com",
-    phone_number: "+213555987654",
-    roles: ["admin"],
-    isblocked: false,
-    created_at: "2024-01-01T10:00:00Z"
-  }
-]
+import { Forbidden } from "@/components/errors/403";
+import AdminLayout from "@/components/layout/admin-layout";
+import UsersHeader from "@/components/users/users-header";
+import UsersTable from "@/components/users/users-table";
+import { useGetAllUsers } from "@/hooks/queries/useAuth";
+import { useState } from "react";
 
 export default function UsersPage() {
+  const skip = 0;
+  const limit = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const { data, isLoading, isError, error } = useGetAllUsers(skip, limit);
+
+  if (isError) {
+    if (error.response?.status === 403) {
+      return (
+        <div>
+          <Forbidden />
+        </div>
+      );
+    }
+  }
+
+  const onExport = () => {
+    console.log("Exporting users...");
+  };
+
+  const onRefresh = () => {
+    console.log("Refreshing users...");
+  };
+
   return (
     <AdminLayout>
+
       <div className="space-y-6">
-        <UsersHeader />
-        <UsersTable users={mockUsers} />
+        <UsersHeader
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          roleFilter={roleFilter}
+          setRoleFilter={setRoleFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          onRefresh={onRefresh}
+          onExport={onExport}
+        />
+        <UsersTable users={data ?? []} />
       </div>
     </AdminLayout>
-  )
+  );
 }
