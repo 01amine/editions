@@ -5,6 +5,7 @@ import AdminLayout from "@/components/layout/admin-layout";
 import UsersHeader from "@/components/users/users-header";
 import UsersTable from "@/components/users/users-table";
 import { useGetAllUsers } from "@/hooks/queries/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 export default function UsersPage() {
@@ -13,11 +14,14 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { toast } = useToast();
 
-  const { data, isLoading, isError, error } = useGetAllUsers(skip, limit);
+  const { data, isLoading, isError, error , refetch} = useGetAllUsers(skip, limit);
 
   if (isError) {
-    if (error.response?.status === 403) {
+  console.log(error)
+    
+    if (error.message === "Insufficient permissions") {
       return (
         <div>
           <Forbidden />
@@ -31,7 +35,11 @@ export default function UsersPage() {
   };
 
   const onRefresh = () => {
-    console.log("Refreshing users...");
+    refetch()
+    toast({
+      title: "Utilisateurs mis à jour",
+      description: "Les utilisateurs ont bien été mis à jour.",
+    })
   };
 
   return (

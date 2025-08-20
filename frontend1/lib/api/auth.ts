@@ -35,7 +35,6 @@ export async function getStudents(skip: number = 0, limit: number = 10): Promise
 }
 
 export async function getAllUsers(skip: number = 0, limit: number = 10): Promise<AllUser[]> {
-    try{
     const { data } = await client.get<AllUser[]>(API_ENDPOINTS.AUTH.ALL_USERS, {
         params: { skip, limit },
     });
@@ -43,11 +42,5 @@ export async function getAllUsers(skip: number = 0, limit: number = 10): Promise
         throw new Error("No users found");
     }
     return data;
-}catch(e){
-    if (e.response?.status === 403) {
-        throw new Error("Unauthorized")
-    }
-    throw e
 }
 
-}
