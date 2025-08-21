@@ -98,7 +98,9 @@ async def logout_user():
 
 @router.post("/add-admin/{user_id}")
 async def add_admin(
+     placement : str,
      user_id: str,
+     
     user: User = role_required(Role.Super_Admin) 
     ):
     print (user_id)
@@ -107,6 +109,7 @@ async def add_admin(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.roles.append(Role.ADMIN.value)
+    user.era = placement
     await user.save()
     return user
 
