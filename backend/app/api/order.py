@@ -36,7 +36,7 @@ async def get_admin_orders(user: User = role_required(Role.ADMIN, Role.Super_Adm
     for order in orders:
         user = await order.student.fetch()
         if user.era == area:
-            ReturnOrders.append(serialize_order_F(order))
+            ReturnOrders.append(serialize_order_F(order, user))
         else :
             continue
     return ReturnOrders

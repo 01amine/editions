@@ -69,12 +69,12 @@ def serialize_order(order: Order):#wrong one i jsut dont know if amine use it
     }
     
     
-def serialize_order_F(order: Order):
+def serialize_order_F(order: Order, user: User = None):
     return {
         "_id": str(order.id),
         "student": {
-            "full_name": order.student.full_name,
-            "email": order.student.email,
+            "full_name": user.full_name if user else None,
+            "email": user.email if user else None,
         },
         "item": [
             (
