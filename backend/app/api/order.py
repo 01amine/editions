@@ -23,10 +23,10 @@ async def get_my_orders(user: User = role_required(Role.USER, Role.ADMIN, Role.S
     orders= await orderService.get_orders_by_student(str(user.id))
     return [serialize_order(order) for order in orders]
 
-@router.get("/all", response_model=List[orderResponse])
-async def get_all_orders(user: User = role_required(Role.ADMIN, Role.Super_Admin)):
-    orders= await orderService.get_all_orders()
-    return [serialize_order(order) for order in orders]
+# @router.get("/all", response_model=List[orderResponse])
+# async def get_all_orders(user: User = role_required(Role.ADMIN, Role.Super_Admin)):
+#     orders= await orderService.get_all_orders()
+#     return [serialize_order(order) for order in orders]
 
 @router.get("/get_admin_orders")
 async def get_admin_orders(user: User = role_required(Role.ADMIN, Role.Super_Admin)):

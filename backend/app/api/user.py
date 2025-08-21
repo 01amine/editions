@@ -19,15 +19,18 @@ router = APIRouter( prefix="/users", tags=["Users"])
 
 @router.post("/")
 async def add_user(user: UserCreate):
-    userpay = User(
-        email=user.email,
-        hashed_password=hash_password(user.password),
-        full_name=user.full_name,
-        phone_number=user.phone_number,
-        era=user.era
-    )
-    await userpay.insert()
-    return {"message": "User added successfully"}
+    try :
+        userpay = User(
+            email=user.email,
+            hashed_password=hash_password(user.password),
+            full_name=user.full_name,
+            phone_number=user.phone_number,
+            era=user.era
+        )
+        await userpay.insert()
+        return {"message": "User added successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
@@ -115,6 +118,7 @@ async def add_admin(
     user.era = placement.placement
     await user.save()
     return user
+
 
 @router.delete("/{user_id}")
 async def delete_user(user_id: str):
