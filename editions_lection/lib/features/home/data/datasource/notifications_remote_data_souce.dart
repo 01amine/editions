@@ -14,7 +14,8 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   final http.Client client;
   final String baseUrl;
 
-  NotificationRemoteDataSourceImpl({required this.client, required this.baseUrl});
+  NotificationRemoteDataSourceImpl(
+      {required this.client, required this.baseUrl});
 
   @override
   Future<List<NotificationModel>> getNotifications(String token) async {
@@ -25,7 +26,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
         'Authorization': 'Bearer $token',
       },
     );
-
+    print('Response status: ${response.body}');
     if (response.statusCode == 200) {
       final notifications = (json.decode(response.body) as List)
           .map((e) => NotificationModel.fromJson(e))
