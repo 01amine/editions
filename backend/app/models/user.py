@@ -52,3 +52,13 @@ class ResetPasswordRequest(BaseModel):
 class VerifyCodeRequest(BaseModel):
     email: str
     code: str
+    
+    
+class UserUpdate(BaseModel):
+    email : str|None = None
+    full_name: str|None = None
+    phone_number: str|None = None
+    password: str|None = None
+    study_year: Optional[str] = None
+    specialite: Optional[str] = None
+    era: str|None = None

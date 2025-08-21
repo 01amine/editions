@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, BackgroundTasks
 from fastapi import APIRouter, HTTPException, Depends
-from app.models.user import ResetPasswordRequest, Role, UserCreate, UserLogin, VerifyCodeRequest
+from app.models.user import ResetPasswordRequest, Role, UserCreate, UserLogin, UserUpdate, VerifyCodeRequest
 from app.services.auth import authenticate_user, create_access_token, get_reset_token, hash_password, verify_reset_token
 from app.models.user import User
 from app.deps.auth import get_current_user
@@ -234,3 +234,22 @@ async def get_user(user_id:str, current_user:User = role_required(Role.Super_Adm
     return user
 
     
+@router.patch("/update-user/{user_id}", response_model=User)
+async def update_user(user_id: str, data: UserUpdate, current_user: User = role_required(Role.Super_Admin, Role.ADMIN, Role.USER)):
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    user = await User.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if data.full_name:
+        user.full_name = data.full_name
+    if data.phone_number:
+        user.phone_number = data.phone_number
+    if data.study_year:
+        user.study_year = data.study_year
+    if data.specialite:
+        user.specialite = data.specialite
+    if data.era:
+        user.era = data.era
+    await user.save()
+    return user
