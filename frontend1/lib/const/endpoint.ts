@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   },
   ORDERS: {
     ROOT: '/orders',
+    GET_ADMIN_ORDERS: "orders/get_admin_orders",
   
     BY_ID: (id: string) => `/orders/${id}`,
   },

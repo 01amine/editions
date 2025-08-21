@@ -27,13 +27,11 @@ export default function UsersPage() {
     }
   }
 
-  // 🔹 Apply search, filters, and ordering client-side
   const filteredUsers = useMemo(() => {
     if (!data) return [];
 
     return data
       .filter((user) => {
-        // search by name or email
         const term = searchTerm.toLowerCase();
         const matchesSearch =
           user.full_name.toLowerCase().includes(term) ||
@@ -45,8 +43,7 @@ export default function UsersPage() {
           (roleFilter === "student" && !user.roles.includes("admin"));
 
         const matchesStatus =
-          statusFilter === "all" || statusFilter === user.status; // assuming user.status exists
-
+          statusFilter === "all" || statusFilter === user.status;//TODO: fix here ix th ebug
         return matchesSearch && matchesRole && matchesStatus;
       })
       .sort((a, b) => {

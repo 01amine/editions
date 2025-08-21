@@ -2,7 +2,7 @@ from fastapi import APIRouter,  HTTPException, Body
 from typing import List, Optional
 from datetime import datetime
 from app.services.Order import orderService
-from app.models.order import Order, OrderCreate, OrderStatus, orderResponse, serialize_order
+from app.models.order import Order, OrderCreate, OrderStatus, orderResponse, serialize_order, serialize_order_F
 from app.models.user import User, Role
 from app.deps.auth import role_required
 
@@ -28,15 +28,15 @@ async def get_all_orders(user: User = role_required(Role.ADMIN, Role.Super_Admin
     orders= await orderService.get_all_orders()
     return [serialize_order(order) for order in orders]
 
-@router.get("/get_admin_orders",response_model=List[orderResponse])
+@router.get("/get_admin_orders")
 async def get_admin_orders(user: User = role_required(Role.ADMIN, Role.Super_Admin)):
     area: str = user.era
-    ReturnOrders = List[orderResponse]
+    ReturnOrders = []
     orders= await orderService.get_all_orders()
     for order in orders:
-        user = order.student
+        user = await order.student.fetch()
         if user.era == area:
-            ReturnOrders.append(serialize_order(order))
+            ReturnOrders.append(serialize_order_F(order))
         else :
             continue
     return ReturnOrders

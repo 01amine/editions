@@ -47,7 +47,7 @@ class orderResponse(BaseModel):
     }
     
 
-def serialize_order(order: Order):
+def serialize_order(order: Order):#wrong one i jsut dont know if amine use it 
     return {
         "id": str(order.id),
         "appointment_date": order.appointment_date,
@@ -66,4 +66,28 @@ def serialize_order(order: Order):
             )
             for material, qty in order.item
         ],
+    }
+    
+    
+def serialize_order_F(order: Order):
+    return {
+        "_id": str(order.id),
+        "student": {
+            "full_name": order.student.full_name,
+            "email": order.student.email,
+        },
+        "item": [
+            (
+                {
+                    "title": material.title,
+                    "material_type": material.material_type,
+                    "price_dzd": material.price_dzd,
+                },
+                qty,
+            )
+            for material, qty in order.item
+        ],
+        "status": order.status,
+        "created_at": order.created_at.isoformat(),
+        "appointment_date": order.appointment_date.isoformat() if order.appointment_date else None,
     }

@@ -6,58 +6,21 @@ import OrdersTable from "@/components/orders/orders-table"
 import OrdersHeader from "@/components/orders/orders-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChartComponent, BarChartComponent } from "@/components/ui/chart"
+import { useOrdersForAdmin } from "@/hooks/queries/useorder"
+import { ref } from "process"
+import { useToast } from "@/hooks/use-toast"
 
-const mockOrders = [
-  {
-    _id: "1",
-    student: { full_name: "Ahmed Benali", email: "ahmed@example.com" },
-    item: [
-      [{ title: "Anatomie Humaine", material_type: "Livre", price_dzd: 2500 }, 2],
-      [{ title: "Physiologie", material_type: "PDF", price_dzd: 1200 }, 1]
-    ],
-    status: "pending",
-    created_at: "2024-01-15T10:30:00Z",
-    appointment_date: null
-  },
-  {
-    _id: "2", 
-    student: { full_name: "Fatima Zohra", email: "fatima@example.com" },
-    item: [
-      [{ title: "Pharmacologie", material_type: "Livre", price_dzd: 3000 }, 1]
-    ],
-    status: "printing",
-    created_at: "2024-01-14T14:20:00Z",
-    appointment_date: null
-  },
-  {
-    _id: "3",
-    student: { full_name: "Yacine Meziani", email: "yacine@example.com" },
-    item: [
-      [{ title: "Cardiologie", material_type: "PDF", price_dzd: 1800 }, 1]
-    ],
-    status: "ready",
-    created_at: "2024-01-13T09:15:00Z",
-    appointment_date: null
-  },
-  {
-    _id: "4",
-    student: { full_name: "Amina Khelifi", email: "amina@example.com" },
-    item: [
-      [{ title: "Neurologie", material_type: "Livre", price_dzd: 3500 }, 1]
-    ],
-    status: "delivered",
-    created_at: "2024-01-12T16:45:00Z",
-    appointment_date: null
-  }
-]
+
 
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [dateRange, setDateRange] = useState<any>(undefined)
+  const {data:mockOrders , isError,isLoading,refetch} = useOrdersForAdmin()
+  const { toast } = useToast();
 
-  // Filter and search logic
   const filteredOrders = useMemo(() => {
+    if (!mockOrders) return []
     return mockOrders.filter(order => {
       const matchesSearch = 
         order.student.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,7 +38,6 @@ export default function OrdersPage() {
     })
   }, [searchTerm, statusFilter, dateRange])
 
-  // Chart data
   const statusData = [
     { name: 'En attente', value: filteredOrders.filter(o => o.status === 'pending').length },
     { name: 'Impression', value: filteredOrders.filter(o => o.status === 'printing').length },
@@ -94,12 +56,11 @@ export default function OrdersPage() {
   ]
 
   const handleRefresh = () => {
-    // Implement refresh logic
+    refetch()
     console.log("Refreshing orders...")
   }
 
   const handleExport = () => {
-    // Implement export logic
     console.log("Exporting orders...")
   }
 
@@ -117,7 +78,6 @@ export default function OrdersPage() {
           onExport={handleExport}
         />
         
-        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>

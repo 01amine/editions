@@ -15,3 +15,23 @@ export enum OrderStatus {
     READY = "ready",
     DELIVERED = "delivered"
 }
+
+
+export interface AdmindOrder {
+  _id: string
+  student: {
+    full_name: string
+    email: string
+  }
+  item: [
+    {
+      title: string
+      material_type: string
+      price_dzd: number
+    },
+    number 
+  ][]
+  status: "pending" | "printing" | "ready" | "delivered" 
+  created_at: string
+  appointment_date: string | null 
+}
