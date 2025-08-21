@@ -1,4 +1,5 @@
-import { get_me, getAllUsers, getStudents, getUserbyId, login, logout } from "@/lib/api/auth";
+
+import { addAdmin, get_me, getAllUsers, getStudents, getUserbyId, login, logout } from "@/lib/api/auth";
 import { AllUser, authRegsiter, User } from "@/lib/types/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -72,4 +73,16 @@ export function useGetAllUsers(skip = 0, limit = 10) {
     retry: false,
     refetchOnWindowFocus: false,
   });
+}
+
+export function useAddAdmin() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: ({ userId, area }: { userId: string; area: string }) =>
+      addAdmin(userId, area),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+  })
 }

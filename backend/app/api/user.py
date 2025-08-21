@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, BackgroundTasks
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from app.models.user import ResetPasswordRequest, Role, UserCreate, UserLogin, UserUpdate, VerifyCodeRequest
 from app.services.auth import authenticate_user, create_access_token, get_reset_token, hash_password, verify_reset_token
 from app.models.user import User
@@ -95,11 +96,13 @@ async def logout_user():
     )
     return response
 
-
+class PlacementRequest(BaseModel):
+    placement: str
 @router.post("/add-admin/{user_id}")
 async def add_admin(
-     placement : str,
      user_id: str,
+     placement : PlacementRequest,
+
      
     user: User = role_required(Role.Super_Admin) 
     ):
@@ -109,7 +112,7 @@ async def add_admin(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.roles.append(Role.ADMIN.value)
-    user.era = placement
+    user.era = placement.placement
     await user.save()
     return user
 

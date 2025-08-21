@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../const/endpoint";
-import { AllUser, authRegsiter, User, UserApiResponse } from "../types/auth";
+import { AddAdmin, AllUser, authRegsiter, User, UserApiResponse } from "../types/auth";
 import client from "../api/clients";
 
 export async function login(payload :authRegsiter): Promise<void> {
@@ -44,3 +44,8 @@ export async function getAllUsers(skip: number = 0, limit: number = 10): Promise
     return data;
 }
 
+export async function addAdmin(userId: string, area :string): Promise<void> {
+await client.post(API_ENDPOINTS.AUTH.ADD_ADMIN(userId), {
+  placement: area,
+})
+}

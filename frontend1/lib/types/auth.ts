@@ -25,3 +25,6 @@ export interface AllUser extends UserApiResponse {
   reset_code : string
   
 }
+export interface AddAdmin{
+  era:string
+}
