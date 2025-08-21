@@ -18,6 +18,7 @@ export default function OrdersPage() {
   const [dateRange, setDateRange] = useState<any>(undefined)
   const {data:mockOrders , isError,isLoading,refetch} = useOrdersForAdmin()
   const { toast } = useToast();
+  console.log(mockOrders)
 
   const filteredOrders = useMemo(() => {
     if (!mockOrders) return []

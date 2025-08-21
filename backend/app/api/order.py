@@ -39,6 +39,7 @@ async def get_admin_orders(user: User = role_required(Role.ADMIN, Role.Super_Adm
             ReturnOrders.append(serialize_order_F(order, user))
         else :
             continue
+    print(ReturnOrders)
     return ReturnOrders
         
     
