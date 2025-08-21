@@ -1,5 +1,5 @@
 
-import { addAdmin, get_me, getAllUsers, getStudents, getUserbyId, login, logout } from "@/lib/api/auth";
+import { addAdmin, block_user, get_me, getAllUsers, getStudents, getUserbyId, login, logout, removeAdmin, unblock_user } from "@/lib/api/auth";
 import { AllUser, authRegsiter, User } from "@/lib/types/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -81,6 +81,40 @@ export function useAddAdmin() {
   return useMutation({
     mutationFn: ({ userId, area }: { userId: string; area: string }) =>
       addAdmin(userId, area),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+  })
+}
+
+export function useRemoveAdmin() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: (userId: string) => removeAdmin(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+  })
+}
+
+
+export function useBlockUser() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: (userId: string) => block_user(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+  })
+}
+
+export function useUnblockUser() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: (userId: string) => unblock_user(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },

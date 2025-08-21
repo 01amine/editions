@@ -6,15 +6,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Download, RefreshCw, UserPlus } from 'lucide-react'
 
 interface UsersHeaderProps {
-  searchTerm: string
-  setSearchTerm: (term: string) => void
-  roleFilter: string
-  setRoleFilter: (role: string) => void
-  statusFilter: string
-  setStatusFilter: (status: string) => void
-  onRefresh: () => void
-  onExport: () => void
+  searchTerm: string;
+  setSearchTerm: (v: string) => void;
+  roleFilter: string;
+  setRoleFilter: (v: string) => void;
+  statusFilter: string;
+  setStatusFilter: (v: string) => void;
+  orderBy: "date" | "name";
+  setOrderBy: (v: "date" | "name") => void;
+  orderDir: "asc" | "desc";
+  setOrderDir: (v: "asc" | "desc") => void;
+  onRefresh: () => void;
+  onExport: () => void;
 }
+
 
 export default function UsersHeader({ 
   searchTerm, 

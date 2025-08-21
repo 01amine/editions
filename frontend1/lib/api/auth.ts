@@ -49,3 +49,15 @@ await client.post(API_ENDPOINTS.AUTH.ADD_ADMIN(userId), {
   placement: area,
 })
 }
+
+export async function removeAdmin(userId: string): Promise<void> {
+  await client.delete(API_ENDPOINTS.AUTH.REMOVE_ADMIN(userId));
+}
+
+export async function  block_user(userId: string): Promise<void> {
+  await client.post(API_ENDPOINTS.AUTH.BLOCK_USER(userId));
+}
+
+export async function  unblock_user(userId: string): Promise<void> {
+  await client.put(API_ENDPOINTS.AUTH.UNBLOCK_USER(userId));
+}

@@ -6,7 +6,7 @@ import UsersHeader from "@/components/users/users-header";
 import UsersTable from "@/components/users/users-table";
 import { useGetAllUsers } from "@/hooks/queries/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function UsersPage() {
   const skip = 0;
@@ -14,37 +14,70 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [orderBy, setOrderBy] = useState<"date" | "name">("date");
+  const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
   const { toast } = useToast();
 
-  const { data, isLoading, isError, error , refetch} = useGetAllUsers(skip, limit);
+  const { data, isLoading, isError, error, refetch } = useGetAllUsers(skip, limit);
 
   if (isError) {
-  console.log(error)
-    
+    console.log(error);
     if (error.message === "Insufficient permissions") {
-      return (
-        <div>
-          <Forbidden />
-        </div>
-      );
+      return <Forbidden />;
     }
   }
+
+  // 🔹 Apply search, filters, and ordering client-side
+  const filteredUsers = useMemo(() => {
+    if (!data) return [];
+
+    return data
+      .filter((user) => {
+        // search by name or email
+        const term = searchTerm.toLowerCase();
+        const matchesSearch =
+          user.full_name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term);
+
+        const matchesRole =
+          roleFilter === "all" ||
+          (roleFilter === "admin" && user.roles.includes("admin")) ||
+          (roleFilter === "student" && !user.roles.includes("admin"));
+
+        const matchesStatus =
+          statusFilter === "all" || statusFilter === user.status; // assuming user.status exists
+
+        return matchesSearch && matchesRole && matchesStatus;
+      })
+      .sort((a, b) => {
+        if (orderBy === "date") {
+          const dateA = new Date(a.created_at).getTime();
+          const dateB = new Date(b.created_at).getTime();
+          return orderDir === "asc" ? dateA - dateB : dateB - dateA;
+        }
+        if (orderBy === "name") {
+          return orderDir === "asc"
+            ? a.full_name.localeCompare(b.full_name)
+            : b.full_name.localeCompare(a.full_name);
+        }
+        return 0;
+      });
+  }, [data, searchTerm, roleFilter, statusFilter, orderBy, orderDir]);
 
   const onExport = () => {
     console.log("Exporting users...");
   };
 
   const onRefresh = () => {
-    refetch()
+    refetch();
     toast({
       title: "Utilisateurs mis à jour",
       description: "Les utilisateurs ont bien été mis à jour.",
-    })
+    });
   };
 
   return (
     <AdminLayout>
-
       <div className="space-y-6">
         <UsersHeader
           searchTerm={searchTerm}
@@ -53,10 +86,18 @@ export default function UsersPage() {
           setRoleFilter={setRoleFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          orderBy={orderBy}
+          setOrderBy={setOrderBy}
+          orderDir={orderDir}
+          setOrderDir={setOrderDir}
           onRefresh={onRefresh}
           onExport={onExport}
         />
-        <UsersTable users={data ?? []} />
+        {isLoading ? (
+          <p>Chargement...</p>
+        ) : (
+          <UsersTable users={filteredUsers} />
+        )}
       </div>
     </AdminLayout>
   );

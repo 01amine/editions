@@ -8,6 +8,9 @@ export const API_ENDPOINTS = {
     ALL_STUDENTS: '/users/all-students',
     ALL_USERS: '/users/all-users',
     ADD_ADMIN: (userId:string)=>`/users/add-admin/${userId}`,
+    REMOVE_ADMIN: (userId:string)=>`/users/remove-admin/${userId}`,
+    BLOCK_USER: (userId:string)=>`/users/block/${userId}`,
+    UNBLOCK_USER: (userId:string)=>`/users/unblock/${userId}`,
   },
   APPOINTMENTS: {
     ROOT: '/appointements/',
