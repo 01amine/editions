@@ -24,7 +24,8 @@ class appointemntService:
             created_at= datetime.utcnow()
         )
         item = await  appointemntService.stringify_order_items(order.item)
-        notif = await notificationService.create_notification(user=student, message=f'You have a new appointement in {scheduled_at} for this order {item}')
+        notif = await notificationService.create_notification(user=student, message=f'vous avez un rendez-vous, le {scheduled_at} pour {item}')
+        notif.insert()
         await appointement.insert()
         return appointement
 
