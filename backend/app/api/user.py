@@ -23,7 +23,7 @@ async def add_user(user: UserCreate):
         hashed_password=hash_password(user.password),
         full_name=user.full_name,
         phone_number=user.phone_number,
-        area=user.area,
+        era=user.era
     )
     await userpay.insert()
     return {"message": "User added successfully"}
@@ -41,7 +41,7 @@ async def register_user(data: UserCreate):
         phone_number=data.phone_number,
         specialite=data.specialite,
         study_year=data.study_year,
-        area=data.area
+        era=data.era
     )
     await user.insert()
     access_token = create_access_token(data={"sub": str(user.id)})
