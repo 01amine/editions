@@ -64,9 +64,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   Future<void> _showLocalNotification(NotificationEntity notif) async {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'new_notifications_channel_id',
-      'New Notifications',
-      channelDescription: 'Channel for new material notifications',
+      'channel_id',
+      'nouveaux messages',
+      channelDescription: 'notifications pour les nouveaux messages',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: true,
@@ -75,7 +75,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         NotificationDetails(android: androidDetails);
 
     await flutterLocalNotificationsPlugin.show(
-      notif.id.hashCode, // A unique ID for the notification
+      notif.id.hashCode,
       'Nouveau message',
       notif.message,
       platformDetails,

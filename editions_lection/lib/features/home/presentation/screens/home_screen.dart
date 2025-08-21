@@ -90,6 +90,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _searchController = TextEditingController();
     context.read<NotificationBloc>().add(StartNotificationPollingEvent());
+    BlocProvider.of<NotificationBloc>(context)
+        .add(StartNotificationPollingEvent());
     // Listen to search focus changes
     _searchFocusNode.addListener(() {
       setState(() {
