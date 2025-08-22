@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
     ACCEPT_ORDER: (id: string) => `/orders/admin/${id}/accept`,
     REJECT_ORDER: (id: string) => `/orders/admin/${id}/reject`,
     Deleiver_ORDER: (id: string) => `/orders/admin/${id}/delivered`,
+    PRINT_ORDER: (id: string) => `/orders/admin/${id}/make_printing`,
   
     BY_ID: (id: string) => `/orders/${id}`,
   },
