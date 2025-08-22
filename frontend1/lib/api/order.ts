@@ -15,14 +15,16 @@ export async function get_order_by_admin():Promise<AdmindOrder[]> {
     return data;
 }
 export async  function  make_order_accepted(id : string): Promise<void> {
-    await client.put(API_ENDPOINTS.ORDERS.ACCEPT_ORDER(id));
+    await client.patch(API_ENDPOINTS.ORDERS.ACCEPT_ORDER(id));
 }
 
 export async function make_order_rejected(id : string): Promise<void> {
-    await client.put(API_ENDPOINTS.ORDERS.REJECT_ORDER(id));
+    await client.patch(API_ENDPOINTS.ORDERS.REJECT_ORDER(id));
 }
 
 export async function make_order_printed(id : string): Promise<void> {
-    await client.put(API_ENDPOINTS.ORDERS.PRINT_ORDER(id));
+    await client.patch(API_ENDPOINTS.ORDERS.PRINT_ORDER(id));
 }
-
+export async function make_order_delivered(id : string): Promise<void> {
+    await client.patch(API_ENDPOINTS.ORDERS.Deleiver_ORDER(id));
+}

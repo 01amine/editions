@@ -83,11 +83,11 @@ def serialize_order_F(order: Order, user: User = None):
                     "material_type": material.material_type,
                     "price_dzd": material.price_dzd,
                 },
-                qty,
+                int(qty),
             )
             for material, qty in order.item
         ],
-        "status": order.status,
+        "status": order.status.value,
         "created_at": order.created_at.isoformat(),
         "appointment_date": order.appointment_date.isoformat() if order.appointment_date else None,
     }

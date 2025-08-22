@@ -1,4 +1,4 @@
-import { get_order_by_admin, get_order_per_student, make_order_accepted, make_order_printed, make_order_rejected } from "@/lib/api/order";
+import { get_order_by_admin, get_order_per_student, make_order_accepted, make_order_delivered, make_order_printed, make_order_rejected } from "@/lib/api/order";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export  function useOrdersForStudent(
@@ -50,6 +50,17 @@ export function useMakeOrderrejected() {
 
   return useMutation({
     mutationFn: (studentId: string) => make_order_rejected(studentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+  })
+}
+
+export function useMakeOrderDelivered() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (studentId: string) => make_order_delivered(studentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },

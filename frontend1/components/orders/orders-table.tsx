@@ -1,15 +1,19 @@
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Eye, Clock, Package, Check, Truck } from 'lucide-react'
+import { Eye, Clock, Package, Check, Truck, CalendarPlus } from 'lucide-react'
+import { useMakeOrderAccepted, useMakeOrderDelivered, useMakeOrderprinted, useMakeOrderrejected } from "@/hooks/queries/useorder"
+import { useToast } from "@/hooks/use-toast"
 
 interface Order {
   _id: string
   student: { full_name: string; email: string }
   item: Array<[{ title: string; material_type: string; price_dzd: number }, number]>
-  status: string
+  status: "pending" | "printing" | "ready" | "delivered"
   created_at: string
   appointment_date: string | null
 }
@@ -19,6 +23,13 @@ interface OrdersTableProps {
 }
 
 export default function OrdersTable({ orders }: OrdersTableProps) {
+  console.log(orders , "are here")
+  const { mutate: makeOrderAccepted } = useMakeOrderAccepted()
+  const { mutate: makeOrderPrinted } = useMakeOrderprinted()
+  const { mutate: makeOrderDelivered } = useMakeOrderDelivered()
+  const { mutate: makeOrderRejected } = useMakeOrderrejected()
+  const { toast } = useToast()
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-yellow-100 text-yellow-800"
@@ -37,6 +48,40 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
       case "delivered": return <Truck className="w-4 h-4" />
       default: return <Clock className="w-4 h-4" />
     }
+  }
+
+  const handleAction = (order: Order, action: "accept" | "print" | "deliver" | "reject") => {
+    switch (action) {
+      case "accept":
+        makeOrderAccepted(order._id, {
+          onSuccess: () => toast({ title: "Commande acceptée", description: "La commande est maintenant en cours d'impression." })
+        })
+        break
+      case "print":
+        makeOrderPrinted(order._id, {
+          onSuccess: () => toast({ title: "Commande imprimée", description: "La commande est prête pour retrait." })
+        })
+        break
+      case "deliver":
+        makeOrderDelivered(order._id, {
+          onSuccess: () => toast({ title: "Commande livrée", description: "La commande a été livrée avec succès." })
+        })
+        break
+      case "reject":
+        makeOrderRejected(order._id, {
+          onSuccess: () => toast({ title: "Commande rejetée", description: "La commande a été annulée." })
+        })
+        break
+    }
+  }
+
+  const handleCreateAppointment = (order: Order) => {
+    // TODO: open dialog to select appointment date
+    console.log("Creating appointment for order:", order._id)
+    toast({
+      title: "Rendez-vous",
+      description: "Fonction de création de rendez-vous (à implémenter)."
+    })
   }
 
   return (
@@ -92,16 +137,34 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     <Button variant="ghost" size="sm">
                       <Eye className="w-4 h-4" />
                     </Button>
+
                     {order.status === "pending" && (
-                      <Button variant="outline" size="sm">
-                        Accepter
-                      </Button>
+                      <>
+                        <Button variant="outline" size="sm" onClick={() => handleAction(order, "accept")}>
+                          Accepter
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleAction(order, "reject")}>
+                          Rejeter
+                        </Button>
+                      </>
                     )}
+
                     {order.status === "printing" && (
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleAction(order, "print")}>
                         Marquer prêt
                       </Button>
                     )}
+
+                    {order.status === "ready" && (
+                      <Button variant="outline" size="sm" onClick={() => handleAction(order, "deliver")}>
+                        Marquer livré
+                      </Button>
+                    )}
+
+                    {/* Quick Action: Create Appointment */}
+                    <Button variant="secondary" size="sm" onClick={() => handleCreateAppointment(order)}>
+                      <CalendarPlus className="w-4 h-4 mr-1" /> Rendez-vous
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
