@@ -87,6 +87,17 @@ async def mark_delivered(
     return order
 
 
+@router.patch("/admin/{order_id}/make_printing", response_model=Order)
+async def make_printing(
+    order_id: str,
+    admin: User = role_required(Role.ADMIN, Role.Super_Admin)
+):
+    order = await orderService.reassign_order_admin(order_id, admin)
+    if not order:
+        raise HTTPException(status_code=400, detail="Order not found")
+    return order
+
+
 @router.get("/{user_id}", response_model=List[Order])
 async def get_user_orders(
     user_id: str,

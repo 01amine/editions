@@ -29,6 +29,9 @@ export const API_ENDPOINTS = {
   ORDERS: {
     ROOT: '/orders',
     GET_ADMIN_ORDERS: "orders/get_admin_orders",
+    ACCEPT_ORDER: (id: string) => `/orders/admin/${id}/accept`,
+    REJECT_ORDER: (id: string) => `/orders/admin/${id}/reject`,
+    Deleiver_ORDER: (id: string) => `/orders/admin/${id}/delivered`,
   
     BY_ID: (id: string) => `/orders/${id}`,
   },
