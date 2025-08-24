@@ -159,7 +159,7 @@ class _VoirToutScreenState extends State<VoirToutScreen>
   }
 
   void _navigateToMaterialDetails(MaterialEntity material) {
-    Navigator.pushNamed(context, '/book_details_screen', arguments: material.id);
+    Navigator.pushNamed(context, '/book_details_screen', arguments: material);
   }
 
   void _onSearchChanged(String query) {
@@ -187,11 +187,11 @@ class _VoirToutScreenState extends State<VoirToutScreen>
 
   List<MaterialEntity> _getFilteredMaterials() {
     final homeState = context.read<HomeBloc>().state;
-    
+
     if (homeState is! HomeLoaded) return [];
 
     List<MaterialEntity> materials;
-    
+
     // Get materials based on type
     if (widget.materialType == "Livres populaires") {
       materials = homeState.books;
@@ -207,9 +207,13 @@ class _VoirToutScreenState extends State<VoirToutScreen>
       final searchResults = homeState.searchResults!;
       // Filter search results by material type
       if (widget.materialType == "Livres populaires") {
-        materials = searchResults.where((m) => m.materialType.toLowerCase() == 'livre').toList();
+        materials = searchResults
+            .where((m) => m.materialType.toLowerCase() == 'livre')
+            .toList();
       } else if (widget.materialType == "Polycopiés") {
-        materials = searchResults.where((m) => m.materialType.toLowerCase() == 'polycopie').toList();
+        materials = searchResults
+            .where((m) => m.materialType.toLowerCase() == 'polycopie')
+            .toList();
       } else {
         materials = searchResults;
       }
@@ -360,7 +364,7 @@ class _VoirToutScreenState extends State<VoirToutScreen>
               ),
             ),
           ),
-          
+
           SizedBox(width: context.width * 0.04),
 
           // Title Section
@@ -386,7 +390,8 @@ class _VoirToutScreenState extends State<VoirToutScreen>
                     Expanded(
                       child: Text(
                         _getScreenTitle(),
-                        style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+                        style: AppTheme.lightTheme.textTheme.headlineMedium
+                            ?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryTextColor,
                         ),
@@ -441,7 +446,8 @@ class _VoirToutScreenState extends State<VoirToutScreen>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isSearchFocused ? AppTheme.primaryColor : Colors.transparent,
+            color:
+                _isSearchFocused ? AppTheme.primaryColor : Colors.transparent,
             width: 2,
           ),
         ),
@@ -530,7 +536,8 @@ class _VoirToutScreenState extends State<VoirToutScreen>
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
               ),
             ),
             const SizedBox(width: 12),
@@ -686,7 +693,8 @@ class _VoirToutScreenState extends State<VoirToutScreen>
                 child: CircularProgressIndicator(
                   value: value,
                   backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                   strokeWidth: 3,
                 ),
               );
@@ -705,8 +713,9 @@ class _VoirToutScreenState extends State<VoirToutScreen>
   }
 
   Widget _buildEmptyState() {
-    final isFiltered = _selectedModule != null || _searchController.text.isNotEmpty;
-    
+    final isFiltered =
+        _selectedModule != null || _searchController.text.isNotEmpty;
+
     return Container(
       height: context.height * 0.4,
       margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
@@ -727,7 +736,7 @@ class _VoirToutScreenState extends State<VoirToutScreen>
           ),
           SizedBox(height: context.height * 0.02),
           Text(
-            isFiltered 
+            isFiltered
                 ? 'Aucun résultat trouvé'
                 : 'Aucun ${widget.materialType.toLowerCase()} disponible',
             style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
@@ -738,7 +747,7 @@ class _VoirToutScreenState extends State<VoirToutScreen>
           ),
           SizedBox(height: context.height * 0.01),
           Text(
-            isFiltered 
+            isFiltered
                 ? 'Essayez de modifier vos filtres de recherche'
                 : 'Les supports seront bientôt disponibles',
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
@@ -861,20 +870,21 @@ class _VoirToutScreenState extends State<VoirToutScreen>
                       margin: EdgeInsets.only(bottom: context.height * 0.02),
                       child: Row(
                         children: [
-                          
                           Expanded(
                             child: MaterialGridItem(
                               material: rowMaterials[0],
-                              onTap: () => _navigateToMaterialDetails(rowMaterials[0]),
+                              onTap: () =>
+                                  _navigateToMaterialDetails(rowMaterials[0]),
                             ),
                           ),
-                          
+
                           if (rowMaterials.length > 1) ...[
                             SizedBox(width: context.width * 0.04),
                             Expanded(
                               child: MaterialGridItem(
                                 material: rowMaterials[1],
-                                onTap: () => _navigateToMaterialDetails(rowMaterials[1]),
+                                onTap: () =>
+                                    _navigateToMaterialDetails(rowMaterials[1]),
                               ),
                             ),
                           ] else
