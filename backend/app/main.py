@@ -9,6 +9,7 @@ from app.api.user import router as user_router
 from app.api.appointement import router as appointement_router
 from app.api.material import router as material_router
 from app.api.order import router as order_router
+from app.api.dashboard import router as dashboard_router
 from app.minio import init_minio_client
 from app.models.appointemnt import Appointment
 from app.models.material import Material
@@ -52,4 +53,5 @@ app.include_router(appointement_router)
 app.include_router(material_router)
 app.include_router(order_router)
 app.include_router(notif_router)
+app.include_router(dashboard_router)
 
