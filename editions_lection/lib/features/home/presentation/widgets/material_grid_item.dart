@@ -1,0 +1,775 @@
+import 'package:editions_lection/core/constants/end_points.dart';
+import 'package:editions_lection/core/extensions/extensions.dart';
+import 'package:editions_lection/core/theme/theme.dart';
+import 'package:editions_lection/features/home/domain/entities/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../domain/entities/order.dart';
+import '../blocs/commands_bloc/commands_bloc.dart';
+
+class MaterialGridItem extends StatefulWidget {
+  final MaterialEntity material;
+  final VoidCallback onTap;
+
+  const MaterialGridItem({
+    super.key,
+    required this.material,
+    required this.onTap,
+  });
+
+  @override
+  State<MaterialGridItem> createState() => _MaterialGridItemState();
+}
+
+class _MaterialGridItemState extends State<MaterialGridItem>
+    with TickerProviderStateMixin {
+  late AnimationController _pressController;
+  late AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pressController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+
+    _shimmerController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pressController.dispose();
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown() {
+    _pressController.forward();
+  }
+
+  void _onTapUp() {
+    _pressController.reverse();
+  }
+
+  void _onTapCancel() {
+    _pressController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _onTapDown(),
+      onTapUp: (_) => _onTapUp(),
+      onTapCancel: _onTapCancel,
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _pressController,
+        builder: (context, child) {
+          double pressScale = 1.0 - (_pressController.value * 0.02);
+
+          return Transform.scale(
+            scale: pressScale,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.08),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildImageSection(context),
+                  _buildContentSection(context),
+                  _buildActionSection(context),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildImageSection(BuildContext context) {
+    String baseUrl = EndPoints.baseUrl;
+    return Container(
+      height: context.height * 0.18,
+      width: double.infinity,
+      margin: EdgeInsets.all(context.width * 0.02),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Main image or placeholder
+            if (widget.material.imageUrls.isNotEmpty)
+              Image.network(
+                '$baseUrl/materials/${widget.material.imageUrls[0]}/get_image',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return _buildShimmerPlaceholder();
+                },
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildStyledPlaceholder(),
+              )
+            else
+              _buildStyledPlaceholder(),
+
+            // Overlay with gradient
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.03),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Category indicator
+            Positioned(
+              bottom: context.height * 0.01,
+              left: context.width * 0.02,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.width * 0.02,
+                  vertical: context.height * 0.005,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.primaryColor.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getCategoryIcon(),
+                      size: 12,
+                      color: AppTheme.primaryColor,
+                    ),
+                    SizedBox(width: context.width * 0.008),
+                    Text(
+                      _getCategoryName(),
+                      style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                        color: AppTheme.primaryTextColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Price indicator
+            Positioned(
+              top: context.height * 0.01,
+              right: context.width * 0.02,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.width * 0.015,
+                  vertical: context.height * 0.004,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '${widget.material.priceDzd.toInt()} DA',
+                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerPlaceholder() {
+    return AnimatedBuilder(
+      animation: _shimmerController,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-1.0 + _shimmerController.value * 2, 0.0),
+              end: Alignment(1.0 + _shimmerController.value * 2, 0.0),
+              colors: [
+                AppTheme.shimmerColor.withOpacity(0.3),
+                AppTheme.shimmerColor.withOpacity(0.6),
+                AppTheme.shimmerColor.withOpacity(0.3),
+              ],
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.image,
+              size: 32,
+              color: AppTheme.primaryTextColor.withOpacity(0.3),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStyledPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryColor.withOpacity(0.1),
+            AppTheme.secondaryColor.withOpacity(0.15),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(context.width * 0.025),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.2),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                _getCategoryIcon(),
+                size: context.width * 0.05,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            SizedBox(height: context.height * 0.008),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.width * 0.02,
+                vertical: context.height * 0.003,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Aperçu',
+                style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                  color: AppTheme.primaryTextColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.width * 0.03,
+        vertical: context.height * 0.01,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            widget.material.title,
+            style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryTextColor,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          SizedBox(height: context.height * 0.005),
+
+          // Module info
+          if (widget.material.module.isNotEmpty)
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.width * 0.02,
+                vertical: context.height * 0.003,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  width: 0.5,
+                ),
+              ),
+              child: Text(
+                widget.material.module,
+                style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+          SizedBox(height: context.height * 0.005),
+
+          // Description
+          if (widget.material.description.isNotEmpty)
+            Text(
+              widget.material.description,
+              style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.primaryTextColor.withOpacity(0.7),
+                height: 1.2,
+                fontSize: 11,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(context.width * 0.03),
+      child: Column(
+        children: [
+          // Read More Button
+          SizedBox(
+            width: double.infinity,
+            height: context.height * 0.04,
+            child: ElevatedButton(
+              onPressed: widget.onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor.withOpacity(0.9),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+                shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.menu_book_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: context.width * 0.015),
+                  Text(
+                    'Lire plus',
+                    style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: context.height * 0.006),
+
+          // Order Button
+          SizedBox(
+            width: double.infinity,
+            height: context.height * 0.04,
+            child: OutlinedButton(
+              onPressed: () {
+                _showEnhancedOrderDialog(context);
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.primaryColor,
+                side: BorderSide(
+                  color: AppTheme.primaryColor,
+                  width: 1.2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 14,
+                    color: AppTheme.primaryColor,
+                  ),
+                  SizedBox(width: context.width * 0.015),
+                  Text(
+                    'Commander',
+                    style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnhancedOrderDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Container();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(context.width * 0.06),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header with icon
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: Icon(
+                          Icons.shopping_cart_rounded,
+                          size: 40,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+
+                      SizedBox(height: context.height * 0.02),
+
+                      // Title
+                      Text(
+                        'Confirmer la commande',
+                        style: AppTheme.lightTheme.textTheme.headlineSmall
+                            ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryTextColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: context.height * 0.015),
+
+                      // Content
+                      Container(
+                        padding: EdgeInsets.all(context.width * 0.04),
+                        decoration: BoxDecoration(
+                          color: AppTheme.backgroundColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  _getCategoryIcon(),
+                                  color: AppTheme.primaryColor,
+                                  size: 24,
+                                ),
+                                SizedBox(width: context.width * 0.03),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget.material.title,
+                                        style: AppTheme
+                                            .lightTheme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        _getCategoryName(),
+                                        style: AppTheme
+                                            .lightTheme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: AppTheme.secondaryTextColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: context.height * 0.015),
+
+                            // Price row
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: context.width * 0.04,
+                                vertical: context.height * 0.01,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.successColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Prix total:',
+                                    style: AppTheme
+                                        .lightTheme.textTheme.titleMedium
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${widget.material.priceDzd.toInt()} DZD',
+                                    style: AppTheme
+                                        .lightTheme.textTheme.titleLarge
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.successColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: context.height * 0.025),
+
+                      // Action buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                FocusScope.of(context).unfocus();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: context.height * 0.015),
+                                side: BorderSide(
+                                  color: AppTheme.secondaryTextColor
+                                      .withOpacity(0.3),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Annuler',
+                                style: AppTheme.lightTheme.textTheme.labelLarge
+                                    ?.copyWith(
+                                  color: AppTheme.secondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: context.width * 0.03),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                context.read<CommandsBloc>().add(
+                                      CreateOrderEvent(
+                                        orders: [
+                                          OrderCreateEntity(
+                                            materialId: widget.material.id,
+                                            quantity: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                FocusScope.of(context).unfocus();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            'Commande ajoutée au panier!',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: AppTheme.successColor,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primaryColor,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: context.height * 0.015),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 2,
+                              ),
+                              child: Text(
+                                'Commander',
+                                style: AppTheme.lightTheme.textTheme.labelLarge
+                                    ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  IconData _getCategoryIcon() {
+    switch (widget.material.materialType.toLowerCase()) {
+      case 'livre':
+        return Icons.menu_book;
+      case 'polycopie':
+        return Icons.description;
+      case 'cours':
+        return Icons.school;
+      default:
+        return Icons.library_books;
+    }
+  }
+
+  String _getCategoryName() {
+    switch (widget.material.materialType.toLowerCase()) {
+      case 'livre':
+        return 'Livre';
+      case 'polycopie':
+        return 'Polycopié';
+      case 'cours':
+        return 'Cours';
+      default:
+        return 'Document';
+    }
+  }
+}

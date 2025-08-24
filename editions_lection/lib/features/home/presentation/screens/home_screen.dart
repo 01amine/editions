@@ -798,8 +798,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     if (materials.isNotEmpty)
                       TextButton(
                         onPressed: () {
-                          // TODO: Navigate to see all materials of this type
-                          Navigator.pushNamed(context, '/materials',
+                          Navigator.pushNamed(context, '/voir-tout',
                               arguments: title);
                         },
                         child: Text(

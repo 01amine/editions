@@ -16,6 +16,7 @@ import 'features/home/presentation/blocs/home_bloc/home_bloc.dart';
 import 'features/home/presentation/blocs/notifications/notification_bloc.dart';
 import 'features/home/presentation/screens/commands_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
+import 'features/home/presentation/screens/voir_tout_screen.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/splash/presentation/bloc/splash_bloc.dart';
@@ -106,6 +107,12 @@ class MyApp extends StatelessWidget {
             case '/profile':
               return MaterialPageRoute(
                 builder: (context) => const ProfileScreen(),
+              );
+            case '/voir-tout':
+              final materialType = settings.arguments as String;
+              return MaterialPageRoute(
+                builder: (context) =>
+                    VoirToutScreen(materialType: materialType),
               );
             default:
               return MaterialPageRoute(
