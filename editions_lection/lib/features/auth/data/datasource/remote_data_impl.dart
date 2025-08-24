@@ -54,7 +54,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'password': password,
         'study_year': studyYear,
         'specialite': specialite,
-        'area': area,
+        'era': area,
       }),
     );
 

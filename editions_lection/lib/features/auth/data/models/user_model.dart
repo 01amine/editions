@@ -19,7 +19,7 @@ class UserModel extends User {
       phoneNumber: json['phone_number'],
       studyYear: json['study_year'],
       specialite: json['specialite'],
-      area: json['area'],
+      area: json['era'],
     );
   }
 
@@ -31,7 +31,7 @@ class UserModel extends User {
       'phone_number': phoneNumber,
       'study_year': studyYear,
       'specialite': specialite,
-      'area': area,
+      'era': area,
     };
   }
 }
