@@ -115,6 +115,7 @@ Future<void> init() async {
   // BLoCs
   sl.registerFactory<AuthBloc>(
     () => AuthBloc(
+      authRepository: sl<AuthRepository>(),
       loginUser: sl<LoginUser>(),
       signupUser: sl<SignupUser>(),
       saveToken: sl<SaveToken>(),
@@ -187,7 +188,8 @@ Future<void> init() async {
       localDataSource: sl<AuthLocalDataSource>(),
     ),
   );
-  sl.registerLazySingleton(() => GetNotificationsUseCase(sl<NotificationRepository>()));
+  sl.registerLazySingleton(
+      () => GetNotificationsUseCase(sl<NotificationRepository>()));
   sl.registerFactory<NotificationBloc>(
     () => NotificationBloc(
       getNotificationsUseCase: sl<GetNotificationsUseCase>(),

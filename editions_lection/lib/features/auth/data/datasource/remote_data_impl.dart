@@ -132,4 +132,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               'Failed to reset password');
     }
   }
+  @override
+  Future<void> updateUser({
+    required String userId,
+    required Map<String, dynamic> data,
+    required String token,
+  }) async {
+    final uri = Uri.parse('$baseUrl/users/update-user/$userId');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final response = await client.patch(
+      uri,
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (response.statusCode != 200) {
+      throw ServerException(
+          message: json.decode(response.body)['detail'] ??
+              'Failed to update user profile');
+    }
+  }
 }

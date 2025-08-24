@@ -21,4 +21,8 @@ abstract class AuthRemoteDataSource {
     required String code,
     required String newPassword,
   });
+  Future<void> updateUser(
+      {required String userId,
+      required Map<String, dynamic> data,
+      required String token});
 }

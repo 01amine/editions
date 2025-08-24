@@ -44,7 +44,9 @@ class SignupRequested extends AuthEvent {
   @override
   List<Object> get props => [fullName, phoneNumber, email, password];
 }
+
 class GetCurrentUserEvent extends AuthEvent {}
+
 class ForgetPasswordRequested extends AuthEvent {
   final String email;
 
@@ -67,4 +69,13 @@ class ResetPasswordRequested extends AuthEvent {
 
   @override
   List<Object> get props => [email, code, newPassword];
+}
+
+class UpdateUserEvent extends AuthEvent {
+  final Map<String, dynamic> userData;
+
+  const UpdateUserEvent({required this.userData});
+
+  @override
+  List<Object> get props => [userData];
 }

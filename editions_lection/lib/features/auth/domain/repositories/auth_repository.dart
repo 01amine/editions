@@ -26,4 +26,5 @@ abstract class AuthRepository {
     required String code,
     required String newPassword,
   });
+  Future<Either<Failure, void>> updateUser({required String userId, required Map<String, dynamic> data});
 }

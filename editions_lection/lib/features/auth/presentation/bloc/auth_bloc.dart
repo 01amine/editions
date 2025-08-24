@@ -6,6 +6,7 @@ import '../../../../core/errors/failure.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/auth_response.dart';
 import '../../domain/entities/user.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/clear_token.dart';
 import '../../domain/usecases/foget_password.dart';
 import '../../domain/usecases/get_current_user.dart';
@@ -18,6 +19,7 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final AuthRepository authRepository;
   final LoginUser loginUser;
   final SignupUser signupUser;
   final SaveToken saveToken;
@@ -27,6 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResetPasswordUser resetPasswordUser;
 
   AuthBloc({
+    required this.authRepository,
     required this.loginUser,
     required this.signupUser,
     required this.saveToken,
@@ -47,6 +50,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
     on<ForgetPasswordRequested>(_onForgetPasswordRequested);
     on<ResetPasswordRequested>(_onResetPasswordRequested);
+    on<UpdateUserEvent>((event, emit) async {
+      if (state is UserLoaded) {
+        final currentUser = (state as UserLoaded).user;
+
+        emit(AuthLoading());
+
+        final result = await authRepository.updateUser(
+          userId: currentUser.id,
+          data: event.userData,
+        );
+
+        result.fold(
+          (failure) => emit(AuthError(message: "failure message")),
+          (_) {
+            add(GetCurrentUserEvent());
+          },
+        );
+      }
+    });
   }
 
   Future<void> _onLoginRequested(

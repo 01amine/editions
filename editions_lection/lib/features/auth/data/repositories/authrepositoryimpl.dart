@@ -150,4 +150,29 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
+   @override
+  Future<Either<Failure, void>> updateUser({
+    required String userId,
+    required Map<String, dynamic> data,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getToken();
+        if (token != null) {
+          await remoteDataSource.updateUser(
+            userId: userId,
+            data: data,
+            token: token,
+          );
+          return const Right(null);
+        } else {
+          return Left(CacheFailure());
+        }
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return const Left(ServerFailure(message: 'No internet connection'));
+    }
+  }
 }
