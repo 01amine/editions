@@ -40,6 +40,9 @@ export const API_ENDPOINTS = {
   },
   Dashboard:{
     ROOT: '/dashboard/analytics',
+  },
+  NOTIF: {
+    ROOT: '/notifications/',
   }
 } as const;
 
