@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Clock, Package, Check, Truck } from 'lucide-react'
+import { AdmindOrder } from "@/lib/types/order"
 
 interface Order {
   _id: string
@@ -13,7 +14,7 @@ interface Order {
 }
 
 interface RecentOrdersProps {
-  orders: Order[]
+  orders: AdmindOrder[]
 }
 
 export default function RecentOrders({ orders }: RecentOrdersProps) {

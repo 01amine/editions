@@ -37,4 +37,9 @@ export const API_ENDPOINTS = {
   
     BY_ID: (id: string) => `/orders/${id}`,
   },
+  Dashboard:{
+    ROOT: '/dashboard/analytics',
+  }
 } as const;
+
+
