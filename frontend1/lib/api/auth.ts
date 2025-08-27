@@ -61,3 +61,8 @@ export async function  block_user(userId: string): Promise<void> {
 export async function  unblock_user(userId: string): Promise<void> {
   await client.put(API_ENDPOINTS.AUTH.UNBLOCK_USER(userId));
 }
+
+export async function  get_user_by_name(name: string): Promise<User> {
+  const { data } = await client.get<User>(API_ENDPOINTS.AUTH.GET_USER_BY_NAME(name));
+  return data;
+}

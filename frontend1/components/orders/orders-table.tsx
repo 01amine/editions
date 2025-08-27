@@ -8,6 +8,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Eye, Clock, Package, Check, Truck, CalendarPlus } from 'lucide-react'
 import { useMakeOrderAccepted, useMakeOrderDelivered, useMakeOrderprinted, useMakeOrderrejected } from "@/hooks/queries/useorder"
 import { useToast } from "@/hooks/use-toast"
+import CreateAppointmentModal from "../appointments/create-appointment-modal"
+import { useState } from "react"
+import RapidCreateAppointmentModal from "../appointments/rapid-appintemnt-modal"
 
 interface Order {
   _id: string
@@ -28,7 +31,12 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
   const { mutate: makeOrderPrinted } = useMakeOrderprinted()
   const { mutate: makeOrderDelivered } = useMakeOrderDelivered()
   const { mutate: makeOrderRejected } = useMakeOrderrejected()
+  const [open, setOpen] = useState(false);
+  
   const { toast } = useToast()
+  const [rapidModalOpen, setRapidModalOpen] = useState(false);
+  const [rapidStudentId, setRapidStudentId] = useState<string>("");
+  const [rapidOrderId, setRapidOrderId] = useState<string>("");
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -76,15 +84,21 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
   }
 
   const handleCreateAppointment = (order: Order) => {
-    // TODO: open dialog to select appointment date
-    console.log("Creating appointment for order:", order._id)
+ 
+    const studentId = order.student.email 
+    setRapidStudentId(studentId);
+    setRapidOrderId(order._id);
+    setRapidModalOpen(true);
+  };
+    const handleAppointmentCreated = (appointment: any) => {
     toast({
-      title: "Rendez-vous",
-      description: "Fonction de création de rendez-vous (à implémenter)."
-    })
-  }
-
+      title: "Rendez-vous créé",
+      description: "Rendez-vous créé avec succès.",
+    });
+    // TODO: refetch orders / appointments if you have a query client available
+  };
   return (
+    <>
     <Card>
       <CardContent className="p-0">
         <Table>
@@ -161,7 +175,6 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                       </Button>
                     )}
 
-                    {/* Quick Action: Create Appointment */}
                     <Button variant="secondary" size="sm" onClick={() => handleCreateAppointment(order)}>
                       <CalendarPlus className="w-4 h-4 mr-1" /> Rendez-vous
                     </Button>
@@ -173,5 +186,14 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
         </Table>
       </CardContent>
     </Card>
+          <RapidCreateAppointmentModal
+        isOpen={rapidModalOpen}
+        onClose={() => setRapidModalOpen(false)}
+        studentId={rapidStudentId}
+        orderId={rapidOrderId}
+        onCreated={handleAppointmentCreated}
+      />
+
+    </>
   )
 }

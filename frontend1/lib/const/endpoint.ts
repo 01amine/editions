@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
     GET_USER : (userId: string) => `/users/get-user/${userId}`,
     ALL_STUDENTS: '/users/all-students',
     ALL_USERS: '/users/all-users',
+    GET_USER_BY_NAME: (name: string) => `/users/get_userby_name/${name}`,
     ADD_ADMIN: (userId:string)=>`/users/add-admin/${userId}`,
     REMOVE_ADMIN: (userId:string)=>`/users/remove-admin/${userId}`,
     BLOCK_USER: (userId:string)=>`/users/block/${userId}`,
@@ -37,4 +38,12 @@ export const API_ENDPOINTS = {
   
     BY_ID: (id: string) => `/orders/${id}`,
   },
+  Dashboard:{
+    ROOT: '/dashboard/analytics',
+  },
+  NOTIF: {
+    ROOT: '/notifications/',
+  }
 } as const;
+
+

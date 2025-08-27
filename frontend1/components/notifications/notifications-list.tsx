@@ -1,40 +1,64 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+"use client";
 
-interface Notification {
-  _id: string
-  title: string
-  message: string
-  type: string
-  created_at: string
-  read: boolean
-}
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Notificationwa } from "@/lib/types/notif";
+import { useNotifications } from "@/hooks/queries/usenotif";
 
-interface NotificationsListProps {
-  notifications: Notification[]
-}
 
-export default function NotificationsList({ notifications }: NotificationsListProps) {
+
+export default function NotificationsList() {
+  const { data: hookNotifications, isLoading, isError } = useNotifications();
+  const notifications =   hookNotifications ?? [];
+
+  if (isLoading ) {
+    return <div className="p-4 text-sm text-gray-500">Chargement des notifications…</div>;
+  }
+
+  if (isError ) {
+    return <div className="p-4 text-sm text-red-500">Impossible de charger les notifications.</div>;
+  }
+
+  if (!notifications || notifications.length === 0) {
+    return <div className="p-4 text-sm text-gray-500">Aucune notification.</div>;
+  }
+
   return (
     <div className="space-y-4">
-      {notifications.map((notification) => (
-        <Card key={notification._id} className={`${!notification.read ? 'border-l-4 border-l-blue-500' : ''}`}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm mb-1">{notification.title}</h3>
-                <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                <p className="text-xs text-gray-400">
-                  {new Date(notification.created_at).toLocaleString('fr-FR')}
-                </p>
+      {notifications.map((notification) => {
+        const title = notification.message.split("\n")[0].slice(0, 60) || "Notification";
+        const isNew = !notification.isSent; 
+
+        return (
+          <Card
+            key={notification.id}
+            className={`${isNew ? "border-l-4 border-l-blue-500" : ""}`}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 pr-4">
+                  <h3 className="font-semibold text-sm mb-1">{title}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs text-gray-400">
+                      {notification.createdAt instanceof Date
+                        ? notification.createdAt.toLocaleString("fr-FR")
+                        : new Date(notification.createdAt).toLocaleString("fr-FR")}
+                    </p>
+                    <p className="text-xs text-gray-400">• user: {notification.user.id}</p>
+                    <p className="text-xs text-gray-400">• {notification.user.collection}</p>
+                  </div>
+                </div>
+
+                <div className="flex-shrink-0 flex flex-col items-end">
+                  {isNew && <Badge variant="default" className="ml-4">Nouveau</Badge>}
+                </div>
               </div>
-              {!notification.read && (
-                <Badge variant="default" className="ml-4">Nouveau</Badge>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
-  )
+  );
 }

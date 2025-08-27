@@ -1,5 +1,5 @@
 
-import { addAdmin, block_user, get_me, getAllUsers, getStudents, getUserbyId, login, logout, removeAdmin, unblock_user } from "@/lib/api/auth";
+import { addAdmin, block_user, get_me, get_user_by_name, getAllUsers, getStudents, getUserbyId, login, logout, removeAdmin, unblock_user } from "@/lib/api/auth";
 import { AllUser, authRegsiter, User } from "@/lib/types/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -119,4 +119,16 @@ export function useUnblockUser() {
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
   })
+}
+
+
+export function useGetByName(name: string) {
+  return useQuery<User>({
+    queryKey: ['users', name], // include name in the key for caching
+    queryFn: () => get_user_by_name(name),
+    enabled: !!name, // prevent query if name is empty
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 }
