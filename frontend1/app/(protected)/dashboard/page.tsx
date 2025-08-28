@@ -8,16 +8,45 @@ import { PieChartComponent, BarChartComponent, LineChartComponent } from "@/comp
 import { useOrdersForAdmin } from "@/hooks/queries/useorder"
 import { useAnalytics } from "@/hooks/queries/useanalytics"
 import { DashboardAnalytics } from "@/lib/types/analytics"
+import { StatsCardsLoading, ChartLoading, TableLoading } from "@/components/ui/loading"
+import { DataError } from "@/components/ui/error"
 
 export default function DashboardPage() {
   const { data: Orders, isError, isLoading } = useOrdersForAdmin()
   const { data: Analytics, isError: isErrorAnalytics, isLoading: isLoadingAnalytics } = useAnalytics()
 
   if (isLoading || isLoadingAnalytics) {
-    return <div>Loading...</div>
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900">Tableau de bord</h2>
+          <StatsCardsLoading />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ChartLoading />
+            <ChartLoading />
+            <ChartLoading />
+            <ChartLoading />
+          </div>
+          <TableLoading rows={5} />
+        </div>
+      </AdminLayout>
+    )
   }
+
   if (isError || isErrorAnalytics || !Analytics) {
-    return <div>Error</div>
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900">Tableau de bord</h2>
+          <DataError 
+            error={isError ? "Erreur lors du chargement des commandes" : isErrorAnalytics ? "Erreur lors du chargement des analyses" : "Données manquantes"}
+            onRetry={() => window.location.reload()}
+            title="Erreur de chargement du tableau de bord"
+            message="Impossible de charger les données du tableau de bord. Veuillez réessayer."
+          />
+        </div>
+      </AdminLayout>
+    )
   }
 
   const stats = {

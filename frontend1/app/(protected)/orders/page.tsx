@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PieChartComponent, BarChartComponent } from "@/components/ui/chart"
 import { useOrdersForAdmin } from "@/hooks/queries/useorder"
 import { useToast } from "@/hooks/use-toast"
+import { TableLoading, ChartLoading } from "@/components/ui/loading"
+import { DataError } from "@/components/ui/error"
 
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -58,16 +60,34 @@ export default function OrdersPage() {
     { name: "Prêt", value: filteredOrders.filter(o => o.status === "ready").length },
     { name: "Livré", value: filteredOrders.filter(o => o.status === "delivered").length },
   ]
+  // Calculate daily orders from real data
+  const dailyOrdersData = (() => {
+    if (!mockOrders || mockOrders.length === 0) {
+      return [
+        { name: "Lun", value: 0 },
+        { name: "Mar", value: 0 },
+        { name: "Mer", value: 0 },
+        { name: "Jeu", value: 0 },
+        { name: "Ven", value: 0 },
+        { name: "Sam", value: 0 },
+        { name: "Dim", value: 0 },
+      ];
+    }
 
-  const dailyOrdersData = [
-    { name: "Lun", value: 12 },
-    { name: "Mar", value: 19 },
-    { name: "Mer", value: 15 },
-    { name: "Jeu", value: 22 },
-    { name: "Ven", value: 18 },
-    { name: "Sam", value: 8 },
-    { name: "Dim", value: 5 },
-  ]
+    const daysOfWeek = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+    const dailyCounts = new Array(7).fill(0);
+
+    mockOrders.forEach(order => {
+      const orderDate = new Date(order.created_at);
+      const dayOfWeek = orderDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      dailyCounts[dayOfWeek]++;
+    });
+
+    return daysOfWeek.map((day, index) => ({
+      name: day,
+      value: dailyCounts[index]
+    }));
+  })();
 
   const handleRefresh = () => {
     refetch()
@@ -92,29 +112,49 @@ export default function OrdersPage() {
           onExport={handleExport}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Répartition par statut</CardTitle>
-              <CardDescription>Commandes filtrées par statut</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PieChartComponent data={statusData} className="h-48" />
-            </CardContent>
-          </Card>
+        {/* Charts */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ChartLoading />
+            <ChartLoading />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition par statut</CardTitle>
+                <CardDescription>Commandes filtrées par statut</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PieChartComponent data={statusData} className="h-48" />
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Commandes par jour</CardTitle>
-              <CardDescription>Activité de la semaine</CardDescription>
+            <Card>
+              <CardHeader>
+                <CardTitle>Commandes par jour</CardTitle>
+                <CardDescription>Activité de la semaine</CardDescription>
             </CardHeader>
-            <CardContent>
-              <BarChartComponent data={dailyOrdersData} className="h-48" />
-            </CardContent>
-          </Card>
-        </div>
+              <CardContent>
+                <BarChartComponent data={dailyOrdersData} className="h-48" />
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        <OrdersTable orders={filteredOrders} />
+        {/* Orders Table */}
+        {isLoading ? (
+          <TableLoading rows={8} />
+        ) : isError ? (
+          <DataError 
+            error={null} 
+            onRetry={handleRefresh}
+            title="Erreur de chargement des commandes"
+            message="Impossible de charger la liste des commandes. Veuillez réessayer."
+          />
+        ) : (
+          <OrdersTable orders={filteredOrders} />
+        )}
       </div>
     </AdminLayout>
   )

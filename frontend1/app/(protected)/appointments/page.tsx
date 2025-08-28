@@ -3,6 +3,8 @@ import AppointmentsHeader from "@/components/appointments/appointments-header"
 import AppointmentsList from "@/components/appointments/appointments-list"
 import AdminLayout from "@/components/layout/admin-layout"
 import { useCreateAppointment, useGetAppointmentsWithUser } from "@/hooks/queries/useappointement"
+import { TableLoading } from "@/components/ui/loading"
+import { DataError } from "@/components/ui/error"
 
 export default function AppointmentsPage() {
   const { data: appointments, isLoading, error } = useGetAppointmentsWithUser(0, 10)
@@ -16,10 +18,18 @@ export default function AppointmentsPage() {
       <div className="space-y-6">
         <AppointmentsHeader onCreateAppointment={handleCreateAppointment} />
 
-        {isLoading && <p>Loading appointments...</p>}
-        {error && <p className="text-red-500">Failed to load appointments</p>}
-
-        {appointments && <AppointmentsList appointments={appointments} />}
+        {isLoading ? (
+          <TableLoading rows={6} />
+        ) : error ? (
+          <DataError 
+            error={error} 
+            onRetry={() => window.location.reload()}
+            title="Erreur de chargement des rendez-vous"
+            message="Impossible de charger la liste des rendez-vous. Veuillez réessayer."
+          />
+        ) : appointments ? (
+          <AppointmentsList appointments={appointments} />
+        ) : null}
       </div>
     </AdminLayout>
   )

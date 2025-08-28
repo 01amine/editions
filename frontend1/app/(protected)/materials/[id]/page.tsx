@@ -15,6 +15,8 @@ import { ImageIcon, FileTextIcon, Save, Trash2, ArrowLeft } from 'lucide-react'
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { Loading } from "@/components/ui/loading"
+import { DataError } from "@/components/ui/error"
 
 export default function MaterialDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -58,8 +60,30 @@ export default function MaterialDetailPage() {
     }
   }, [material])
 
-  if (isLoading) return <AdminLayout><div className="flex justify-center items-center h-screen">Loading...</div></AdminLayout>
-  if (isError || !material) return <AdminLayout><div className="flex justify-center items-center h-screen text-red-500">Failed to load material.</div></AdminLayout>
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <Loading type="spinner" className="h-screen" />
+        </div>
+      </AdminLayout>
+    )
+  }
+  
+  if (isError || !material) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <DataError 
+            error={null}
+            onRetry={() => window.location.reload()}
+            title="Erreur de chargement du support"
+            message="Impossible de charger les détails du support. Veuillez réessayer."
+          />
+        </div>
+      </AdminLayout>
+    )
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target

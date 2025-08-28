@@ -80,8 +80,18 @@ const handleview = (id: string) => {
               <Button variant="ghost" size="sm" onClick={() => handleEdit(material.id)}>
                 <Edit className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDelete(material.id)} disabled={deleteMutation.isPending}>
-                <Trash2 className="w-4 h-4" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => handleDelete(material.id)} 
+                disabled={deleteMutation.isPending}
+                className={deleteMutation.isPending ? "opacity-50" : ""}
+              >
+                {deleteMutation.isPending ? (
+                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
               </Button>
             </div>
           </CardContent>

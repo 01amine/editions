@@ -7,6 +7,8 @@ import UsersTable from "@/components/users/users-table";
 import { useGetAllUsers } from "@/hooks/queries/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
+import { TableLoading } from "@/components/ui/loading";
+import { DataError } from "@/components/ui/error";
 
 export default function UsersPage() {
   const skip = 0;
@@ -20,7 +22,7 @@ export default function UsersPage() {
 
   const { data, isLoading, isError, error, refetch } = useGetAllUsers(skip, limit);
 
-  if (isError) {
+    if (isError) {
     console.log(error);
     if (error.message === "Insufficient permissions") {
       return <Forbidden />;
@@ -43,7 +45,9 @@ export default function UsersPage() {
           (roleFilter === "student" && !user.roles.includes("admin"));
 
         const matchesStatus =
-          statusFilter === "all" || statusFilter === user.status;//TODO: fix here ix th ebug
+          statusFilter === "all" || 
+          (statusFilter === "active" && !user.isblocked) ||
+          (statusFilter === "blocked" && user.isblocked); 
         return matchesSearch && matchesRole && matchesStatus;
       })
       .sort((a, b) => {
@@ -91,7 +95,14 @@ export default function UsersPage() {
           onExport={onExport}
         />
         {isLoading ? (
-          <p>Chargement...</p>
+          <TableLoading rows={8} />
+        ) : isError ? (
+          <DataError 
+            error={error} 
+            onRetry={onRefresh}
+            title="Erreur de chargement des utilisateurs"
+            message="Impossible de charger la liste des utilisateurs. Veuillez réessayer."
+          />
         ) : (
           <UsersTable users={filteredUsers} />
         )}

@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Notificationwa } from "@/lib/types/notif";
 import { useNotifications } from "@/hooks/queries/usenotif";
+import { Loading } from "@/components/ui/loading";
+import { DataError } from "@/components/ui/error";
 
 
 
@@ -12,12 +14,19 @@ export default function NotificationsList() {
   const { data: hookNotifications, isLoading, isError } = useNotifications();
   const notifications =   hookNotifications ?? [];
 
-  if (isLoading ) {
-    return <div className="p-4 text-sm text-gray-500">Chargement des notifications…</div>;
+  if (isLoading) {
+    return <Loading type="spinner" className="p-8" />;
   }
 
-  if (isError ) {
-    return <div className="p-4 text-sm text-red-500">Impossible de charger les notifications.</div>;
+  if (isError) {
+    return (
+      <DataError 
+        error={null}
+        onRetry={() => window.location.reload()}
+        title="Erreur de chargement des notifications"
+        message="Impossible de charger les notifications. Veuillez réessayer."
+      />
+    );
   }
 
   if (!notifications || notifications.length === 0) {

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import CreateAppointmentModal from "../appointments/create-appointment-modal"
 import { useState } from "react"
 import RapidCreateAppointmentModal from "../appointments/rapid-appintemnt-modal"
+import OrderDetailsModal from "./order-details-modal"
 
 interface Order {
   _id: string
@@ -95,8 +96,14 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
       title: "Rendez-vous créé",
       description: "Rendez-vous créé avec succès.",
     });
-    // TODO: refetch orders / appointments if you have a query client available
   };
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false)
+
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order)
+    setIsOrderDetailsOpen(true)
+  }
   return (
     <>
     <Card>
@@ -148,29 +155,49 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewOrder(order)}>
                       <Eye className="w-4 h-4" />
                     </Button>
 
                     {order.status === "pending" && (
                       <>
-                        <Button variant="outline" size="sm" onClick={() => handleAction(order, "accept")}>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleAction(order, "accept")}
+                          disabled={false}
+                        >
                           Accepter
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleAction(order, "reject")}>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={() => handleAction(order, "reject")}
+                          disabled={false}
+                        >
                           Rejeter
                         </Button>
                       </>
                     )}
 
                     {order.status === "printing" && (
-                      <Button variant="outline" size="sm" onClick={() => handleAction(order, "print")}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleAction(order, "print")}
+                        disabled={false}
+                      >
                         Marquer prêt
                       </Button>
                     )}
 
                     {order.status === "ready" && (
-                      <Button variant="outline" size="sm" onClick={() => handleAction(order, "deliver")}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleAction(order, "deliver")}
+                        disabled={false}
+                      >
                         Marquer livré
                       </Button>
                     )}
@@ -187,12 +214,18 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
       </CardContent>
     </Card>
           <RapidCreateAppointmentModal
-        isOpen={rapidModalOpen}
-        onClose={() => setRapidModalOpen(false)}
-        studentId={rapidStudentId}
-        orderId={rapidOrderId}
-        onCreated={handleAppointmentCreated}
-      />
+            isOpen={rapidModalOpen}
+            onClose={() => setRapidModalOpen(false)}
+            studentId={rapidStudentId}
+            orderId={rapidOrderId}
+            onCreated={handleAppointmentCreated}
+          />
+
+          <OrderDetailsModal
+            order={selectedOrder}
+            isOpen={isOrderDetailsOpen}
+            onClose={() => setIsOrderDetailsOpen(false)}
+          />
 
     </>
   )
