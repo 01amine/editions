@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PieChartComponent, BarChartComponent } from "@/components/ui/chart"
 import { useGetMaterials } from "@/hooks/queries/useMaterial"
 import { toast, useToast } from "@/components/ui/use-toast"
+import { MaterialsGridLoading, ChartLoading } from "@/components/ui/loading"
+import { DataError } from "@/components/ui/error"
 
 
 
@@ -93,29 +95,48 @@ const typeData = [
         />
         
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Répartition par type</CardTitle>
-              <CardDescription>Types de supports disponibles</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PieChartComponent data={typeData} className="h-48" />
-            </CardContent>
-          </Card>
+        {isLoading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ChartLoading />
+            <ChartLoading />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition par type</CardTitle>
+                <CardDescription>Types de supports disponibles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PieChartComponent data={typeData} className="h-48" />
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Répartition par prix</CardTitle>
-              <CardDescription>Gammes de prix des supports</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BarChartComponent data={priceRangeData} className="h-48" />
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition par prix</CardTitle>
+                <CardDescription>Gammes de prix des supports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BarChartComponent data={priceRangeData} className="h-48" />
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        <MaterialsGrid materials={filteredMaterials} />
+        {/* Materials Grid */}
+        {isLoading ? (
+          <MaterialsGridLoading />
+        ) : isError ? (
+          <DataError 
+            error={error} 
+            onRetry={handleRefresh}
+            title="Erreur de chargement des supports"
+            message="Impossible de charger la liste des supports. Veuillez réessayer."
+          />
+        ) : (
+          <MaterialsGrid materials={filteredMaterials} />
+        )}
       </div>
     </AdminLayout>
   )

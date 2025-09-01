@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from fastapi import APIRouter, Query, UploadFile, File, Form,  HTTPException
 from typing import List, Optional
 from fastapi.responses import StreamingResponse
@@ -245,10 +246,9 @@ async def update_material(
             await document_bucket.delete(material_to_update.pdf_url)
         updates["pdf_url"] = None
     elif file:
-        # If a new PDF file is uploaded, delete the old one first
         if material_to_update.pdf_url:
             await document_bucket.delete_by_url(material_to_update.pdf_url)
-        pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
+        pdf_name = f"materials/{material_id}/material.pdf"
         pdf_url = await document_bucket.put(file, object_name=pdf_name)
         updates["pdf_url"] = pdf_url
 
@@ -265,7 +265,8 @@ async def update_material(
 
     if images:
         for image in images:
-            image_name = f"{uuid.uuid4().hex}_{image.filename}"
+            ext = os.path.splitext(image.filename)[1] 
+            image_name = f"materials/{material_id}/images/{uuid.uuid4().hex}{ext}" 
             image_url = await image_bucket.put(image, object_name=image_name)
             final_image_urls.append(image_url)
 

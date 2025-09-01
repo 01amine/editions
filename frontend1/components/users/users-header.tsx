@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Download, RefreshCw, UserPlus } from 'lucide-react'
+import CreateUserModal from "./create-user-modal"
 
 interface UsersHeaderProps {
   searchTerm: string;
@@ -21,6 +23,7 @@ interface UsersHeaderProps {
 }
 
 
+
 export default function UsersHeader({ 
   searchTerm, 
   setSearchTerm, 
@@ -31,6 +34,16 @@ export default function UsersHeader({
   onRefresh,
   onExport 
 }: UsersHeaderProps) {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+
+  const handleCreate = () => {
+    setIsCreateModalOpen(true)
+  }
+
+  const handleCreateSuccess = () => {
+    onRefresh() // Refresh the users list after creation
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -44,9 +57,9 @@ export default function UsersHeader({
             <Download className="w-4 h-4 mr-2" />
             Exporter
           </Button>
-          <Button>
+          <Button variant="outline" size="sm" onClick={handleCreate}>
             <UserPlus className="w-4 h-4 mr-2" />
-            Inviter
+            Créer un utilisateur
           </Button>
         </div>
       </div>
@@ -69,7 +82,7 @@ export default function UsersHeader({
           <SelectContent>
             <SelectItem value="all">Tous les rôles</SelectItem>
             <SelectItem value="admin">Administrateurs</SelectItem>
-            <SelectItem value="user">Étudiants</SelectItem>
+            <SelectItem value="student">Étudiants</SelectItem>
           </SelectContent>
         </Select>
         
@@ -84,6 +97,12 @@ export default function UsersHeader({
           </SelectContent>
         </Select>
       </div>
+
+      <CreateUserModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </div>
   )
 }

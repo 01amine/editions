@@ -29,10 +29,10 @@ export default function UsersTable({ users }: UsersTableProps) {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  const { mutate } = useAddAdmin()
-  const { mutate: mutateBlockUser } = useBlockUser()
-  const { mutate: mutateUnblockUser } = useUnblockUser()
-  const { mutate: mutateRemoveAdmin } = useRemoveAdmin()
+  const { mutate, isPending: isAddingAdmin } = useAddAdmin()
+  const { mutate: mutateBlockUser, isPending: isBlockingUser } = useBlockUser()
+  const { mutate: mutateUnblockUser, isPending: isUnblockingUser } = useUnblockUser()
+  const { mutate: mutateRemoveAdmin, isPending: isRemovingAdmin } = useRemoveAdmin()
   const { toast } = useToast()
 
   const handlePromoteAdmin = async () => {
@@ -144,24 +144,34 @@ export default function UsersTable({ users }: UsersTableProps) {
                               setSelectedUser(user)
                               setDialogOpen(true)
                             }}
+                            disabled={isAddingAdmin}
                           >
-                            Promouvoir Admin
+                            {isAddingAdmin ? "Promotion en cours..." : "Promouvoir Admin"}
                           </DropdownMenuItem>
                         )}
 
                         {user.roles.includes("admin") && (
-                          <DropdownMenuItem onClick={() => handleRemoveAdmin(user)}>
-                            Retirer des admins
+                          <DropdownMenuItem 
+                            onClick={() => handleRemoveAdmin(user)}
+                            disabled={isRemovingAdmin}
+                          >
+                            {isRemovingAdmin ? "Suppression en cours..." : "Retirer des admins"}
                           </DropdownMenuItem>
                         )}
 
                         {!user.isblocked ? (
-                          <DropdownMenuItem onClick={() => handleBlockUser(user)}>
-                            Bloquer l’utilisateur
+                          <DropdownMenuItem 
+                            onClick={() => handleBlockUser(user)}
+                            disabled={isBlockingUser}
+                          >
+                            {isBlockingUser ? "Blocage en cours..." : "Bloquer l'utilisateur"}
                           </DropdownMenuItem>
                         ) : (
-                          <DropdownMenuItem onClick={() => handleUnblockUser(user)}>
-                            Débloquer l’utilisateur
+                          <DropdownMenuItem 
+                            onClick={() => handleUnblockUser(user)}
+                            disabled={isUnblockingUser}
+                          >
+                            {isUnblockingUser ? "Déblocage en cours..." : "Débloquer l'utilisateur"}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
