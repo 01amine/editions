@@ -12,8 +12,6 @@ from app.minio import DocumentBucket, ImageBucket
 
 router = APIRouter(prefix="/materials", tags=["Materials"])
 
-
-
 image_bucket = ImageBucket(file_prefix="materials/images")
 document_bucket = DocumentBucket(file_prefix="materials/documents")
 
@@ -46,7 +44,8 @@ async def get_materials_user(
     
 @router.post("/", response_model=Material)
 async def create_material(
-file: Optional[UploadFile] = File(None),    images: List[UploadFile] = File(...), 
+    file: Optional[UploadFile] = File(None),    
+    images: List[UploadFile] = File(...), 
     title: str = Form(...),
     description: str = Form(...),
     material_type: str = Form(...),
@@ -56,15 +55,25 @@ file: Optional[UploadFile] = File(None),    images: List[UploadFile] = File(...)
     module: Optional[str] = Form(None), 
     user: User = role_required(Role.ADMIN, Role.Super_Admin),
 ):
+    # Handle PDF upload
     if file is not None:
         pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
-        pdf_url =  await document_bucket.put(file, object_name=pdf_name)
+        pdf_url = await document_bucket.put(file, object_name=pdf_name)
     else:
         pdf_url = ""
+    
+    # Handle image uploads
     image_urls = []
     for image in images:
-        image_name = f"{uuid.uuid4().hex}_{image.filename}"
-        image_url= await image_bucket.put(image, object_name=image_name)
+        # Extract file extension properly
+        ext = os.path.splitext(image.filename)[1] if image.filename else ""
+        # Generate unique filename with proper extension
+        image_name = f"{uuid.uuid4().hex}{ext}"
+        
+        # Store the image and get the full URL
+        image_url = await image_bucket.put(image, object_name=image_name)
+        
+        # Store the full URL for consistency
         image_urls.append(image_url)
 
     material = await materialService.create_material(
@@ -73,13 +82,12 @@ file: Optional[UploadFile] = File(None),    images: List[UploadFile] = File(...)
         material_type=material_type,
         price_dzd=price_dzd,
         image_urls=image_urls,
-        pdf_url=pdf_url ,
+        pdf_url=pdf_url,
         study_year=study_year, 
         specialite=specialite,
         module=module,
     )
     return material
-
 
 
 @router.head("/{file_url}/get_file")
@@ -109,27 +117,13 @@ async def get_all_materials_user(user: User = role_required(Role.ADMIN, Role.Sup
         raise HTTPException(status_code=404, detail="Materials not found")
     return [materialUser.model_validate(m, from_attributes=True) for m in materials]
 
-
-
 @router.get("/", response_model=List[Material])
 async def get_all_materials_admin_paginated( user: User = role_required(Role.ADMIN, Role.Super_Admin), skip: int = 0, limit: int = 10):
     return await materialService.get_all_materials(skip, limit)
 
-
-# @router.get("/", response_model=List[materialUser])
-# async def get_all_materials_user_paginated(user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER), skip: int = 0, limit: int = 10):
-#     return await materialService.get_all_materials_user(skip, limit)
-
-
-
-
-
-
-
 @router.get("/search/admin", response_model=List[Material])
 async def search_by_title(q: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
     return await materialService.search_materials_by_title(q)
-
 
 @router.get("/filter/type/admin", response_model=List[Material])
 async def get_by_type(type: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
@@ -139,7 +133,6 @@ async def get_by_type(type: str, user: User = role_required(Role.ADMIN, Role.Sup
 async def get_materials_admin(
     title: Optional[str] = Query(None),
     material_type: Optional[str] = Query(None),
-    
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     date: Optional[datetime] = Query(None),
@@ -157,15 +150,13 @@ async def get_materials_admin(
         limit=limit,
     )
 
-
 @router.get("/filter/date/admin", response_model=List[Material], description="ISO format: yyyy-mm-dd")
-async def get_by_date(date: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):  # ISO format: yyyy-mm-dd
+async def get_by_date(date: str, user: User = role_required(Role.ADMIN, Role.Super_Admin, Role.USER)):
     try:
         parsed = datetime.fromisoformat(date)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
     return await materialService.get_materials_by_date(parsed)
-
 
 @router.delete("/{material_id}")
 async def delete_material(
@@ -176,18 +167,25 @@ async def delete_material(
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
 
+    # Delete PDF if exists
     if material.pdf_url:
         try:
             await document_bucket.delete(material.pdf_url)
         except Exception as e:
-            raise HTTPException(status_code=500, detail="Failed to delete PDF")
+            print(f"Warning: Failed to delete PDF {material.pdf_url}: {e}")
 
+    # Delete images if exist
     if material.image_urls:
         for image_url in material.image_urls:
             try:
-                await image_bucket.delete(image_url)
+                # Extract object name from URL if it's a full URL
+                if image_url.startswith('http'):
+                    object_name = image_url.split('/')[-1]
+                else:
+                    object_name = image_url
+                await image_bucket.delete(object_name)
             except Exception as e:
-                raise HTTPException(status_code=500, detail="Failed to delete image")
+                print(f"Warning: Failed to delete image {image_url}: {e}")
 
     success = await materialService.delete_material(material_id)
     if not success:
@@ -210,7 +208,6 @@ async def update_material(
     module: Optional[str] = Form(None),
     existing_image_urls: Optional[List[str]] = Form(None),
     remove_pdf: Optional[bool] = Form(False),
-    
     user: User = role_required(Role.ADMIN, Role.Super_Admin),
 ):
     material_to_update = await materialService.get_material_by_id(material_id)
@@ -219,60 +216,82 @@ async def update_material(
         
     updates = {}
 
+    # Update basic fields
     if title is not None:
         updates["title"] = title
-    
     if description is not None:
         updates["description"] = description
-
     if material_type is not None:
         updates["material_type"] = material_type
-
     if price_dzd is not None:
         updates["price_dzd"] = price_dzd
-
     if year_study is not None:
         updates["study_year"] = year_study
-
     if specialite is not None:
         updates["specialite"] = specialite
-
     if module is not None:
         updates["module"] = module
 
-
+    # Handle PDF updates
     if remove_pdf:
         if material_to_update.pdf_url:
-            await document_bucket.delete(material_to_update.pdf_url)
+            try:
+                await document_bucket.delete(material_to_update.pdf_url)
+            except Exception as e:
+                print(f"Warning: Failed to delete old PDF: {e}")
         updates["pdf_url"] = None
     elif file:
+        # Delete old PDF if exists
         if material_to_update.pdf_url:
-            await document_bucket.delete_by_url(material_to_update.pdf_url)
-        pdf_name = f"materials/{material_id}/material.pdf"
+            try:
+                await document_bucket.delete(material_to_update.pdf_url)
+            except Exception as e:
+                print(f"Warning: Failed to delete old PDF: {e}")
+        
+        # Upload new PDF
+        pdf_name = f"{uuid.uuid4().hex}_{file.filename}"
         pdf_url = await document_bucket.put(file, object_name=pdf_name)
         updates["pdf_url"] = pdf_url
 
+    # Handle image updates
     current_image_urls = material_to_update.image_urls or []
     final_image_urls = []
 
+    # Keep existing images if specified
     if existing_image_urls is not None:
-        final_image_urls = existing_image_urls
+        final_image_urls = existing_image_urls.copy()
+    else:
+        final_image_urls = current_image_urls.copy()
     
-    removed_images = set(current_image_urls) - set(final_image_urls)
-    for image_url in removed_images:
-        object_name = image_url.split('/')[-1] 
-        await image_bucket.delete(object_name)
+    # Delete removed images
+    images_to_keep = set(final_image_urls)
+    for image_url in current_image_urls:
+        if image_url not in images_to_keep:
+            try:
+                # Extract object name from URL
+                if image_url.startswith('http'):
+                    object_name = image_url.split('/')[-1]
+                else:
+                    object_name = image_url
+                await image_bucket.delete(object_name)
+            except Exception as e:
+                print(f"Warning: Failed to delete image {image_url}: {e}")
 
+    # Upload new images
     if images:
         for image in images:
-            ext = os.path.splitext(image.filename)[1] 
-            image_name = f"materials/{material_id}/images/{uuid.uuid4().hex}{ext}" 
+            # Extract file extension properly
+            ext = os.path.splitext(image.filename)[1] if image.filename else ""
+            # Generate unique filename with proper extension
+            image_name = f"{uuid.uuid4().hex}{ext}"
+            
+            # Store the image and get the full URL
             image_url = await image_bucket.put(image, object_name=image_name)
             final_image_urls.append(image_url)
 
     updates["image_urls"] = final_image_urls
-    material = await materialService.update_material(material_id, updates)
     
+    material = await materialService.update_material(material_id, updates)
     if not material:
         raise HTTPException(status_code=404, detail="Material not found after update")
         
@@ -284,7 +303,6 @@ async def get_material_by_id_user(material_id: str, user: User = role_required(R
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     return materialUser(**material.model_dump(by_alias=True))
-
 
 @router.get("/{material_id}/admin", response_model=Material)
 async def get_material_by_id(material_id: str, user: User = role_required(Role.ADMIN, Role.Super_Admin)):
