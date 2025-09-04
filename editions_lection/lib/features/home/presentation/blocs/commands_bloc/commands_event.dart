@@ -11,7 +11,18 @@ final class FetchOrdersEvent extends CommandsEvent {}
 
 final class CreateOrderEvent extends CommandsEvent {
   final List<OrderCreateEntity> orders;
-  const CreateOrderEvent({required this.orders});
+  final DeliveryType deliveryType;
+  final String? deliveryAddress;
+  final String? deliveryPhone;
+
+  const CreateOrderEvent({
+    required this.orders,
+    required this.deliveryType,
+    this.deliveryAddress,
+    this.deliveryPhone,
+  });
+
   @override
-  List<Object> get props => [orders];
+  List<Object> get props =>
+      [orders, deliveryType, deliveryAddress ?? '', deliveryPhone ?? ''];
 }

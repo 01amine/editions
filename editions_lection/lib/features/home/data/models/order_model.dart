@@ -17,7 +17,10 @@ class OrderModel extends OrderEntity {
     required super.id,
     required super.items,
     required super.status,
+    required super.deliveryType,
     super.appointmentDate,
+    super.deliveryAddress,
+    super.zrTrackingId,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +31,11 @@ class OrderModel extends OrderEntity {
       id: json['_id'],
       items: items,
       status: json['status'],
+      deliveryType: json['delivery_type'] == 'pickup'
+          ? DeliveryType.pickup
+          : DeliveryType.delivery,
+      deliveryAddress: json['delivery_address'],
+      zrTrackingId: json['zr_tracking_id'],
       appointmentDate: json['appointment_date'] != null
           ? DateTime.parse(json['appointment_date'])
           : null,
@@ -35,16 +43,22 @@ class OrderModel extends OrderEntity {
   }
 }
 
-class OrderCreateModel {
-  final String materialId;
-  final int quantity;
-
-  OrderCreateModel({required this.materialId, required this.quantity});
+class OrderCreateModel extends OrderCreateEntity {
+  const OrderCreateModel({
+    required super.materialId,
+    required super.quantity,
+    required super.deliveryType,
+    super.deliveryAddress,
+    super.deliveryPhone,
+  });
 
   Map<String, dynamic> toJson() {
     return {
       'materiel_id': materialId,
       'quantity': quantity,
+      'delivery_type': deliveryType.name,
+      'delivery_address': deliveryAddress,
+      'delivery_phone': deliveryPhone,
     };
   }
 }

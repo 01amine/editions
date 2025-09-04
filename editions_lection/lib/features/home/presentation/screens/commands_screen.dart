@@ -766,6 +766,92 @@ class EnhancedCommandCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                const SizedBox(height: 16),
+
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.primaryColor.withOpacity(0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            order.deliveryType == DeliveryType.pickup
+                                ? Icons.store_rounded
+                                : Icons.local_shipping_rounded,
+                            color: AppTheme.primaryColor,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            order.deliveryType == DeliveryType.pickup
+                                ? 'Retrait en magasin'
+                                : 'Livraison à domicile',
+                            style: AppTheme.lightTheme.textTheme.titleSmall
+                                ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (order.deliveryType == DeliveryType.delivery) ...[
+                        const SizedBox(height: 8),
+                        if (order.deliveryAddress != null) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                color: AppTheme.secondaryTextColor,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  order.deliveryAddress!,
+                                  style: AppTheme.lightTheme.textTheme.bodySmall
+                                      ?.copyWith(
+                                    color: AppTheme.secondaryTextColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                        if (order.deliveryPhone != null) ...[
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.phone_rounded,
+                                color: AppTheme.secondaryTextColor,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                order.deliveryPhone!,
+                                style: AppTheme.lightTheme.textTheme.bodySmall
+                                    ?.copyWith(
+                                  color: AppTheme.secondaryTextColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
               ],
             ),
           ),

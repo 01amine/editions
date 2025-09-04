@@ -33,6 +33,9 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
   late Animation<Offset> _contentSlideAnimation;
   int _currentImageIndex = 0;
   bool _isOrderLoading = false;
+  DeliveryType _selectedDeliveryType = DeliveryType.pickup;
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   @override
   void initState() {
@@ -113,6 +116,8 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
     _fadeController.dispose();
     _headerAnimationController.dispose();
     _contentAnimationController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -767,326 +772,633 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
   }
 
   void _showEnhancedOrderDialog(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      barrierColor: Colors.black.withOpacity(0.6),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Container();
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          )),
-          child: FadeTransition(
-            opacity: animation,
-            child: Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(context.width * 0.06),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Header with icon
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.primaryColor.withOpacity(0.2),
-                              AppTheme.secondaryColor.withOpacity(0.2),
-                            ],
+  // Reset form state
+  _selectedDeliveryType = DeliveryType.pickup;
+  _addressController.clear();
+  _phoneController.text = ""; // You can pre-fill with user's phone if available
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: '',
+    barrierColor: Colors.black.withOpacity(0.6),
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Container();
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        )),
+        child: FadeTransition(
+          opacity: animation,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: context.width * 0.05),
+              constraints: BoxConstraints(
+                maxHeight: context.height * 0.8,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.all(context.width * 0.06),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Header with icon
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppTheme.primaryColor.withOpacity(0.2),
+                                  AppTheme.secondaryColor.withOpacity(0.2),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            child: Icon(
+                              Icons.shopping_cart_rounded,
+                              size: 40,
+                              color: AppTheme.primaryColor,
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(40),
-                        ),
-                        child: Icon(
-                          Icons.shopping_cart_rounded,
-                          size: 40,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
 
-                      SizedBox(height: context.height * 0.02),
+                          SizedBox(height: context.height * 0.02),
 
-                      // Title
-                      Text(
-                        'Confirmer la commande',
-                        style: AppTheme.lightTheme.textTheme.headlineSmall
-                            ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryTextColor,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      SizedBox(height: context.height * 0.015),
-
-                      // Content
-                      Container(
-                        padding: EdgeInsets.all(context.width * 0.04),
-                        decoration: BoxDecoration(
-                          color: AppTheme.backgroundColor.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppTheme.primaryColor.withOpacity(0.2),
+                          // Title
+                          Text(
+                            'Confirmer la commande',
+                            style: AppTheme.lightTheme.textTheme.headlineSmall
+                                ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryTextColor,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
+
+                          SizedBox(height: context.height * 0.02),
+
+                          // Book Info Container
+                          Container(
+                            padding: EdgeInsets.all(context.width * 0.04),
+                            decoration: BoxDecoration(
+                              color: AppTheme.backgroundColor.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.primaryColor.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Column(
                               children: [
-                                Container(
-                                  padding: EdgeInsets.all(context.width * 0.02),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppTheme.primaryColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    _getCategoryIcon(),
-                                    color: AppTheme.primaryColor,
-                                    size: 24,
-                                  ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(context.width * 0.02),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(
+                                        _getCategoryIcon(),
+                                        color: AppTheme.primaryColor,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    SizedBox(width: context.width * 0.03),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            widget.book.title,
+                                            style: AppTheme.lightTheme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: AppTheme.primaryTextColor,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            _formatMaterialType(widget.book.materialType),
+                                            style: AppTheme.lightTheme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color: AppTheme.secondaryTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: context.width * 0.03),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        widget.book.title,
-                                        style: AppTheme
-                                            .lightTheme.textTheme.bodyLarge
-                                            ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppTheme.primaryTextColor,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                SizedBox(height: context.height * 0.015),
+                                Divider(
+                                  color: AppTheme.primaryColor.withOpacity(0.2),
+                                  thickness: 1,
+                                ),
+                                SizedBox(height: context.height * 0.015),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Prix total:',
+                                      style: AppTheme.lightTheme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.primaryTextColor,
                                       ),
-                                      Text(
-                                        _formatMaterialType(
-                                            widget.book.materialType),
-                                        style: AppTheme
-                                            .lightTheme.textTheme.bodySmall
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: context.width * 0.03,
+                                        vertical: context.height * 0.01,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.successColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${widget.book.priceDzd.toStringAsFixed(0)} DA',
+                                        style: AppTheme.lightTheme.textTheme.headlineSmall
                                             ?.copyWith(
-                                          color: AppTheme.secondaryTextColor,
+                                          color: AppTheme.successColor,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            SizedBox(height: context.height * 0.015),
-                            Divider(
-                              color: AppTheme.primaryColor.withOpacity(0.2),
-                              thickness: 1,
+                          ),
+
+                          SizedBox(height: context.height * 0.03),
+
+                          // Delivery Type Selection
+                          Container(
+                            padding: EdgeInsets.all(context.width * 0.04),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.primaryColor.withOpacity(0.2),
+                              ),
                             ),
-                            SizedBox(height: context.height * 0.015),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Prix total:',
-                                  style: AppTheme
-                                      .lightTheme.textTheme.bodyMedium
+                                  'Type de livraison',
+                                  style: AppTheme.lightTheme.textTheme.titleMedium
                                       ?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.bold,
                                     color: AppTheme.primaryTextColor,
                                   ),
                                 ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: context.width * 0.009,
-                                    vertical: context.height * 0.01,
+                                SizedBox(height: context.height * 0.015),
+                                
+                                // Pickup Option
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedDeliveryType = DeliveryType.pickup;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(context.width * 0.03),
+                                    decoration: BoxDecoration(
+                                      color: _selectedDeliveryType == DeliveryType.pickup
+                                          ? AppTheme.primaryColor.withOpacity(0.1)
+                                          : Colors.grey.withOpacity(0.05),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: _selectedDeliveryType == DeliveryType.pickup
+                                            ? AppTheme.primaryColor
+                                            : Colors.grey.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Radio<DeliveryType>(
+                                          value: DeliveryType.pickup,
+                                          groupValue: _selectedDeliveryType,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _selectedDeliveryType = value!;
+                                            });
+                                          },
+                                          activeColor: AppTheme.primaryColor,
+                                        ),
+                                        Icon(
+                                          Icons.store_rounded,
+                                          color: AppTheme.primaryColor,
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: context.width * 0.02),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Retrait en magasin',
+                                                style: AppTheme.lightTheme.textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppTheme.primaryTextColor,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Gratuit - Retrait dans nos locaux',
+                                                style: AppTheme.lightTheme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                  color: AppTheme.secondaryTextColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppTheme.successColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${widget.book.priceDzd.toStringAsFixed(0)}DA',
-                                    style: AppTheme
-                                        .lightTheme.textTheme.headlineSmall
-                                        ?.copyWith(
-                                      color: AppTheme.successColor,
-                                      fontWeight: FontWeight.bold,
+                                ),
+                                
+                                SizedBox(height: context.height * 0.01),
+                                
+                                // Delivery Option
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedDeliveryType = DeliveryType.delivery;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(context.width * 0.03),
+                                    decoration: BoxDecoration(
+                                      color: _selectedDeliveryType == DeliveryType.delivery
+                                          ? AppTheme.primaryColor.withOpacity(0.1)
+                                          : Colors.grey.withOpacity(0.05),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: _selectedDeliveryType == DeliveryType.delivery
+                                            ? AppTheme.primaryColor
+                                            : Colors.grey.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Radio<DeliveryType>(
+                                          value: DeliveryType.delivery,
+                                          groupValue: _selectedDeliveryType,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _selectedDeliveryType = value!;
+                                            });
+                                          },
+                                          activeColor: AppTheme.primaryColor,
+                                        ),
+                                        Icon(
+                                          Icons.local_shipping_rounded,
+                                          color: AppTheme.primaryColor,
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: context.width * 0.02),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Livraison à domicile',
+                                                style: AppTheme.lightTheme.textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppTheme.primaryTextColor,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Livraison à votre adresse',
+                                                style: AppTheme.lightTheme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                  color: AppTheme.secondaryTextColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: context.height * 0.03),
-
-                      // Action buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                FocusScope.of(context).unfocus();
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: context.height * 0.015,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color:
-                                        AppTheme.primaryColor.withOpacity(0.3),
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                'Annuler',
-                                style: AppTheme.lightTheme.textTheme.titleMedium
-                                    ?.copyWith(
-                                  color: AppTheme.primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
                           ),
-                          SizedBox(width: context.width * 0.04),
-                          Expanded(
-                            flex: 2,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                _processOrder(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primaryColor,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(
-                                  vertical: context.height * 0.015,
-                                ),
-                                elevation: 4,
-                                shadowColor:
-                                    AppTheme.primaryColor.withOpacity(0.4),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+
+                          // Delivery Details (only show if delivery is selected)
+                          if (_selectedDeliveryType == DeliveryType.delivery) ...[
+                            SizedBox(height: context.height * 0.02),
+                            
+                            Container(
+                              padding: EdgeInsets.all(context.width * 0.04),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppTheme.primaryColor.withOpacity(0.2),
                                 ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.check_circle_rounded,
-                                    size: context.width * 0.05,
-                                  ),
-                                  SizedBox(width: context.width * 0.02),
                                   Text(
-                                    'Confirmer',
-                                    style: AppTheme
-                                        .lightTheme.textTheme.titleMedium
+                                    'Informations de livraison',
+                                    style: AppTheme.lightTheme.textTheme.titleMedium
                                         ?.copyWith(
-                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryTextColor,
+                                    ),
+                                  ),
+                                  SizedBox(height: context.height * 0.015),
+                                  
+                                  // Address Field
+                                  TextField(
+                                    controller: _addressController,
+                                    maxLines: 2,
+                                    decoration: InputDecoration(
+                                      labelText: 'Adresse de livraison *',
+                                      hintText: 'Entrez votre adresse complète',
+                                      prefixIcon: Icon(
+                                        Icons.location_on_rounded,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppTheme.primaryColor.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppTheme.primaryColor.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppTheme.primaryColor,
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: context.width * 0.04,
+                                        vertical: context.height * 0.015,
+                                      ),
+                                    ),
+                                  ),
+                                  
+                                  SizedBox(height: context.height * 0.015),
+                                  
+                                  // Phone Field
+                                  TextField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(
+                                      labelText: 'Numéro de téléphone *',
+                                      hintText: 'Ex: 0555 123 456',
+                                      prefixIcon: Icon(
+                                        Icons.phone_rounded,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppTheme.primaryColor.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppTheme.primaryColor.withOpacity(0.3),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppTheme.primaryColor,
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: context.width * 0.04,
+                                        vertical: context.height * 0.015,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                          ],
+
+                          SizedBox(height: context.height * 0.03),
+
+                          // Action buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    FocusScope.of(context).unfocus();
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: context.height * 0.015,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: BorderSide(
+                                        color: AppTheme.primaryColor.withOpacity(0.3),
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Annuler',
+                                    style: AppTheme.lightTheme.textTheme.titleMedium
+                                        ?.copyWith(
+                                      color: AppTheme.primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: context.width * 0.04),
+                              Expanded(
+                                flex: 2,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // Validate delivery details if delivery is selected
+                                    if (_selectedDeliveryType == DeliveryType.delivery) {
+                                      if (_addressController.text.trim().isEmpty ||
+                                          _phoneController.text.trim().isEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Veuillez remplir tous les champs obligatoires',
+                                              style: TextStyle(color: Colors.white),
+                                            ),
+                                            backgroundColor: Colors.red,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            margin: EdgeInsets.all(context.width * 0.04),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                    }
+                                    
+                                    Navigator.of(context).pop();
+                                    _processOrder(context);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: context.height * 0.015,
+                                    ),
+                                    elevation: 4,
+                                    shadowColor: AppTheme.primaryColor.withOpacity(0.4),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_rounded,
+                                        size: context.width * 0.05,
+                                      ),
+                                      SizedBox(width: context.width * 0.02),
+                                      Text(
+                                        'Confirmer',
+                                        style: AppTheme.lightTheme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   void _processOrder(BuildContext context) {
-    setState(() {
-      _isOrderLoading = true;
-    });
+  setState(() {
+    _isOrderLoading = true;
+  });
 
-    context.read<CommandsBloc>().add(
-          CreateOrderEvent(
-            orders: [
-              OrderCreateEntity(
-                materialId: widget.book.id,
-                quantity: 1,
-              ),
-            ],
+  context.read<CommandsBloc>().add(
+    CreateOrderEvent(
+      orders: [
+        OrderCreateEntity(
+          materialId: widget.book.id,
+          quantity: 1,
+          deliveryType: _selectedDeliveryType,
+          deliveryAddress: _selectedDeliveryType == DeliveryType.delivery 
+              ? _addressController.text.trim() 
+              : null,
+          deliveryPhone: _selectedDeliveryType == DeliveryType.delivery 
+              ? _phoneController.text.trim() 
+              : null,
+        ),
+      ],
+      deliveryType: _selectedDeliveryType,
+      deliveryAddress: _selectedDeliveryType == DeliveryType.delivery 
+          ? _addressController.text.trim() 
+          : null,
+      deliveryPhone: _selectedDeliveryType == DeliveryType.delivery 
+          ? _phoneController.text.trim() 
+          : null,
+    ),
+  );
+
+  // Show success message
+  String deliveryMessage = _selectedDeliveryType == DeliveryType.pickup 
+      ? 'Commande confirmée pour retrait en magasin!'
+      : 'Commande confirmée pour livraison!';
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            Icons.check_circle_rounded,
+            color: Colors.white,
+            size: 20,
           ),
-        );
-
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              Icons.check_circle_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                '"${widget.book.title}" ajouté à votre panier!',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              deliveryMessage,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ],
-        ),
-        backgroundColor: AppTheme.successColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        margin: EdgeInsets.all(context.width * 0.04),
-        duration: const Duration(seconds: 3),
+          ),
+        ],
       ),
-    );
+      backgroundColor: AppTheme.successColor,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: EdgeInsets.all(context.width * 0.04),
+      duration: const Duration(seconds: 3),
+    ),
+  );
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isOrderLoading = false;
-        });
-      }
-    });
-  }
+  Future.delayed(const Duration(seconds: 2), () {
+    if (mounted) {
+      setState(() {
+        _isOrderLoading = false;
+      });
+    }
+  });
+}
 
   IconData _getCategoryIcon() {
     switch (widget.book.materialType.toLowerCase()) {

@@ -1,5 +1,3 @@
-// home_repository_impl.dart
-
 import 'package:editions_lection/features/home/data/datasource/remote_data.dart';
 import 'package:editions_lection/features/home/domain/repositories/home_repository.dart';
 import 'package:dartz/dartz.dart';
@@ -17,7 +15,8 @@ class HomeRepositoryImpl implements HomeRepository {
   final NetworkInfo networkInfo;
   final AuthLocalDataSource localDataSource;
 
-  HomeRepositoryImpl(this.networkInfo, this.localDataSource, {required this.remoteDataSource});
+  HomeRepositoryImpl(this.networkInfo, this.localDataSource,
+      {required this.remoteDataSource});
 
   @override
   Future<Either<Failure, List<MaterialEntity>>> getBooks() async {
@@ -38,9 +37,10 @@ class HomeRepositoryImpl implements HomeRepository {
       return Left(ServerFailure(message: e.message));
     }
   }
-  
+
   @override
-  Future<Either<Failure, List<MaterialEntity>>> searchMaterialsByTitle(String title) async {
+  Future<Either<Failure, List<MaterialEntity>>> searchMaterialsByTitle(
+      String title) async {
     try {
       final materials = await remoteDataSource.searchMaterialsByTitle(title);
       return Right(materials);
@@ -48,20 +48,31 @@ class HomeRepositoryImpl implements HomeRepository {
       return Left(ServerFailure(message: e.message));
     }
   }
-  
+
   @override
-  Future<Either<Failure, bool>> createOrder(List<OrderCreateEntity> orders) async {
+  Future<Either<Failure, bool>> createOrder(
+      List<OrderCreateEntity> orders,
+      DeliveryType deliveryType,
+      String? deliveryAddress,
+      String? deliveryPhone) async {
     if (await networkInfo.isConnected) {
       try {
-        final orderModels = orders.map((e) => OrderCreateModel(materialId: e.materialId, quantity: e.quantity)).toList();
+        final orderModels = orders
+            .map((e) => OrderCreateModel(
+                  materialId: e.materialId,
+                  quantity: e.quantity,
+                  deliveryType: deliveryType,
+                  deliveryAddress: deliveryAddress,
+                  deliveryPhone: deliveryPhone,
+                ))
+            .toList();
         final token = await localDataSource.getToken();
-        if(token != null){
+        if (token != null) {
           final result = await remoteDataSource.createOrder(orderModels, token);
           return Right(result);
-        }else {
+        } else {
           return Left(CacheFailure());
         }
-        
       } on ServerException catch (e) {
         return Left(ServerFailure(message: e.message));
       }
@@ -71,22 +82,21 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-Future<Either<Failure, List<OrderEntity>>> getOrders() async {
-  if (await networkInfo.isConnected) {
-    try {
-      final token = await localDataSource.getToken();
-      if (token != null) {
-        final orders = await remoteDataSource.getOrders(token);
-        return Right(orders);
-      } else {
-        return Left(CacheFailure());
+  Future<Either<Failure, List<OrderEntity>>> getOrders() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final token = await localDataSource.getToken();
+        if (token != null) {
+          final orders = await remoteDataSource.getOrders(token);
+          return Right(orders);
+        } else {
+          return Left(CacheFailure());
+        }
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
       }
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } else {
+      return Left(ServerFailure(message: 'No internet connection'));
     }
-  } else {
-    return Left(ServerFailure(message: 'No internet connection'));
   }
-}
-
 }

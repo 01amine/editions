@@ -9,6 +9,11 @@ abstract class HomeRepository {
   Future<Either<Failure, List<MaterialEntity>>> getPolycopies();
   Future<Either<Failure, List<MaterialEntity>>> searchMaterialsByTitle(
       String title);
-  Future<Either<Failure, bool>> createOrder(List<OrderCreateEntity> orders);
+  Future<Either<Failure, bool>> createOrder(
+    List<OrderCreateEntity> orders,
+    DeliveryType deliveryType,
+    String? deliveryAddress,
+    String? deliveryPhone,
+  );
   Future<Either<Failure, List<OrderEntity>>> getOrders();
 }

@@ -47,7 +47,14 @@ class CommandsBloc extends Bloc<CommandsEvent, CommandsState> {
     Emitter<CommandsState> emit,
   ) async {
     emit(CommandsLoading());
-    final result = await createOrder(CreateOrderParams(orders: event.orders));
+    final result = await createOrder(
+      CreateOrderParams(
+        orders: event.orders,
+        deliveryType: event.deliveryType,
+        deliveryAddress: event.deliveryAddress,
+        deliveryPhone: event.deliveryPhone,
+      ),
+    );
     result.fold(
       (failure) =>
           emit(CommandsFailure(message: _mapFailureToMessage(failure))),
@@ -59,10 +66,10 @@ class CommandsBloc extends Bloc<CommandsEvent, CommandsState> {
   String _mapFailureToMessage(Failure failure) {
     if (failure is ServerFailure) {
       return failure.message;
-    } else if (failure is ServerFailure) {
-      return 'Server failure occurred. Please try again later.';
+    } else if (failure is CacheFailure) {
+      return 'Could not retrieve data from local storage';
     } else {
-      return 'An unexpected error occurred.';
+      return 'An unexpected error occurred';
     }
   }
 }

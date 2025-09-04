@@ -12,15 +12,25 @@ class CreateOrder implements UseCase<bool, CreateOrderParams> {
 
   @override
   Future<Either<Failure, bool>> call(CreateOrderParams params) async {
-    return await repository.createOrder(params.orders);
+    return await repository.createOrder(params.orders, params.deliveryType,
+        params.deliveryAddress, params.deliveryPhone);
   }
 }
 
 class CreateOrderParams extends Equatable {
   final List<OrderCreateEntity> orders;
+  final DeliveryType deliveryType;
+  final String? deliveryAddress;
+  final String? deliveryPhone;
 
-  const CreateOrderParams({required this.orders});
+  const CreateOrderParams({
+    required this.orders,
+    required this.deliveryType,
+    this.deliveryAddress,
+    this.deliveryPhone,
+  });
 
   @override
-  List<Object?> get props => [orders];
+  List<Object?> get props =>
+      [orders, deliveryType, deliveryAddress, deliveryPhone];
 }
