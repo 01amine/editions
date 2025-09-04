@@ -14,8 +14,12 @@ class OrderStatus(str, Enum):
     PRINTING = "printing"
     READY = "ready"
     DELIVERED = "delivered"
+    OUT_FOR_DELIVERY = "out_for_delivery"
     
-      
+class DeliveryType(str, Enum):
+    PICKUP = "pickup"  # Client picks up at lbureau
+    DELIVERY = "delivery"  # ZR Express delivery a domicile
+  
 class Order(Document):
     student: Link[User]
     item : List[tuple[Link[Material], int]]
@@ -23,6 +27,10 @@ class Order(Document):
     appointment_date: Optional[datetime] = None
     created_at: datetime = datetime.utcnow()
     assigned_admin: Optional[Link[User]]  = None
+    delivery_type: DeliveryType = DeliveryType.PICKUP
+    delivery_address: Optional[str] = None
+    delivery_phone: Optional[str] = None
+    zr_tracking_id: Optional[str] = None
 
 # Student Places Order -> pending
 # Admin Accepts & Starts Printing -> printing
@@ -33,6 +41,9 @@ class Order(Document):
 class OrderCreate(BaseModel):
     materiel_id: str
     quantity: int
+    delivery_type: DeliveryType = DeliveryType.PICKUP
+    delivery_address: Optional[str] = None
+    delivery_phone: Optional[str] = None
     
 
 
@@ -41,17 +52,23 @@ class orderResponse(BaseModel):
     appointment_date : Optional[datetime]
     status : OrderStatus
     item : List[tuple[materialUser, int]]
+    delivery_type: DeliveryType
+    delivery_address: Optional[str] = None
+    zr_tracking_id: Optional[str] = None
     model_config = {
         "populate_by_name": True,  
         "from_attributes": True     
     }
     
 
-def serialize_order(order: Order):#wrong one i jsut dont know if amine use it 
+def serialize_order(order: Order):
     return {
         "id": str(order.id),
         "appointment_date": order.appointment_date,
         "status": order.status,
+        "delivery_type": order.delivery_type,
+        "delivery_address": order.delivery_address,
+        "zr_tracking_id": order.zr_tracking_id,
         "item": [
             (
                 {
@@ -62,13 +79,13 @@ def serialize_order(order: Order):#wrong one i jsut dont know if amine use it
                     "material_type": material.material_type,
                     "price_dzd": material.price_dzd,
                 },
-                 qty,
+                qty,
             )
             for material, qty in order.item
         ],
     }
-    
-    
+
+
 def serialize_order_F(order: Order, user: User = None):
     return {
         "_id": str(order.id),
@@ -88,6 +105,9 @@ def serialize_order_F(order: Order, user: User = None):
             for material, qty in order.item
         ],
         "status": order.status.value,
+        "delivery_type": order.delivery_type.value,
+        "delivery_address": order.delivery_address,
+        "zr_tracking_id": order.zr_tracking_id,
         "created_at": order.created_at.isoformat(),
         "appointment_date": order.appointment_date.isoformat() if order.appointment_date else None,
     }

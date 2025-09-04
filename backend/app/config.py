@@ -21,7 +21,8 @@ class Settings(BaseSettings):
     MAILJET_API_KEY: str
     MAILJET_SECRET_KEY: str
     MAIL_FROM_ADDRESS: str
-
+    ZR_EXPRESS_TOKEN: str
+    ZR_EXPRESS_KEY: str
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()
