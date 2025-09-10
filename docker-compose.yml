@@ -1,4 +1,37 @@
 services:
+  frontend:
+    build: 
+      context: ./frontend1
+      dockerfile: Dockerfile
+
+    container_name: lectio-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+
+    
+    networks:
+      - lexion_internal_net 
+    depends_on:
+      - backend
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: lectio-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - lexion_internal_net 
+    depends_on:
+      - mongo
+      - minio
+
+
   minio:
     image: minio/minio:latest
     container_name: lection_minio
@@ -18,8 +51,13 @@ services:
   mongo:
     image: mongo:7
     container_name: mongo
+    networks:
+      - lexion_internal_net
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME?}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD?}"
     volumes:
       - mongo_data:/data/db
 
