@@ -8,8 +8,8 @@ services:
     networks:
       - lexion_internal_net
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: crptx123
+      MINIO_ROOT_USER: "${MINIO_USER?}"
+      MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD?}"
     ports:
       - "9000:9000"
       - "9001:9001"
