@@ -1,0 +1,190 @@
+{
+    "navbar" : {
+      "ourapp" : "Our App",
+      "features" : "Features",
+      "contactus" : "Contact Us"
+    },
+    "Header" : {
+      "badge" : "Print via our app",
+      "title" : "Print Your Medical Books with",
+      "titlegreen" : "Quality and Precision" ,
+      "description" : "Get your medical textbooks and study materials printed with professional quality. Our platform provides seamless printing services for medical students to enhance their learning experience.",
+      "primarybutton" : "Print Now",
+      "secondarybutton" : "Learn more"
+    },
+    "features" : {
+      "badge" : "New features",
+      "title" : "Print Your Medical Books",
+      "description" : "Easily print your medical textbooks and study materials with our new features designed for your convenience. Now you can manage printing orders effortlessly.",
+      "cards" : {
+        "feature1" : {
+          "title" : "High Quality Printing",
+          "description" : "Print your medical books with high quality and excellent clarity, whether large textbooks or small study materials."
+        }, 
+        "feature2" : {
+          "title" : "Fast Delivery",
+          "description" : "Get your printed books delivered to your home quickly with ZR Express fast delivery service."
+        }, 
+        "feature3" : {
+          "title" : "Flexible Options",
+          "description" : "Choose between different types of paper, sizes, and covers based on your study needs and preferences."
+        }, 
+        "feature4" : {
+          "title" : "Order Tracking",
+          "description" : "Track your order status from printing to delivery anytime, anywhere."
+        }
+      }
+    },
+    "footer" : {
+      "description" : "Welcome to our innovative book printing platform offering convenient and accessible printing solutions for medical students. Our platform enables users to seamlessly print medical textbooks and study materials, whether it's for large volumes, custom formats, or quick delivery to your home.",
+      "description2" : "With our user-friendly interface and comprehensive printing services, we strive to provide quality educational materials that fit your study needs. Experience the future of academic printing with us.",
+      "links" : {
+        "aboutus" : {
+          "title" : "About Us",
+          "link1" : "Who We are",
+          "link2" : "Portfolio",
+          "link3" : "Our Projects",
+          "link4" : "Partners",
+          "link5" : "Media"
+        },
+        "recherch" : {
+          "title" : "What are you looking for",
+          "link1" : "Health experts",
+          "link2" : "Medcins",
+          "link3" : "Help center",
+          "link4" : "Blogs",
+          "link5" : "Suggestions"
+        }
+      },
+      "subscribtion": {
+        "title" : "Subscribe for updates",
+        "description" : "Be the first to be notified at the app release.",
+        "button" : "Subscribe"
+      },       
+      "successmessage" : "You have been successfully registered",
+      "errormessage" : "Error during registration",
+      "copyrights" : "© Copyright 2024. All rights reserved."
+    },
+    "modal" : {
+      "title" : "We are",
+      "titlegreen" : "Coming Soon",
+      "subtitle" : "Stay Updated",
+      "description" : "Subscribe to get our news and give us your suggestions",
+      "button" : "Back to the home Screen"
+    },
+    "ourapps" : {
+      "title" : "Download our", 
+      "titlegreen" : "Printing App",
+      "description" : "Get our mobile app for easy book printing on the go. Upload, customize, and order your medical books with just a few taps."
+    },
+    "pricing" : {
+      "badge" : "Best Seller",
+      "cards" : {
+        "card1" : {
+          "title" : "Basic Pack",
+          "description" : "Essential Printing",
+          "button" : "Choose Basic Pack"
+        },
+        "card2" : {
+          "title" : "Pro Pack",
+          "description" : "Advanced Printing",
+          "button" : "Choose Pro Pack"
+        },
+        "card3" : {
+          "title" : "Full Pack",
+          "description" : "Premium Printing",
+          "button" : "Choose Full Pack"
+        }
+      },
+      "features" : {
+        "feature1" : "Standard Paper",
+        "feature2" : "Premium Binding",
+        "feature3" : "Express Delivery"
+      }
+    },
+    "service" : {
+      "title" : "Professional Book Printing",
+      "titlegreen" : "for medical students",
+      "description" : "Our printing platform is designed to help medical students get their textbooks and study materials printed with professional quality and fast delivery.",
+      "services" : {
+        "service1" : {
+          "title" : "Textbook Printing",
+          "description" : "High-quality printing of medical textbooks with clear text and diagrams, perfect for studying and reference."
+        },
+        "service2" : {
+          "title" : "Study Materials",
+          "description" : "Print your lecture notes, summaries, and study guides with professional binding and formatting."
+        },
+        "service3" : {
+          "title" : "Express Delivery",
+          "description" : "Get your printed books delivered quickly to your home with ZR Express fast delivery service."
+        }
+      }
+    },
+    "steps" : {
+      "title" : "How it works ?",
+      "step" : "Step",
+      "step1" : "Open the mobile app and browse available medical books.",
+      "step2" : "Search and filter books by subject, author, or course to find exactly what you need.",
+      "step3" : "Select your desired book and choose printing options (paper type, size, binding).",
+      "step4" : "Start the printing process and confirm your order details.",
+      "step5" : "Receive a call from our team to confirm delivery address and payment method.",
+      "step6" : "Get your printed books delivered to your home and complete payment."
+    },
+    "community" : {
+      "title" : "Join our community today!",
+      "description" : "Join our"  ,
+      "boldtext" : "WhatsApp ",
+      "description2" : "community for exclusive news and pre-tests, resources, and more",
+      "button" : "Explore the forum"
+    },
+    "contact" : {
+      "title" : "Contact Us For More Informations",
+      "subtitle" : "",
+      "follow" : "Follow Us" , 
+      "question" : "What do you want to ask ?" ,
+      "labels" : {
+        "name" : "Full Name",
+        "email" : "Email address",
+        "message" : "Message"
+      },
+      "placeholders" : {
+        "name" : "Enter Your Full Name",
+        "email" : "Enter Your Email",
+        "message" : "Enter Your Message"
+      },
+      "button" : "Submit",
+      "successmessage" : "Your message has been successfully sent",
+      "errormessage" : "Error while sending the message"
+      },
+      "ourteam" : {
+        "title" : "Lectio Leadership Team" ,
+        "description" : "Lectio prides itself not only on award-winning technology, but also on the talent of its people, some of the brightest minds and most experienced executives in business.",
+        "leaders" : [
+          {
+            "name" : "Houssam Bouzidi",
+            "position" : "Scrum Master | Software Engineer Lead"
+          },
+          {
+            "name" : "Abdelhamid Bensalah",
+            "position" : "Product Owner | Founder | Backend Department Head"
+          },
+          {
+            "name" : "Idir Belmokhtar",
+            "position" : "Mobile Department Head | Flutter Developer Expert"
+          }
+          ,{
+            "name" : "Oukil Zakarya",
+            "position" : "Ui/Ux & Software Design Department Head | React Developer"
+          }
+          ,{
+            "name" : "Abdallah Benassloune",
+            "position" : "Web Department Head | React Developer "
+          },
+          {
+            "name" : "Saoussene Ait Ahmed",
+            "position" : "Testing Department Head | Flutter Developer"
+          }
+        ]
+      }
+}

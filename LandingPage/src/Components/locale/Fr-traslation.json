@@ -1,0 +1,165 @@
+{
+  "navbar" : {
+    "ourapp" : "Notre Application",
+    "features" : "Fonctionnalités",
+    "contactus" : "Nous Contacter"
+  },
+  "Header" : {
+    "badge" : "Imprimez via notre app",
+    "title" : "Imprimez Vos Livres Médicaux avec",
+    "titlegreen" : "Qualité et Précision",
+    "description" : "Obtenez vos manuels médicaux et matériels d'étude imprimés avec une qualité professionnelle. Notre plateforme offre des services d'impression fluides pour les étudiants en médecine afin d'améliorer leur expérience d'apprentissage.",
+    "primarybutton" : "Imprimez Maintenant",
+    "secondarybutton" : "En savoir plus"
+  },
+  "features" : {
+    "badge" : "Nouvelles fonctionnalités",
+    "title" : "Imprimez Vos Livres Médicaux",
+    "description" : "Imprimez facilement vos manuels médicaux et matériels d'étude grâce à nos nouvelles fonctionnalités conçues pour votre commodité. Gérez désormais vos commandes d'impression sans effort.",
+    "cards" : {
+      "feature1" : {
+        "title" : "Impression Haute Qualité",
+        "description" : "Imprimez vos livres médicaux avec une qualité élevée et une clarté excellente, qu'il s'agisse de gros manuels ou de petits matériels d'étude."
+      }, 
+      "feature2" : {
+        "title" : "Livraison Rapide",
+        "description" : "Recevez vos livres imprimés livrés chez vous rapidement avec le service de livraison rapide ZR Express."
+      }, 
+      "feature3" : {
+        "title" : "Options Flexibles",
+        "description" : "Choisissez entre différents types de papier, tailles et couvertures selon vos besoins et préférences d'étude."
+      }, 
+      "feature4" : {
+        "title" : "Suivi des Commandes",
+        "description" : "Suivez le statut de votre commande de l'impression à la livraison à tout moment, où que vous soyez."
+      }
+    }
+  },
+  "footer" : {
+    "description" : "Bienvenue sur notre plateforme d'impression de livres innovante offrant des solutions d'impression pratiques et accessibles pour les étudiants en médecine. Notre plateforme permet aux utilisateurs d'imprimer facilement des manuels médicaux et du matériel d'étude, que ce soit pour de gros volumes, des formats personnalisés, ou une livraison rapide à domicile.",
+    "description2" : "Avec notre interface conviviale et nos services d'impression complets, nous nous efforçons de fournir du matériel éducatif de qualité qui s'adapte à vos besoins d'étude. Découvrez l'avenir de l'impression académique avec nous.",
+    "links" : {
+      "aboutus" : {
+        "title" : "À Propos de Nous",
+        "link1" : "Qui Nous Sommes",
+        "link2" : "Portfolio",
+        "link3" : "Nos Projets",
+        "link4" : "Partenaires",
+        "link5" : "Médias"
+      },
+      "recherch" : {
+        "title" : "Que cherchez-vous",
+        "link1" : "Experts en santé",
+        "link2" : "Médecins",
+        "link3" : "Centre d'aide",
+        "link4" : "Blogs",
+        "link5" : "Suggestions"
+      }
+    },
+    "subscribtion": {
+      "title" : "Abonnez-vous pour recevoir les mises à jour",
+      "description" : "Soyez le premier informé lors de la sortie de l'application.",
+      "button" : "S'abonner"
+    },
+    "copyrights" : "© Copyright 2024. Tous droits réservés.",
+    "successmessage" : "Vous avez été enregistré avec succès",
+    "errormessage" : "Erreur lors de l'enregistrement"
+  },
+  "modal" : {
+    "title" : "Nous Sommes",
+    "titlegreen" : "Bientôt Disponible",
+    "subtitle" : "Restez Informé",
+    "description" : "Abonnez-vous pour recevoir nos nouvelles et donnez-nous vos suggestions",
+    "button" : "Retour à l'écran d'accueil"
+  },
+  "ourapps" : {
+    "title" : "Téléchargez notre",
+    "titlegreen" : "App d'Impression",
+    "description" : "Obtenez notre application mobile pour l'impression facile de livres en déplacement. Téléchargez, personnalisez et commandez vos livres médicaux en quelques clics."
+  },
+  "pricing" : {
+    "badge" : "Meilleure Vente",
+    "cards" : {
+      "card1" : {
+        "title" : "Pack Basique",
+        "description" : "Impression Essentielle",
+        "button" : "Choisir le Pack Basique"
+      },
+      "card2" : {
+        "title" : "Pack Pro",
+        "description" : "Impression Avancée",
+        "button" : "Choisir le Pack Pro"
+      },
+      "card3" : {
+        "title" : "Pack Complet",
+        "description" : "Impression Premium",
+        "button" : "Choisir le Pack Complet"
+      }
+    },
+    "features" : {
+      "feature1" : "Papier Standard",
+      "feature2" : "Reliure Premium",
+      "feature3" : "Livraison Express"
+    }
+  },
+  "service" : {
+    "title" : "Impression Professionnelle de Livres",
+    "titlegreen" : "pour les étudiants en médecine",
+    "description" : "Notre plateforme d'impression est conçue pour aider les étudiants en médecine à obtenir leurs manuels et matériels d'étude imprimés avec une qualité professionnelle et une livraison rapide.",
+    "services" : {
+      "service1" : {
+        "title" : "Impression de Manuels",
+        "description" : "Impression de haute qualité des manuels médicaux avec texte et diagrammes clairs, parfaits pour l'étude et la référence."
+      },
+      "service2" : {
+        "title" : "Matériels d'Étude",
+        "description" : "Imprimez vos notes de cours, résumés et guides d'étude avec reliure et formatage professionnels."
+      },
+      "service3" : {
+        "title" : "Livraison Express",
+        "description" : "Recevez vos livres imprimés livrés rapidement à domicile avec le service de livraison rapide ZR Express."
+      }
+    }
+  },
+  "steps" : {
+    "title" : "Comment ça marche ?",
+    "step" : "Étape",
+    "step1" : "Ouvrez l'application mobile et parcourez les manuels médicaux disponibles.",
+    "step2" : "Recherchez et filtrez les livres par matière, auteur ou cours pour trouver exactement ce dont vous avez besoin.",
+    "step3" : "Sélectionnez le livre désiré et choisissez les options d'impression (type de papier, taille, reliure).",
+    "step4" : "Lancez le processus d'impression et confirmez les détails de votre commande.",
+    "step5" : "Recevez un appel de notre équipe pour confirmer l'adresse de livraison et le mode de paiement.",
+    "step6" : "Recevez vos livres imprimés livrés à domicile et finalisez le paiement."
+  },
+  "community" : {
+    "title" : "Rejoignez notre communauté dès aujourd'hui !",
+    "description" : "Rejoignez notre",
+    "boldtext" : "communauté WhatsApp ",
+    "description2" : "pour des nouvelles exclusives et des pré-tests, des ressources, et plus encore",
+    "button" : "Explorez le forum"
+  },
+  "contact" : {
+    "title" : "Contactez-nous pour plus d'informations",
+    "subtitle" : "",
+    "follow" : "Suivez-nous", 
+    "question" : "Que souhaitez-vous demander ?", 
+    "labels" : {
+      "name" : "Nom Complet",
+      "email" : "Adresse E-mail",
+      "message" : "Message"
+    },
+    "placeholders" : {
+      "name" : "Entrez Votre Nom Complet",
+      "email" : "Entrez Votre E-mail",
+      "message" : "Entrez Votre Message"
+    },
+    "button" : "Soumettre",
+    "successmessage" : "Votre message a été envoyé avec succès",
+    "errormessage" : "Erreur lors de l'envoi du message"
+  },
+  "ourteam" : {
+    "title" : "Équipe de Direction de Lectio",
+    "description" : "Lectio est fier non seulement de sa technologie primée, mais aussi du talent de ses équipes, composées des esprits les plus brillants et des cadres les plus expérimentés du secteur."
+    
+  }
+}
