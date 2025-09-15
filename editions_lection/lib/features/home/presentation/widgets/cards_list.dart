@@ -534,9 +534,9 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
 
   void _showEnhancedOrderDialog(BuildContext context) {
   // Initialize state variables
-  DeliveryType _selectedDeliveryType = DeliveryType.pickup;
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  DeliveryType selectedDeliveryType = DeliveryType.pickup;
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   // You can pre-fill with user's phone if available
   // _phoneController.text = "user_phone_number";
 
@@ -744,18 +744,18 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _selectedDeliveryType = DeliveryType.pickup;
+                                      selectedDeliveryType = DeliveryType.pickup;
                                     });
                                   },
                                   child: Container(
                                     padding: EdgeInsets.all(context.width * 0.03),
                                     decoration: BoxDecoration(
-                                      color: _selectedDeliveryType == DeliveryType.pickup
+                                      color: selectedDeliveryType == DeliveryType.pickup
                                           ? AppTheme.primaryColor.withOpacity(0.1)
                                           : Colors.grey.withOpacity(0.05),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: _selectedDeliveryType == DeliveryType.pickup
+                                        color: selectedDeliveryType == DeliveryType.pickup
                                             ? AppTheme.primaryColor
                                             : Colors.grey.withOpacity(0.3),
                                       ),
@@ -764,10 +764,10 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                       children: [
                                         Radio<DeliveryType>(
                                           value: DeliveryType.pickup,
-                                          groupValue: _selectedDeliveryType,
+                                          groupValue: selectedDeliveryType,
                                           onChanged: (value) {
                                             setState(() {
-                                              _selectedDeliveryType = value!;
+                                              selectedDeliveryType = value!;
                                             });
                                           },
                                           activeColor: AppTheme.primaryColor,
@@ -811,18 +811,18 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _selectedDeliveryType = DeliveryType.delivery;
+                                      selectedDeliveryType = DeliveryType.delivery;
                                     });
                                   },
                                   child: Container(
                                     padding: EdgeInsets.all(context.width * 0.03),
                                     decoration: BoxDecoration(
-                                      color: _selectedDeliveryType == DeliveryType.delivery
+                                      color: selectedDeliveryType == DeliveryType.delivery
                                           ? AppTheme.primaryColor.withOpacity(0.1)
                                           : Colors.grey.withOpacity(0.05),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: _selectedDeliveryType == DeliveryType.delivery
+                                        color: selectedDeliveryType == DeliveryType.delivery
                                             ? AppTheme.primaryColor
                                             : Colors.grey.withOpacity(0.3),
                                       ),
@@ -831,10 +831,10 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                       children: [
                                         Radio<DeliveryType>(
                                           value: DeliveryType.delivery,
-                                          groupValue: _selectedDeliveryType,
+                                          groupValue: selectedDeliveryType,
                                           onChanged: (value) {
                                             setState(() {
-                                              _selectedDeliveryType = value!;
+                                              selectedDeliveryType = value!;
                                             });
                                           },
                                           activeColor: AppTheme.primaryColor,
@@ -876,7 +876,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                           ),
 
                           // Delivery Details (only show if delivery is selected)
-                          if (_selectedDeliveryType == DeliveryType.delivery) ...[
+                          if (selectedDeliveryType == DeliveryType.delivery) ...[
                             SizedBox(height: context.height * 0.02),
                             
                             Container(
@@ -903,7 +903,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                   
                                   // Address Field
                                   TextField(
-                                    controller: _addressController,
+                                    controller: addressController,
                                     maxLines: 2,
                                     decoration: InputDecoration(
                                       labelText: 'Adresse de livraison *',
@@ -941,7 +941,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                   
                                   // Phone Field
                                   TextField(
-                                    controller: _phoneController,
+                                    controller: phoneController,
                                     keyboardType: TextInputType.phone,
                                     decoration: InputDecoration(
                                       labelText: 'Numéro de téléphone *',
@@ -1017,9 +1017,9 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                 child: ElevatedButton(
                                   onPressed: () {
                                     // Validate delivery details if delivery is selected
-                                    if (_selectedDeliveryType == DeliveryType.delivery) {
-                                      if (_addressController.text.trim().isEmpty ||
-                                          _phoneController.text.trim().isEmpty) {
+                                    if (selectedDeliveryType == DeliveryType.delivery) {
+                                      if (addressController.text.trim().isEmpty ||
+                                          phoneController.text.trim().isEmpty) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             content: Text(
@@ -1047,21 +1047,21 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                           OrderCreateEntity(
                                             materialId: widget.material.id,
                                             quantity: 1,
-                                            deliveryType: _selectedDeliveryType,
-                                            deliveryAddress: _selectedDeliveryType == DeliveryType.delivery 
-                                                ? _addressController.text.trim() 
+                                            deliveryType: selectedDeliveryType,
+                                            deliveryAddress: selectedDeliveryType == DeliveryType.delivery 
+                                                ? addressController.text.trim() 
                                                 : null,
-                                            deliveryPhone: _selectedDeliveryType == DeliveryType.delivery 
-                                                ? _phoneController.text.trim() 
+                                            deliveryPhone: selectedDeliveryType == DeliveryType.delivery 
+                                                ? phoneController.text.trim() 
                                                 : null,
                                           ),
                                         ],
-                                        deliveryType: _selectedDeliveryType,
-                                        deliveryAddress: _selectedDeliveryType == DeliveryType.delivery 
-                                            ? _addressController.text.trim() 
+                                        deliveryType: selectedDeliveryType,
+                                        deliveryAddress: selectedDeliveryType == DeliveryType.delivery 
+                                            ? addressController.text.trim() 
                                             : null,
-                                        deliveryPhone: _selectedDeliveryType == DeliveryType.delivery 
-                                            ? _phoneController.text.trim() 
+                                        deliveryPhone: selectedDeliveryType == DeliveryType.delivery 
+                                            ? phoneController.text.trim() 
                                             : null,
                                       ),
                                     );
@@ -1069,7 +1069,7 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
                                     FocusScope.of(context).unfocus();
                                     
                                     // Show success message
-                                    String deliveryMessage = _selectedDeliveryType == DeliveryType.pickup 
+                                    String deliveryMessage = selectedDeliveryType == DeliveryType.pickup 
                                         ? 'Commande confirmée pour retrait en magasin!'
                                         : 'Commande confirmée pour livraison!';
 
