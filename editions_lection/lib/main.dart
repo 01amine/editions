@@ -1,6 +1,8 @@
 import 'package:editions_lection/features/home/presentation/screens/book_details_screen.dart';
 import 'package:editions_lection/features/home/presentation/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/theme.dart';
@@ -22,6 +24,7 @@ import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/splash/presentation/bloc/splash_bloc.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,71 +63,93 @@ class MyApp extends StatelessWidget {
           create: (_) => di.sl<NotificationBloc>(),
         ),
       ],
-      child: MaterialApp(
+      child: _buildApp(),
+    );
+  }
+
+  Widget _buildApp() {
+    // Determine initial route based on platform
+    Widget initialScreen;
+    if (kIsWeb) {
+      initialScreen = const LoginScreen();
+    } else {
+      initialScreen = const SplashScreen();
+    }
+
+    // Use CupertinoApp for iOS, MaterialApp for Android and Web
+    if (!kIsWeb && Platform.isIOS) {
+      return CupertinoApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Editions Lection',
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: initialScreen,
+        onGenerateRoute: _generateRoute,
+      );
+    } else {
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Editions Lection',
         theme: AppTheme.darkTheme,
-        home: const SplashScreen(),
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
-            case '/':
-              return MaterialPageRoute(
-                  builder: (context) => const SplashScreen());
-            case '/onboarding':
-              return MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                  create: (_) => di.sl<OnboardingBloc>(),
-                  child: const OnboardingScreen(),
-                ),
-              );
-            case '/login':
-              return MaterialPageRoute(
-                  builder: (context) => const LoginScreen());
-            case '/signup':
-              return MaterialPageRoute(
-                  builder: (context) => const SignupScreen());
-            case '/home':
-              return MaterialPageRoute(
-                  builder: (context) => const HomeScreen());
-            case '/book_details_screen':
-              final Object? book = settings.arguments;
-              return MaterialPageRoute(
-                builder: (context) =>
-                    BookDetailsScreen(book: book as MaterialEntity),
-              );
-            case '/commands':
-              return MaterialPageRoute(
-                builder: (context) => const CommandsScreen(),
-              );
-            case '/notification':
-              return MaterialPageRoute(
-                builder: (context) => const NotificationsScreen(),
-              );
-            case '/forgot_password':
-              return MaterialPageRoute(
-                builder: (context) => const ForgotPasswordScreen(),
-              );
-            case '/profile':
-              return MaterialPageRoute(
-                builder: (context) => const ProfileScreen(),
-              );
-            case '/voir-tout':
-              final materialType = settings.arguments as String;
-              return MaterialPageRoute(
-                builder: (context) =>
-                    VoirToutScreen(materialType: materialType),
-              );
-            default:
-              return MaterialPageRoute(
-                builder: (context) => const Scaffold(
-                  body: Center(
-                    child: Text('Error: Page not found!'),
-                  ),
-                ),
-              );
-          }
-        },
-      ),
-    );
+        home: initialScreen,
+        onGenerateRoute: _generateRoute,
+      );
+    }
+  }
+
+  Route<dynamic>? _generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case '/':
+        return _createRoute(const SplashScreen());
+      case '/onboarding':
+        return _createRoute(
+          BlocProvider(
+            create: (_) => di.sl<OnboardingBloc>(),
+            child: const OnboardingScreen(),
+          ),
+        );
+      case '/login':
+        return _createRoute(const LoginScreen());
+      case '/signup':
+        return _createRoute(const SignupScreen());
+      case '/home':
+        return _createRoute(const HomeScreen());
+      case '/book_details_screen':
+        final Object? book = settings.arguments;
+        return _createRoute(
+          BookDetailsScreen(book: book as MaterialEntity),
+        );
+      case '/commands':
+        return _createRoute(const CommandsScreen());
+      case '/notification':
+        return _createRoute(const NotificationsScreen());
+      case '/forgot_password':
+        return _createRoute(const ForgotPasswordScreen());
+      case '/profile':
+        return _createRoute(const ProfileScreen());
+      case '/voir-tout':
+        final materialType = settings.arguments as String;
+        return _createRoute(
+          VoirToutScreen(materialType: materialType),
+        );
+      default:
+        return _createRoute(
+          const Scaffold(
+            body: Center(
+              child: Text('Error: Page not found!'),
+            ),
+          ),
+        );
+    }
+  }
+
+  Route<dynamic> _createRoute(Widget screen) {
+    // Use CupertinoPageRoute for iOS, MaterialPageRoute for others
+    if (!kIsWeb && Platform.isIOS) {
+      return CupertinoPageRoute(builder: (context) => screen);
+    } else {
+      return MaterialPageRoute(builder: (context) => screen);
+    }
   }
 }
