@@ -32,7 +32,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen>
   late Animation<double> _contentFadeAnimation;
   late Animation<Offset> _contentSlideAnimation;
   int _currentImageIndex = 0;
-  bool _isOrderLoading = false;
+  final bool _isOrderLoading = false;
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
