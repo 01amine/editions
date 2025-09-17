@@ -76,28 +76,13 @@ class MyApp extends StatelessWidget {
       initialScreen = const SplashScreen();
     }
 
-    // Use CupertinoApp for iOS, MaterialApp for Android and Web
-    if (!kIsWeb && Platform.isIOS) {
-      return MaterialApp(
-        home: CupertinoApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Editions Lection',
-          theme: const CupertinoThemeData(
-            brightness: Brightness.dark,
-          ),
-          home: initialScreen,
-          onGenerateRoute: _generateRoute,
-        ),
-      );
-    } else {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Editions Lection',
-        theme: AppTheme.darkTheme,
-        home: initialScreen,
-        onGenerateRoute: _generateRoute,
-      );
-    }
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Editions Lection',
+      theme: AppTheme.darkTheme,
+      home: initialScreen,
+      onGenerateRoute: _generateRoute,
+    );
   }
 
   Route<dynamic>? _generateRoute(RouteSettings settings) {
