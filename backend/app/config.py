@@ -5,7 +5,7 @@ from fastapi_mail import ConnectionConfig
 
 
 class Settings(BaseSettings):
-    ALLOWED_ORIGINS: str = Field(default="http://localhost:3000")
+    ALLOWED_ORIGINS: str = Field(default="https://editions-x2gc.vercel.app")
     @property
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
