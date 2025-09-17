@@ -78,14 +78,16 @@ class MyApp extends StatelessWidget {
 
     // Use CupertinoApp for iOS, MaterialApp for Android and Web
     if (!kIsWeb && Platform.isIOS) {
-      return CupertinoApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Editions Lection',
-        theme: const CupertinoThemeData(
-          brightness: Brightness.dark,
+      return MaterialApp(
+        home: CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Editions Lection',
+          theme: const CupertinoThemeData(
+            brightness: Brightness.dark,
+          ),
+          home: initialScreen,
+          onGenerateRoute: _generateRoute,
         ),
-        home: initialScreen,
-        onGenerateRoute: _generateRoute,
       );
     } else {
       return MaterialApp(
