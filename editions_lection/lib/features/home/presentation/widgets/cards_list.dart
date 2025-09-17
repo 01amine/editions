@@ -115,6 +115,13 @@ class _BookCardState extends State<BookCard> with TickerProviderStateMixin {
       onTapDown: (_) => _onTapDown(),
       onTapUp: (_) => _onTapUp(),
       onTapCancel: _onTapCancel,
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/book_details_screen',
+          arguments: widget.material,
+        );
+      },
       child: AnimatedBuilder(
         animation: _pressController,
         builder: (context, child) {
