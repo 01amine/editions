@@ -1,6 +1,6 @@
-enum Speciality{
-  medcine,
+enum Speciality {
+  medecine,
   pharmacie,
   dentaire,
   pharmacieIndustrielle,
-} 
+}

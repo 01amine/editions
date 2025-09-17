@@ -92,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   // Helper functions for dropdown display names
   String _getSpecialityDisplayName(Speciality speciality) {
     switch (speciality) {
-      case Speciality.medcine:
+      case Speciality.medecine:
         return 'Médecine';
       case Speciality.pharmacie:
         return 'Pharmacie';
@@ -1154,7 +1154,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             label: 'Spécialité',
             value: _getSpecialityDisplayName(
                 _getSpecialityFromString(user.specialite) ??
-                    Speciality.medcine),
+                    Speciality.medecine),
           ),
           const SizedBox(height: 16),
           _buildInfoRow(

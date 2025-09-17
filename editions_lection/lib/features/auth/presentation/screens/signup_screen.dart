@@ -116,7 +116,7 @@ class _SignupScreenState extends State<SignupScreen>
   // Helper function to get speciality display name
   String _getSpecialityDisplayName(Speciality speciality) {
     switch (speciality) {
-      case Speciality.medcine:
+      case Speciality.medecine:
         return 'Médecine';
       case Speciality.pharmacie:
         return 'Pharmacie';
