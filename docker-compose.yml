@@ -64,7 +64,7 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
-
+  
   minio:
     image: minio/minio:latest
     container_name: lection_minio
