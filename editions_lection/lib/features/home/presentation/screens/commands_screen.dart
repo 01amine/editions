@@ -92,6 +92,25 @@ class _CommandsScreenState extends State<CommandsScreen>
     return orders.where((order) => order.status == _selectedFilter).toList();
   }
 
+  // Calculate total price for an order
+  double _calculateOrderTotal(OrderEntity order) {
+    return order.items.fold(0.0, (total, item) {
+      return total + (item.material.priceDzd * item.quantity);
+    });
+  }
+
+  // Calculate total price for all orders
+  double _calculateAllOrdersTotal(List<OrderEntity> orders) {
+    return orders.fold(0.0, (total, order) {
+      return total + _calculateOrderTotal(order);
+    });
+  }
+
+  // Format price in DZD
+  String _formatPrice(double price) {
+    return '${price.toStringAsFixed(0)} DA';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,6 +130,17 @@ class _CommandsScreenState extends State<CommandsScreen>
                   child: FadeTransition(
                     opacity: _headerFadeAnimation,
                     child: _buildHeader(),
+                  ),
+                ),
+              ),
+
+              // Total Price Section
+              SliverToBoxAdapter(
+                child: SlideTransition(
+                  position: _contentSlideAnimation,
+                  child: FadeTransition(
+                    opacity: _contentFadeAnimation,
+                    child: _buildTotalPriceSection(),
                   ),
                 ),
               ),
@@ -204,6 +234,95 @@ class _CommandsScreenState extends State<CommandsScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTotalPriceSection() {
+    return BlocBuilder<CommandsBloc, CommandsState>(
+      builder: (context, state) {
+        if (state is CommandsLoaded) {
+          final filteredOrders = _filterOrders(state.orders);
+          final totalPrice = _calculateAllOrdersTotal(filteredOrders);
+
+          return Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: context.width * 0.05,
+              vertical: context.height * 0.01,
+            ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor,
+                  AppTheme.primaryColor.withOpacity(0.8),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  SizedBox(width: context.width * 0.04),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total des commandes',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatPrice(totalPrice),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${filteredOrders.length} commande${filteredOrders.length > 1 ? 's' : ''}',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -480,7 +599,11 @@ class _CommandsScreenState extends State<CommandsScreen>
               offset: Offset(0, 30 * (1 - value)),
               child: Opacity(
                 opacity: value,
-                child: EnhancedCommandCard(order: orders[index]),
+                child: EnhancedCommandCard(
+                  order: orders[index],
+                  orderTotal: _calculateOrderTotal(orders[index]),
+                  formatPrice: _formatPrice,
+                ),
               ),
             );
           },
@@ -507,8 +630,15 @@ class _CommandsScreenState extends State<CommandsScreen>
 
 class EnhancedCommandCard extends StatelessWidget {
   final OrderEntity order;
+  final double orderTotal;
+  final String Function(double) formatPrice;
 
-  const EnhancedCommandCard({super.key, required this.order});
+  const EnhancedCommandCard({
+    super.key,
+    required this.order,
+    required this.orderTotal,
+    required this.formatPrice,
+  });
 
   IconData getStatusIcon(String status) {
     switch (status) {
@@ -566,7 +696,7 @@ class EnhancedCommandCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
             blurRadius: 15,
-            offset: const Offset(0, 4),
+            offset: const Offset(4, 4),
             spreadRadius: 0,
           ),
         ],
@@ -584,7 +714,7 @@ class EnhancedCommandCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Row
+                // Header Row with Total Price
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -605,6 +735,24 @@ class EnhancedCommandCard extends StatelessWidget {
                             style: AppTheme.lightTheme.textTheme.bodySmall
                                 ?.copyWith(
                               color: AppTheme.secondaryTextColor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Order Total Price
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppTheme.successColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              formatPrice(orderTotal),
+                              style: AppTheme.lightTheme.textTheme.titleSmall
+                                  ?.copyWith(
+                                color: AppTheme.successColor,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -681,57 +829,83 @@ class EnhancedCommandCard extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Items List
-                ...order.items.take(3).map((item) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.backgroundColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              item.material.materialType == 'book'
-                                  ? Icons.menu_book_rounded
-                                  : Icons.article_rounded,
-                              size: 20,
-                              color: AppTheme.primaryColor,
-                            ),
+                ...order.items.take(3).map((item) {
+                  final itemTotal = item.material.priceDzd * item.quantity;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.backgroundColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.material.title,
-                                  style: AppTheme
-                                      .lightTheme.textTheme.bodyMedium
-                                      ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Quantité: ${item.quantity}',
-                                  style: AppTheme.lightTheme.textTheme.bodySmall
-                                      ?.copyWith(
-                                    color: AppTheme.secondaryTextColor,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: Icon(
+                            item.material.materialType == 'book'
+                                ? Icons.menu_book_rounded
+                                : Icons.article_rounded,
+                            size: 20,
+                            color: AppTheme.primaryColor,
                           ),
-                        ],
-                      ),
-                    )),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.material.title,
+                                style: AppTheme.lightTheme.textTheme.bodyMedium
+                                    ?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Quantité: ${item.quantity}',
+                                    style: AppTheme
+                                        .lightTheme.textTheme.bodySmall
+                                        ?.copyWith(
+                                      color: AppTheme.secondaryTextColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primaryColor
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      formatPrice(itemTotal),
+                                      style: AppTheme
+                                          .lightTheme.textTheme.bodySmall
+                                          ?.copyWith(
+                                        color: AppTheme.primaryColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
 
                 // Show more items indicator
                 if (order.items.length > 3)
